@@ -1,4 +1,6 @@
 import 'package:moor/moor.dart';
+import 'package:sprightly/extensions/enum_extensions.dart';
+import 'package:sprightly/models/constants/enums.dart';
 
 part 'database.g.dart';
 
@@ -15,7 +17,8 @@ class Members extends Table {
   TextColumn get name => text().nullable().withLength(max: 50)();
   TextColumn get nickName => text().withLength(max: 10)();
   BlobColumn get avatar => blob().nullable()();
-  // EnumColumn<MemberIdType> get idType => enumText<MemberIdType>(MemberIdType.values)();
+  TextColumn get idType => text().customConstraint(
+      '${MemberIdType.values.getConstraints('id_type')} NOT NULL')();
   TextColumn get idValue => text().withLength(max: 50)();
   TextColumn get secondaryIdValue => text().nullable().withLength(max: 50)();
   @JsonKey("isGroupExpense")
@@ -33,7 +36,9 @@ class Members extends Table {
 class Groups extends Table {
   TextColumn get id => text().withLength(max: 16)();
   TextColumn get name => text().withLength(max: 50)();
-  // EnumColumn<GroupType> get idType => enumText<GroupType>(GroupType.values)();
+  TextColumn get type => text().customConstraint(
+      '${GroupType.values.getConstraints('type')}'
+      'NOT NULL DEFAULT ${Enums.convertToString(GroupType.Shared, true)}')();
   DateTimeColumn get createdOn =>
       dateTime().clientDefault(() => DateTime.now().toUtc())();
   DateTimeColumn get updatedOn =>
@@ -46,10 +51,12 @@ class Groups extends Table {
 @DataClassName("GroupMember")
 class GroupMembers extends Table {
   TextColumn get id => text().withLength(max: 16)();
-  TextColumn get groupId =>
-      text().withLength(max: 16).customConstraint('REFERENCES Groups(id)')();
-  TextColumn get memberId =>
-      text().withLength(max: 16).customConstraint('REFERENCES Members(id)')();
+  TextColumn get groupId => text()
+      .withLength(max: 16)
+      .customConstraint('REFERENCES Groups(id) NOT NULL ON UPDATE CASCADE')();
+  TextColumn get memberId => text()
+      .withLength(max: 16)
+      .customConstraint('REFERENCES Members(id) NOT NULL ON UPDATE CASCADE')();
   DateTimeColumn get createdOn =>
       dateTime().clientDefault(() => DateTime.now().toUtc())();
   DateTimeColumn get updatedOn =>
@@ -64,8 +71,9 @@ class Accounts extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text().withLength(max: 15)();
   IntColumn get parentId =>
-      integer().customConstraint('NULLABLE REFERENCES Accounts(id)')();
-  // EnumColumn<CategoryType> get idType => enumText<CategoryType>(CategoryType.values)();
+      integer().customConstraint('REFERENCES Accounts(id)')();
+  TextColumn get type =>
+      text().customConstraint('${AccountType.values.getConstraints('type')}')();
   DateTimeColumn get createdOn =>
       dateTime().clientDefault(() => DateTime.now().toUtc())();
   DateTimeColumn get updatedOn =>
@@ -77,8 +85,9 @@ class Categories extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text().withLength(max: 15)();
   IntColumn get parentId =>
-      integer().customConstraint('NULLABLE REFERENCES Categories(id)')();
-  // EnumColumn<AccountType> get idType => enumText<AccountType>(AccountType.values)();
+      integer().customConstraint('REFERENCES Categories(id)')();
+  TextColumn get type => text()
+      .customConstraint('${CategoryType.values.getConstraints('type')}')();
   DateTimeColumn get createdOn =>
       dateTime().clientDefault(() => DateTime.now().toUtc())();
   DateTimeColumn get updatedOn =>
@@ -88,18 +97,19 @@ class Categories extends Table {
 @DataClassName("Transaction")
 class Transactions extends Table {
   TextColumn get id => text().withLength(max: 18)();
-  TextColumn get memberId =>
-      text().withLength(max: 16).customConstraint('REFERENCES Members(id)')();
+  TextColumn get memberId => text()
+      .withLength(max: 16)
+      .customConstraint('REFERENCES Members(id) NOT NULL')();
   RealColumn get amount => real()();
   IntColumn get categoryId =>
-      integer().customConstraint('NULLABLE REFERENCES Categories(id)')();
+      integer().customConstraint('REFERENCES Categories(id)')();
   TextColumn get groupId => text()
       .withLength(max: 16)
-      .customConstraint('NULLABLE REFERENCES Groups(id)')();
+      .customConstraint('REFERENCES Groups(id) NOT NULL')();
   IntColumn get fromAccountId =>
-      integer().customConstraint('NULLABLE REFERENCES Accounts(id)')();
+      integer().customConstraint('REFERENCES Accounts(id)')();
   IntColumn get toAccountId =>
-      integer().customConstraint('NULLABLE REFERENCES Accounts(id)')();
+      integer().customConstraint('REFERENCES Accounts(id)')();
   TextColumn get notes => text().nullable()();
   TextColumn get attachments => text().nullable()();
   DateTimeColumn get createdOn =>
