@@ -120,3 +120,7 @@ class Transactions extends Table {
   @override
   Set<Column> get primaryKey => {id};
 }
+
+@UseMoor(
+    tables: [Members, Groups, GroupMembers, Accounts, Categories, Transactions])
+class SprightlyData {}
