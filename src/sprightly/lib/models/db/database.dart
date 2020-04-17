@@ -1,4 +1,6 @@
 import 'package:moor/moor.dart';
+import 'package:moor_ffi/moor_ffi.dart';
+import 'package:sprightly/utils/file_provider.dart';
 
 part 'database.g.dart';
 
@@ -8,6 +10,9 @@ part 'database.g.dart';
 //   DateTimeColumn get updatedOn =>
 //       dateTime().clientDefault(() => DateTime.now().toUtc())();
 // }
+
+const String appDataDbFile = 'sprightly_db.lite';
+const String userDataDbFile = 'sprightly_user.lite';
 
 @DataClassName("Member")
 class Members extends Table {
@@ -125,6 +130,14 @@ class Transactions extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+LazyDatabase _openConnection(String dbFile, [bool isSupportFile = false]) =>
+    LazyDatabase(() async => VmDatabase(await getFile(dbFile, isSupportFile)));
+
 @UseMoor(
     tables: [Members, Groups, GroupMembers, Accounts, Categories, Transactions])
-class SprightlyData {}
+class SprightlyData extends _$SprightlyData {
+  SprightlyData() : super(_openConnection(appDataDbFile));
+
+  @override
+  int get schemaVersion => 1;
+}
