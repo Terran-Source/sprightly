@@ -1,6 +1,4 @@
 import 'package:moor/moor.dart';
-import 'package:sprightly/extensions/enum_extensions.dart';
-import 'package:sprightly/models/constants/enums.dart';
 
 part 'database.g.dart';
 
@@ -18,7 +16,7 @@ class Members extends Table {
   TextColumn get nickName => text().withLength(max: 10)();
   BlobColumn get avatar => blob().nullable()();
   TextColumn get idType => text().customConstraint(
-      '${MemberIdType.values.getConstraints('id_type')} NOT NULL')();
+      "CHECK (id_type IN ('Phone', 'Email', 'NickName', 'Group')) NOT NULL")();
   TextColumn get idValue => text().withLength(max: 50)();
   TextColumn get secondaryIdValue => text().nullable().withLength(max: 50)();
   @JsonKey("isGroupExpense")
@@ -36,9 +34,10 @@ class Members extends Table {
 class Groups extends Table {
   TextColumn get id => text().withLength(max: 16)();
   TextColumn get name => text().withLength(max: 50)();
-  TextColumn get type => text().customConstraint(
-      '${GroupType.values.getConstraints('type')}'
-      'NOT NULL DEFAULT ${Enums.convertToString(GroupType.Shared, true)}')();
+  TextColumn get type => text()
+      .nullable()
+      .customConstraint("CHECK (type IN ('Personal', 'Budget', 'Shared'))"
+          " NOT NULL DEFAULT 'Shared'")();
   DateTimeColumn get createdOn =>
       dateTime().clientDefault(() => DateTime.now().toUtc())();
   DateTimeColumn get updatedOn =>
@@ -70,10 +69,11 @@ class GroupMembers extends Table {
 class Accounts extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text().withLength(max: 15)();
-  IntColumn get parentId =>
-      integer().customConstraint('REFERENCES Accounts(id)')();
-  TextColumn get type =>
-      text().customConstraint('${AccountType.values.getConstraints('type')}')();
+  IntColumn get parentId => integer()
+      .nullable()
+      .customConstraint('REFERENCES Accounts(id) NULLABLE')();
+  TextColumn get type => text().nullable().customConstraint(
+      "CHECK (type IN ('Group', 'Cash', 'Credit', 'Bank', 'Investment')) NULLABLE")();
   DateTimeColumn get createdOn =>
       dateTime().clientDefault(() => DateTime.now().toUtc())();
   DateTimeColumn get updatedOn =>
@@ -84,10 +84,12 @@ class Accounts extends Table {
 class Categories extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text().withLength(max: 15)();
-  IntColumn get parentId =>
-      integer().customConstraint('REFERENCES Categories(id)')();
-  TextColumn get type => text()
-      .customConstraint('${CategoryType.values.getConstraints('type')}')();
+  IntColumn get parentId => integer()
+      .nullable()
+      .customConstraint('REFERENCES Categories(id) NULLABLE')();
+  TextColumn get type => text().nullable().customConstraint(
+      "CHECK (type IN ('Expense', 'Liability', 'Income', 'Investment', 'Misc'))"
+      " NOT NULL DEFAULT 'Misc'")();
   DateTimeColumn get createdOn =>
       dateTime().clientDefault(() => DateTime.now().toUtc())();
   DateTimeColumn get updatedOn =>
@@ -101,15 +103,17 @@ class Transactions extends Table {
       .withLength(max: 16)
       .customConstraint('REFERENCES Members(id) NOT NULL')();
   RealColumn get amount => real()();
-  IntColumn get categoryId =>
-      integer().customConstraint('REFERENCES Categories(id)')();
+  IntColumn get categoryId => integer()
+      .nullable()
+      .customConstraint('REFERENCES Categories(id) NULLABLE')();
   TextColumn get groupId => text()
       .withLength(max: 16)
       .customConstraint('REFERENCES Groups(id) NOT NULL')();
   IntColumn get fromAccountId =>
-      integer().customConstraint('REFERENCES Accounts(id)')();
-  IntColumn get toAccountId =>
-      integer().customConstraint('REFERENCES Accounts(id)')();
+      integer().customConstraint('REFERENCES Accounts(id) NOT NULL')();
+  IntColumn get toAccountId => integer()
+      .nullable()
+      .customConstraint('REFERENCES Accounts(id) NULLABLE')();
   TextColumn get notes => text().nullable()();
   TextColumn get attachments => text().nullable()();
   DateTimeColumn get createdOn =>

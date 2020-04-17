@@ -305,11 +305,9 @@ class $MembersTable extends Members with TableInfo<$MembersTable, Member> {
   @override
   GeneratedTextColumn get idType => _idType ??= _constructIdType();
   GeneratedTextColumn _constructIdType() {
-    return GeneratedTextColumn(
-      'id_type',
-      $tableName,
-      false,
-    );
+    return GeneratedTextColumn('id_type', $tableName, false,
+        $customConstraints:
+            'CHECK (id_type IN (\'Phone\', \'Email\', \'NickName\', \'Group\')) NOT NULL');
   }
 
   final VerificationMeta _idValueMeta = const VerificationMeta('idValue');
@@ -504,7 +502,7 @@ class Group extends DataClass implements Insertable<Group> {
   Group(
       {@required this.id,
       @required this.name,
-      @required this.type,
+      this.type,
       @required this.createdOn,
       @required this.updatedOn});
   factory Group.fromData(Map<String, dynamic> data, GeneratedDatabase db,
@@ -619,12 +617,11 @@ class GroupsCompanion extends UpdateCompanion<Group> {
   GroupsCompanion.insert({
     @required String id,
     @required String name,
-    @required String type,
+    this.type = const Value.absent(),
     this.createdOn = const Value.absent(),
     this.updatedOn = const Value.absent(),
   })  : id = Value(id),
-        name = Value(name),
-        type = Value(type);
+        name = Value(name);
   GroupsCompanion copyWith(
       {Value<String> id,
       Value<String> name,
@@ -666,11 +663,9 @@ class $GroupsTable extends Groups with TableInfo<$GroupsTable, Group> {
   @override
   GeneratedTextColumn get type => _type ??= _constructType();
   GeneratedTextColumn _constructType() {
-    return GeneratedTextColumn(
-      'type',
-      $tableName,
-      false,
-    );
+    return GeneratedTextColumn('type', $tableName, true,
+        $customConstraints:
+            'CHECK (type IN (\'Personal\', \'Budget\', \'Shared\')) NOT NULL DEFAULT \'Shared\'');
   }
 
   final VerificationMeta _createdOnMeta = const VerificationMeta('createdOn');
@@ -723,8 +718,6 @@ class $GroupsTable extends Groups with TableInfo<$GroupsTable, Group> {
     if (d.type.present) {
       context.handle(
           _typeMeta, type.isAcceptableValue(d.type.value, _typeMeta));
-    } else if (isInserting) {
-      context.missing(_typeMeta);
     }
     if (d.createdOn.present) {
       context.handle(_createdOnMeta,
@@ -1068,8 +1061,8 @@ class Account extends DataClass implements Insertable<Account> {
   Account(
       {@required this.id,
       @required this.name,
-      @required this.parentId,
-      @required this.type,
+      this.parentId,
+      this.type,
       @required this.createdOn,
       @required this.updatedOn});
   factory Account.fromData(Map<String, dynamic> data, GeneratedDatabase db,
@@ -1200,13 +1193,11 @@ class AccountsCompanion extends UpdateCompanion<Account> {
   AccountsCompanion.insert({
     this.id = const Value.absent(),
     @required String name,
-    @required int parentId,
-    @required String type,
+    this.parentId = const Value.absent(),
+    this.type = const Value.absent(),
     this.createdOn = const Value.absent(),
     this.updatedOn = const Value.absent(),
-  })  : name = Value(name),
-        parentId = Value(parentId),
-        type = Value(type);
+  }) : name = Value(name);
   AccountsCompanion copyWith(
       {Value<int> id,
       Value<String> name,
@@ -1251,8 +1242,8 @@ class $AccountsTable extends Accounts with TableInfo<$AccountsTable, Account> {
   @override
   GeneratedIntColumn get parentId => _parentId ??= _constructParentId();
   GeneratedIntColumn _constructParentId() {
-    return GeneratedIntColumn('parent_id', $tableName, false,
-        $customConstraints: 'REFERENCES Accounts(id)');
+    return GeneratedIntColumn('parent_id', $tableName, true,
+        $customConstraints: 'REFERENCES Accounts(id) NULLABLE');
   }
 
   final VerificationMeta _typeMeta = const VerificationMeta('type');
@@ -1260,11 +1251,9 @@ class $AccountsTable extends Accounts with TableInfo<$AccountsTable, Account> {
   @override
   GeneratedTextColumn get type => _type ??= _constructType();
   GeneratedTextColumn _constructType() {
-    return GeneratedTextColumn(
-      'type',
-      $tableName,
-      false,
-    );
+    return GeneratedTextColumn('type', $tableName, true,
+        $customConstraints:
+            'CHECK (type IN (\'Group\', \'Cash\', \'Credit\', \'Bank\', \'Investment\')) NULLABLE');
   }
 
   final VerificationMeta _createdOnMeta = const VerificationMeta('createdOn');
@@ -1316,14 +1305,10 @@ class $AccountsTable extends Accounts with TableInfo<$AccountsTable, Account> {
     if (d.parentId.present) {
       context.handle(_parentIdMeta,
           parentId.isAcceptableValue(d.parentId.value, _parentIdMeta));
-    } else if (isInserting) {
-      context.missing(_parentIdMeta);
     }
     if (d.type.present) {
       context.handle(
           _typeMeta, type.isAcceptableValue(d.type.value, _typeMeta));
-    } else if (isInserting) {
-      context.missing(_typeMeta);
     }
     if (d.createdOn.present) {
       context.handle(_createdOnMeta,
@@ -1384,8 +1369,8 @@ class Category extends DataClass implements Insertable<Category> {
   Category(
       {@required this.id,
       @required this.name,
-      @required this.parentId,
-      @required this.type,
+      this.parentId,
+      this.type,
       @required this.createdOn,
       @required this.updatedOn});
   factory Category.fromData(Map<String, dynamic> data, GeneratedDatabase db,
@@ -1516,13 +1501,11 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
   CategoriesCompanion.insert({
     this.id = const Value.absent(),
     @required String name,
-    @required int parentId,
-    @required String type,
+    this.parentId = const Value.absent(),
+    this.type = const Value.absent(),
     this.createdOn = const Value.absent(),
     this.updatedOn = const Value.absent(),
-  })  : name = Value(name),
-        parentId = Value(parentId),
-        type = Value(type);
+  }) : name = Value(name);
   CategoriesCompanion copyWith(
       {Value<int> id,
       Value<String> name,
@@ -1568,8 +1551,8 @@ class $CategoriesTable extends Categories
   @override
   GeneratedIntColumn get parentId => _parentId ??= _constructParentId();
   GeneratedIntColumn _constructParentId() {
-    return GeneratedIntColumn('parent_id', $tableName, false,
-        $customConstraints: 'REFERENCES Categories(id)');
+    return GeneratedIntColumn('parent_id', $tableName, true,
+        $customConstraints: 'REFERENCES Categories(id) NULLABLE');
   }
 
   final VerificationMeta _typeMeta = const VerificationMeta('type');
@@ -1577,11 +1560,9 @@ class $CategoriesTable extends Categories
   @override
   GeneratedTextColumn get type => _type ??= _constructType();
   GeneratedTextColumn _constructType() {
-    return GeneratedTextColumn(
-      'type',
-      $tableName,
-      false,
-    );
+    return GeneratedTextColumn('type', $tableName, true,
+        $customConstraints:
+            'CHECK (type IN (\'Expense\', \'Liability\', \'Income\', \'Investment\', \'Misc\')) NOT NULL DEFAULT \'Misc\'');
   }
 
   final VerificationMeta _createdOnMeta = const VerificationMeta('createdOn');
@@ -1633,14 +1614,10 @@ class $CategoriesTable extends Categories
     if (d.parentId.present) {
       context.handle(_parentIdMeta,
           parentId.isAcceptableValue(d.parentId.value, _parentIdMeta));
-    } else if (isInserting) {
-      context.missing(_parentIdMeta);
     }
     if (d.type.present) {
       context.handle(
           _typeMeta, type.isAcceptableValue(d.type.value, _typeMeta));
-    } else if (isInserting) {
-      context.missing(_typeMeta);
     }
     if (d.createdOn.present) {
       context.handle(_createdOnMeta,
@@ -1707,10 +1684,10 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       {@required this.id,
       @required this.memberId,
       @required this.amount,
-      @required this.categoryId,
+      this.categoryId,
       @required this.groupId,
       @required this.fromAccountId,
-      @required this.toAccountId,
+      this.toAccountId,
       this.notes,
       this.attachments,
       @required this.createdOn,
@@ -1926,10 +1903,10 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     @required String id,
     @required String memberId,
     @required double amount,
-    @required int categoryId,
+    this.categoryId = const Value.absent(),
     @required String groupId,
     @required int fromAccountId,
-    @required int toAccountId,
+    this.toAccountId = const Value.absent(),
     this.notes = const Value.absent(),
     this.attachments = const Value.absent(),
     this.createdOn = const Value.absent(),
@@ -1937,10 +1914,8 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
   })  : id = Value(id),
         memberId = Value(memberId),
         amount = Value(amount),
-        categoryId = Value(categoryId),
         groupId = Value(groupId),
-        fromAccountId = Value(fromAccountId),
-        toAccountId = Value(toAccountId);
+        fromAccountId = Value(fromAccountId);
   TransactionsCompanion copyWith(
       {Value<String> id,
       Value<String> memberId,
@@ -2009,8 +1984,8 @@ class $TransactionsTable extends Transactions
   @override
   GeneratedIntColumn get categoryId => _categoryId ??= _constructCategoryId();
   GeneratedIntColumn _constructCategoryId() {
-    return GeneratedIntColumn('category_id', $tableName, false,
-        $customConstraints: 'REFERENCES Categories(id)');
+    return GeneratedIntColumn('category_id', $tableName, true,
+        $customConstraints: 'REFERENCES Categories(id) NULLABLE');
   }
 
   final VerificationMeta _groupIdMeta = const VerificationMeta('groupId');
@@ -2031,7 +2006,7 @@ class $TransactionsTable extends Transactions
       _fromAccountId ??= _constructFromAccountId();
   GeneratedIntColumn _constructFromAccountId() {
     return GeneratedIntColumn('from_account_id', $tableName, false,
-        $customConstraints: 'REFERENCES Accounts(id)');
+        $customConstraints: 'REFERENCES Accounts(id) NOT NULL');
   }
 
   final VerificationMeta _toAccountIdMeta =
@@ -2041,8 +2016,8 @@ class $TransactionsTable extends Transactions
   GeneratedIntColumn get toAccountId =>
       _toAccountId ??= _constructToAccountId();
   GeneratedIntColumn _constructToAccountId() {
-    return GeneratedIntColumn('to_account_id', $tableName, false,
-        $customConstraints: 'REFERENCES Accounts(id)');
+    return GeneratedIntColumn('to_account_id', $tableName, true,
+        $customConstraints: 'REFERENCES Accounts(id) NULLABLE');
   }
 
   final VerificationMeta _notesMeta = const VerificationMeta('notes');
@@ -2139,8 +2114,6 @@ class $TransactionsTable extends Transactions
     if (d.categoryId.present) {
       context.handle(_categoryIdMeta,
           categoryId.isAcceptableValue(d.categoryId.value, _categoryIdMeta));
-    } else if (isInserting) {
-      context.missing(_categoryIdMeta);
     }
     if (d.groupId.present) {
       context.handle(_groupIdMeta,
@@ -2159,8 +2132,6 @@ class $TransactionsTable extends Transactions
     if (d.toAccountId.present) {
       context.handle(_toAccountIdMeta,
           toAccountId.isAcceptableValue(d.toAccountId.value, _toAccountIdMeta));
-    } else if (isInserting) {
-      context.missing(_toAccountIdMeta);
     }
     if (d.notes.present) {
       context.handle(
