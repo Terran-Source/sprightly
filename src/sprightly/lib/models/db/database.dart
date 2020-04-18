@@ -207,6 +207,15 @@ class GroupOnlyMembers {
 
   GroupOnlyMembers(this.groupId);
 }
+
+class Settlement {
+  final double amount;
+  double settledAmount;
+  final Member fromMember;
+  final Member toMember;
+
+  Settlement(this.amount, this.fromMember, this.toMember);
+}
 //#endregion Custom query & classes
 
 LazyDatabase _openConnection(String dbFile, [bool isSupportFile = false]) =>
