@@ -15,7 +15,7 @@ class Member extends DataClass implements Insertable<Member> {
   final String idType;
   final String idValue;
   final String secondaryIdValue;
-  final bool groupExpense;
+  final bool isGroupExpense;
   final DateTime createdOn;
   final DateTime updatedOn;
   Member(
@@ -26,7 +26,7 @@ class Member extends DataClass implements Insertable<Member> {
       @required this.idType,
       @required this.idValue,
       this.secondaryIdValue,
-      @required this.groupExpense,
+      @required this.isGroupExpense,
       @required this.createdOn,
       @required this.updatedOn});
   factory Member.fromData(Map<String, dynamic> data, GeneratedDatabase db,
@@ -40,21 +40,21 @@ class Member extends DataClass implements Insertable<Member> {
       id: stringType.mapFromDatabaseResponse(data['${effectivePrefix}id']),
       name: stringType.mapFromDatabaseResponse(data['${effectivePrefix}name']),
       nickName: stringType
-          .mapFromDatabaseResponse(data['${effectivePrefix}nick_name']),
+          .mapFromDatabaseResponse(data['${effectivePrefix}nickName']),
       avatar: uint8ListType
           .mapFromDatabaseResponse(data['${effectivePrefix}avatar']),
       idType:
-          stringType.mapFromDatabaseResponse(data['${effectivePrefix}id_type']),
-      idValue: stringType
-          .mapFromDatabaseResponse(data['${effectivePrefix}id_value']),
-      secondaryIdValue: stringType.mapFromDatabaseResponse(
-          data['${effectivePrefix}secondary_id_value']),
-      groupExpense: boolType
-          .mapFromDatabaseResponse(data['${effectivePrefix}group_expense']),
+          stringType.mapFromDatabaseResponse(data['${effectivePrefix}idType']),
+      idValue:
+          stringType.mapFromDatabaseResponse(data['${effectivePrefix}idValue']),
+      secondaryIdValue: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}secondaryIdValue']),
+      isGroupExpense: boolType
+          .mapFromDatabaseResponse(data['${effectivePrefix}isGroupExpense']),
       createdOn: dateTimeType
-          .mapFromDatabaseResponse(data['${effectivePrefix}created_on']),
+          .mapFromDatabaseResponse(data['${effectivePrefix}createdOn']),
       updatedOn: dateTimeType
-          .mapFromDatabaseResponse(data['${effectivePrefix}updated_on']),
+          .mapFromDatabaseResponse(data['${effectivePrefix}updatedOn']),
     );
   }
   factory Member.fromJson(Map<String, dynamic> json,
@@ -68,7 +68,7 @@ class Member extends DataClass implements Insertable<Member> {
       idType: serializer.fromJson<String>(json['idType']),
       idValue: serializer.fromJson<String>(json['idValue']),
       secondaryIdValue: serializer.fromJson<String>(json['secondaryIdValue']),
-      groupExpense: serializer.fromJson<bool>(json['isGroupExpense']),
+      isGroupExpense: serializer.fromJson<bool>(json['isGroupExpense']),
       createdOn: serializer.fromJson<DateTime>(json['createdOn']),
       updatedOn: serializer.fromJson<DateTime>(json['updatedOn']),
     );
@@ -84,7 +84,7 @@ class Member extends DataClass implements Insertable<Member> {
       'idType': serializer.toJson<String>(idType),
       'idValue': serializer.toJson<String>(idValue),
       'secondaryIdValue': serializer.toJson<String>(secondaryIdValue),
-      'isGroupExpense': serializer.toJson<bool>(groupExpense),
+      'isGroupExpense': serializer.toJson<bool>(isGroupExpense),
       'createdOn': serializer.toJson<DateTime>(createdOn),
       'updatedOn': serializer.toJson<DateTime>(updatedOn),
     };
@@ -108,9 +108,9 @@ class Member extends DataClass implements Insertable<Member> {
       secondaryIdValue: secondaryIdValue == null && nullToAbsent
           ? const Value.absent()
           : Value(secondaryIdValue),
-      groupExpense: groupExpense == null && nullToAbsent
+      isGroupExpense: isGroupExpense == null && nullToAbsent
           ? const Value.absent()
-          : Value(groupExpense),
+          : Value(isGroupExpense),
       createdOn: createdOn == null && nullToAbsent
           ? const Value.absent()
           : Value(createdOn),
@@ -128,7 +128,7 @@ class Member extends DataClass implements Insertable<Member> {
           String idType,
           String idValue,
           String secondaryIdValue,
-          bool groupExpense,
+          bool isGroupExpense,
           DateTime createdOn,
           DateTime updatedOn}) =>
       Member(
@@ -139,7 +139,7 @@ class Member extends DataClass implements Insertable<Member> {
         idType: idType ?? this.idType,
         idValue: idValue ?? this.idValue,
         secondaryIdValue: secondaryIdValue ?? this.secondaryIdValue,
-        groupExpense: groupExpense ?? this.groupExpense,
+        isGroupExpense: isGroupExpense ?? this.isGroupExpense,
         createdOn: createdOn ?? this.createdOn,
         updatedOn: updatedOn ?? this.updatedOn,
       );
@@ -153,7 +153,7 @@ class Member extends DataClass implements Insertable<Member> {
           ..write('idType: $idType, ')
           ..write('idValue: $idValue, ')
           ..write('secondaryIdValue: $secondaryIdValue, ')
-          ..write('groupExpense: $groupExpense, ')
+          ..write('isGroupExpense: $isGroupExpense, ')
           ..write('createdOn: $createdOn, ')
           ..write('updatedOn: $updatedOn')
           ..write(')'))
@@ -176,7 +176,7 @@ class Member extends DataClass implements Insertable<Member> {
                           $mrjc(
                               secondaryIdValue.hashCode,
                               $mrjc(
-                                  groupExpense.hashCode,
+                                  isGroupExpense.hashCode,
                                   $mrjc(createdOn.hashCode,
                                       updatedOn.hashCode))))))))));
   @override
@@ -190,7 +190,7 @@ class Member extends DataClass implements Insertable<Member> {
           other.idType == this.idType &&
           other.idValue == this.idValue &&
           other.secondaryIdValue == this.secondaryIdValue &&
-          other.groupExpense == this.groupExpense &&
+          other.isGroupExpense == this.isGroupExpense &&
           other.createdOn == this.createdOn &&
           other.updatedOn == this.updatedOn);
 }
@@ -203,7 +203,7 @@ class MembersCompanion extends UpdateCompanion<Member> {
   final Value<String> idType;
   final Value<String> idValue;
   final Value<String> secondaryIdValue;
-  final Value<bool> groupExpense;
+  final Value<bool> isGroupExpense;
   final Value<DateTime> createdOn;
   final Value<DateTime> updatedOn;
   const MembersCompanion({
@@ -214,7 +214,7 @@ class MembersCompanion extends UpdateCompanion<Member> {
     this.idType = const Value.absent(),
     this.idValue = const Value.absent(),
     this.secondaryIdValue = const Value.absent(),
-    this.groupExpense = const Value.absent(),
+    this.isGroupExpense = const Value.absent(),
     this.createdOn = const Value.absent(),
     this.updatedOn = const Value.absent(),
   });
@@ -226,7 +226,7 @@ class MembersCompanion extends UpdateCompanion<Member> {
     @required String idType,
     @required String idValue,
     this.secondaryIdValue = const Value.absent(),
-    this.groupExpense = const Value.absent(),
+    this.isGroupExpense = const Value.absent(),
     this.createdOn = const Value.absent(),
     this.updatedOn = const Value.absent(),
   })  : id = Value(id),
@@ -241,7 +241,7 @@ class MembersCompanion extends UpdateCompanion<Member> {
       Value<String> idType,
       Value<String> idValue,
       Value<String> secondaryIdValue,
-      Value<bool> groupExpense,
+      Value<bool> isGroupExpense,
       Value<DateTime> createdOn,
       Value<DateTime> updatedOn}) {
     return MembersCompanion(
@@ -252,7 +252,7 @@ class MembersCompanion extends UpdateCompanion<Member> {
       idType: idType ?? this.idType,
       idValue: idValue ?? this.idValue,
       secondaryIdValue: secondaryIdValue ?? this.secondaryIdValue,
-      groupExpense: groupExpense ?? this.groupExpense,
+      isGroupExpense: isGroupExpense ?? this.isGroupExpense,
       createdOn: createdOn ?? this.createdOn,
       updatedOn: updatedOn ?? this.updatedOn,
     );
@@ -268,7 +268,7 @@ class $MembersTable extends Members with TableInfo<$MembersTable, Member> {
   @override
   GeneratedTextColumn get id => _id ??= _constructId();
   GeneratedTextColumn _constructId() {
-    return GeneratedTextColumn('id', $tableName, false, maxTextLength: 16);
+    return GeneratedTextColumn('id', $tableName, false, minTextLength: 16);
   }
 
   final VerificationMeta _nameMeta = const VerificationMeta('name');
@@ -284,7 +284,7 @@ class $MembersTable extends Members with TableInfo<$MembersTable, Member> {
   @override
   GeneratedTextColumn get nickName => _nickName ??= _constructNickName();
   GeneratedTextColumn _constructNickName() {
-    return GeneratedTextColumn('nick_name', $tableName, false,
+    return GeneratedTextColumn('nickName', $tableName, false,
         maxTextLength: 10);
   }
 
@@ -305,9 +305,9 @@ class $MembersTable extends Members with TableInfo<$MembersTable, Member> {
   @override
   GeneratedTextColumn get idType => _idType ??= _constructIdType();
   GeneratedTextColumn _constructIdType() {
-    return GeneratedTextColumn('id_type', $tableName, false,
+    return GeneratedTextColumn('idType', $tableName, false,
         $customConstraints:
-            'CHECK (id_type IN (\'Phone\', \'Email\', \'NickName\', \'Group\')) NOT NULL');
+            'CHECK (idType IN (\'Phone\', \'Email\', \'NickName\', \'Group\')) NOT NULL');
   }
 
   final VerificationMeta _idValueMeta = const VerificationMeta('idValue');
@@ -315,8 +315,7 @@ class $MembersTable extends Members with TableInfo<$MembersTable, Member> {
   @override
   GeneratedTextColumn get idValue => _idValue ??= _constructIdValue();
   GeneratedTextColumn _constructIdValue() {
-    return GeneratedTextColumn('id_value', $tableName, false,
-        maxTextLength: 50);
+    return GeneratedTextColumn('idValue', $tableName, false, maxTextLength: 50);
   }
 
   final VerificationMeta _secondaryIdValueMeta =
@@ -326,18 +325,18 @@ class $MembersTable extends Members with TableInfo<$MembersTable, Member> {
   GeneratedTextColumn get secondaryIdValue =>
       _secondaryIdValue ??= _constructSecondaryIdValue();
   GeneratedTextColumn _constructSecondaryIdValue() {
-    return GeneratedTextColumn('secondary_id_value', $tableName, true,
+    return GeneratedTextColumn('secondaryIdValue', $tableName, true,
         maxTextLength: 50);
   }
 
-  final VerificationMeta _groupExpenseMeta =
-      const VerificationMeta('groupExpense');
-  GeneratedBoolColumn _groupExpense;
+  final VerificationMeta _isGroupExpenseMeta =
+      const VerificationMeta('isGroupExpense');
+  GeneratedBoolColumn _isGroupExpense;
   @override
-  GeneratedBoolColumn get groupExpense =>
-      _groupExpense ??= _constructGroupExpense();
-  GeneratedBoolColumn _constructGroupExpense() {
-    return GeneratedBoolColumn('group_expense', $tableName, false,
+  GeneratedBoolColumn get isGroupExpense =>
+      _isGroupExpense ??= _constructIsGroupExpense();
+  GeneratedBoolColumn _constructIsGroupExpense() {
+    return GeneratedBoolColumn('isGroupExpense', $tableName, false,
         defaultValue: const Constant(false));
   }
 
@@ -347,7 +346,7 @@ class $MembersTable extends Members with TableInfo<$MembersTable, Member> {
   GeneratedDateTimeColumn get createdOn => _createdOn ??= _constructCreatedOn();
   GeneratedDateTimeColumn _constructCreatedOn() {
     return GeneratedDateTimeColumn(
-      'created_on',
+      'createdOn',
       $tableName,
       false,
     )..clientDefault = () => DateTime.now().toUtc();
@@ -359,7 +358,7 @@ class $MembersTable extends Members with TableInfo<$MembersTable, Member> {
   GeneratedDateTimeColumn get updatedOn => _updatedOn ??= _constructUpdatedOn();
   GeneratedDateTimeColumn _constructUpdatedOn() {
     return GeneratedDateTimeColumn(
-      'updated_on',
+      'updatedOn',
       $tableName,
       false,
     )..clientDefault = () => DateTime.now().toUtc();
@@ -374,16 +373,16 @@ class $MembersTable extends Members with TableInfo<$MembersTable, Member> {
         idType,
         idValue,
         secondaryIdValue,
-        groupExpense,
+        isGroupExpense,
         createdOn,
         updatedOn
       ];
   @override
   $MembersTable get asDslTable => this;
   @override
-  String get $tableName => _alias ?? 'members';
+  String get $tableName => _alias ?? 'Members';
   @override
-  final String actualTableName = 'members';
+  final String actualTableName = 'Members';
   @override
   VerificationContext validateIntegrity(MembersCompanion d,
       {bool isInserting = false}) {
@@ -425,11 +424,11 @@ class $MembersTable extends Members with TableInfo<$MembersTable, Member> {
           secondaryIdValue.isAcceptableValue(
               d.secondaryIdValue.value, _secondaryIdValueMeta));
     }
-    if (d.groupExpense.present) {
+    if (d.isGroupExpense.present) {
       context.handle(
-          _groupExpenseMeta,
-          groupExpense.isAcceptableValue(
-              d.groupExpense.value, _groupExpenseMeta));
+          _isGroupExpenseMeta,
+          isGroupExpense.isAcceptableValue(
+              d.isGroupExpense.value, _isGroupExpenseMeta));
     }
     if (d.createdOn.present) {
       context.handle(_createdOnMeta,
@@ -460,29 +459,29 @@ class $MembersTable extends Members with TableInfo<$MembersTable, Member> {
       map['name'] = Variable<String, StringType>(d.name.value);
     }
     if (d.nickName.present) {
-      map['nick_name'] = Variable<String, StringType>(d.nickName.value);
+      map['nickName'] = Variable<String, StringType>(d.nickName.value);
     }
     if (d.avatar.present) {
       map['avatar'] = Variable<Uint8List, BlobType>(d.avatar.value);
     }
     if (d.idType.present) {
-      map['id_type'] = Variable<String, StringType>(d.idType.value);
+      map['idType'] = Variable<String, StringType>(d.idType.value);
     }
     if (d.idValue.present) {
-      map['id_value'] = Variable<String, StringType>(d.idValue.value);
+      map['idValue'] = Variable<String, StringType>(d.idValue.value);
     }
     if (d.secondaryIdValue.present) {
-      map['secondary_id_value'] =
+      map['secondaryIdValue'] =
           Variable<String, StringType>(d.secondaryIdValue.value);
     }
-    if (d.groupExpense.present) {
-      map['group_expense'] = Variable<bool, BoolType>(d.groupExpense.value);
+    if (d.isGroupExpense.present) {
+      map['isGroupExpense'] = Variable<bool, BoolType>(d.isGroupExpense.value);
     }
     if (d.createdOn.present) {
-      map['created_on'] = Variable<DateTime, DateTimeType>(d.createdOn.value);
+      map['createdOn'] = Variable<DateTime, DateTimeType>(d.createdOn.value);
     }
     if (d.updatedOn.present) {
-      map['updated_on'] = Variable<DateTime, DateTimeType>(d.updatedOn.value);
+      map['updatedOn'] = Variable<DateTime, DateTimeType>(d.updatedOn.value);
     }
     return map;
   }
@@ -515,9 +514,9 @@ class Group extends DataClass implements Insertable<Group> {
       name: stringType.mapFromDatabaseResponse(data['${effectivePrefix}name']),
       type: stringType.mapFromDatabaseResponse(data['${effectivePrefix}type']),
       createdOn: dateTimeType
-          .mapFromDatabaseResponse(data['${effectivePrefix}created_on']),
+          .mapFromDatabaseResponse(data['${effectivePrefix}createdOn']),
       updatedOn: dateTimeType
-          .mapFromDatabaseResponse(data['${effectivePrefix}updated_on']),
+          .mapFromDatabaseResponse(data['${effectivePrefix}updatedOn']),
     );
   }
   factory Group.fromJson(Map<String, dynamic> json,
@@ -647,7 +646,7 @@ class $GroupsTable extends Groups with TableInfo<$GroupsTable, Group> {
   @override
   GeneratedTextColumn get id => _id ??= _constructId();
   GeneratedTextColumn _constructId() {
-    return GeneratedTextColumn('id', $tableName, false, maxTextLength: 16);
+    return GeneratedTextColumn('id', $tableName, false, minTextLength: 16);
   }
 
   final VerificationMeta _nameMeta = const VerificationMeta('name');
@@ -674,7 +673,7 @@ class $GroupsTable extends Groups with TableInfo<$GroupsTable, Group> {
   GeneratedDateTimeColumn get createdOn => _createdOn ??= _constructCreatedOn();
   GeneratedDateTimeColumn _constructCreatedOn() {
     return GeneratedDateTimeColumn(
-      'created_on',
+      'createdOn',
       $tableName,
       false,
     )..clientDefault = () => DateTime.now().toUtc();
@@ -686,7 +685,7 @@ class $GroupsTable extends Groups with TableInfo<$GroupsTable, Group> {
   GeneratedDateTimeColumn get updatedOn => _updatedOn ??= _constructUpdatedOn();
   GeneratedDateTimeColumn _constructUpdatedOn() {
     return GeneratedDateTimeColumn(
-      'updated_on',
+      'updatedOn',
       $tableName,
       false,
     )..clientDefault = () => DateTime.now().toUtc();
@@ -697,9 +696,9 @@ class $GroupsTable extends Groups with TableInfo<$GroupsTable, Group> {
   @override
   $GroupsTable get asDslTable => this;
   @override
-  String get $tableName => _alias ?? 'groups';
+  String get $tableName => _alias ?? 'Groups';
   @override
-  final String actualTableName = 'groups';
+  final String actualTableName = 'Groups';
   @override
   VerificationContext validateIntegrity(GroupsCompanion d,
       {bool isInserting = false}) {
@@ -751,10 +750,10 @@ class $GroupsTable extends Groups with TableInfo<$GroupsTable, Group> {
       map['type'] = Variable<String, StringType>(d.type.value);
     }
     if (d.createdOn.present) {
-      map['created_on'] = Variable<DateTime, DateTimeType>(d.createdOn.value);
+      map['createdOn'] = Variable<DateTime, DateTimeType>(d.createdOn.value);
     }
     if (d.updatedOn.present) {
-      map['updated_on'] = Variable<DateTime, DateTimeType>(d.updatedOn.value);
+      map['updatedOn'] = Variable<DateTime, DateTimeType>(d.updatedOn.value);
     }
     return map;
   }
@@ -766,7 +765,7 @@ class $GroupsTable extends Groups with TableInfo<$GroupsTable, Group> {
 }
 
 class GroupMember extends DataClass implements Insertable<GroupMember> {
-  final String id;
+  final int id;
   final String groupId;
   final String memberId;
   final DateTime createdOn;
@@ -780,25 +779,26 @@ class GroupMember extends DataClass implements Insertable<GroupMember> {
   factory GroupMember.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String prefix}) {
     final effectivePrefix = prefix ?? '';
+    final intType = db.typeSystem.forDartType<int>();
     final stringType = db.typeSystem.forDartType<String>();
     final dateTimeType = db.typeSystem.forDartType<DateTime>();
     return GroupMember(
-      id: stringType.mapFromDatabaseResponse(data['${effectivePrefix}id']),
-      groupId: stringType
-          .mapFromDatabaseResponse(data['${effectivePrefix}group_id']),
+      id: intType.mapFromDatabaseResponse(data['${effectivePrefix}id']),
+      groupId:
+          stringType.mapFromDatabaseResponse(data['${effectivePrefix}groupId']),
       memberId: stringType
-          .mapFromDatabaseResponse(data['${effectivePrefix}member_id']),
+          .mapFromDatabaseResponse(data['${effectivePrefix}memberId']),
       createdOn: dateTimeType
-          .mapFromDatabaseResponse(data['${effectivePrefix}created_on']),
+          .mapFromDatabaseResponse(data['${effectivePrefix}createdOn']),
       updatedOn: dateTimeType
-          .mapFromDatabaseResponse(data['${effectivePrefix}updated_on']),
+          .mapFromDatabaseResponse(data['${effectivePrefix}updatedOn']),
     );
   }
   factory GroupMember.fromJson(Map<String, dynamic> json,
       {ValueSerializer serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
     return GroupMember(
-      id: serializer.fromJson<String>(json['id']),
+      id: serializer.fromJson<int>(json['id']),
       groupId: serializer.fromJson<String>(json['groupId']),
       memberId: serializer.fromJson<String>(json['memberId']),
       createdOn: serializer.fromJson<DateTime>(json['createdOn']),
@@ -809,7 +809,7 @@ class GroupMember extends DataClass implements Insertable<GroupMember> {
   Map<String, dynamic> toJson({ValueSerializer serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
-      'id': serializer.toJson<String>(id),
+      'id': serializer.toJson<int>(id),
       'groupId': serializer.toJson<String>(groupId),
       'memberId': serializer.toJson<String>(memberId),
       'createdOn': serializer.toJson<DateTime>(createdOn),
@@ -837,7 +837,7 @@ class GroupMember extends DataClass implements Insertable<GroupMember> {
   }
 
   GroupMember copyWith(
-          {String id,
+          {int id,
           String groupId,
           String memberId,
           DateTime createdOn,
@@ -880,7 +880,7 @@ class GroupMember extends DataClass implements Insertable<GroupMember> {
 }
 
 class GroupMembersCompanion extends UpdateCompanion<GroupMember> {
-  final Value<String> id;
+  final Value<int> id;
   final Value<String> groupId;
   final Value<String> memberId;
   final Value<DateTime> createdOn;
@@ -893,16 +893,15 @@ class GroupMembersCompanion extends UpdateCompanion<GroupMember> {
     this.updatedOn = const Value.absent(),
   });
   GroupMembersCompanion.insert({
-    @required String id,
+    this.id = const Value.absent(),
     @required String groupId,
     @required String memberId,
     this.createdOn = const Value.absent(),
     this.updatedOn = const Value.absent(),
-  })  : id = Value(id),
-        groupId = Value(groupId),
+  })  : groupId = Value(groupId),
         memberId = Value(memberId);
   GroupMembersCompanion copyWith(
-      {Value<String> id,
+      {Value<int> id,
       Value<String> groupId,
       Value<String> memberId,
       Value<DateTime> createdOn,
@@ -923,11 +922,12 @@ class $GroupMembersTable extends GroupMembers
   final String _alias;
   $GroupMembersTable(this._db, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
-  GeneratedTextColumn _id;
+  GeneratedIntColumn _id;
   @override
-  GeneratedTextColumn get id => _id ??= _constructId();
-  GeneratedTextColumn _constructId() {
-    return GeneratedTextColumn('id', $tableName, false, maxTextLength: 16);
+  GeneratedIntColumn get id => _id ??= _constructId();
+  GeneratedIntColumn _constructId() {
+    return GeneratedIntColumn('id', $tableName, false,
+        hasAutoIncrement: true, declaredAsPrimaryKey: true);
   }
 
   final VerificationMeta _groupIdMeta = const VerificationMeta('groupId');
@@ -935,8 +935,8 @@ class $GroupMembersTable extends GroupMembers
   @override
   GeneratedTextColumn get groupId => _groupId ??= _constructGroupId();
   GeneratedTextColumn _constructGroupId() {
-    return GeneratedTextColumn('group_id', $tableName, false,
-        maxTextLength: 16,
+    return GeneratedTextColumn('groupId', $tableName, false,
+        minTextLength: 16,
         $customConstraints: 'REFERENCES Groups(id) NOT NULL ON UPDATE CASCADE');
   }
 
@@ -945,8 +945,8 @@ class $GroupMembersTable extends GroupMembers
   @override
   GeneratedTextColumn get memberId => _memberId ??= _constructMemberId();
   GeneratedTextColumn _constructMemberId() {
-    return GeneratedTextColumn('member_id', $tableName, false,
-        maxTextLength: 16,
+    return GeneratedTextColumn('memberId', $tableName, false,
+        minTextLength: 16,
         $customConstraints:
             'REFERENCES Members(id) NOT NULL ON UPDATE CASCADE');
   }
@@ -957,7 +957,7 @@ class $GroupMembersTable extends GroupMembers
   GeneratedDateTimeColumn get createdOn => _createdOn ??= _constructCreatedOn();
   GeneratedDateTimeColumn _constructCreatedOn() {
     return GeneratedDateTimeColumn(
-      'created_on',
+      'createdOn',
       $tableName,
       false,
     )..clientDefault = () => DateTime.now().toUtc();
@@ -969,7 +969,7 @@ class $GroupMembersTable extends GroupMembers
   GeneratedDateTimeColumn get updatedOn => _updatedOn ??= _constructUpdatedOn();
   GeneratedDateTimeColumn _constructUpdatedOn() {
     return GeneratedDateTimeColumn(
-      'updated_on',
+      'updatedOn',
       $tableName,
       false,
     )..clientDefault = () => DateTime.now().toUtc();
@@ -981,17 +981,15 @@ class $GroupMembersTable extends GroupMembers
   @override
   $GroupMembersTable get asDslTable => this;
   @override
-  String get $tableName => _alias ?? 'group_members';
+  String get $tableName => _alias ?? 'GroupMembers';
   @override
-  final String actualTableName = 'group_members';
+  final String actualTableName = 'GroupMembers';
   @override
   VerificationContext validateIntegrity(GroupMembersCompanion d,
       {bool isInserting = false}) {
     final context = VerificationContext();
     if (d.id.present) {
       context.handle(_idMeta, id.isAcceptableValue(d.id.value, _idMeta));
-    } else if (isInserting) {
-      context.missing(_idMeta);
     }
     if (d.groupId.present) {
       context.handle(_groupIdMeta,
@@ -1028,19 +1026,19 @@ class $GroupMembersTable extends GroupMembers
   Map<String, Variable> entityToSql(GroupMembersCompanion d) {
     final map = <String, Variable>{};
     if (d.id.present) {
-      map['id'] = Variable<String, StringType>(d.id.value);
+      map['id'] = Variable<int, IntType>(d.id.value);
     }
     if (d.groupId.present) {
-      map['group_id'] = Variable<String, StringType>(d.groupId.value);
+      map['groupId'] = Variable<String, StringType>(d.groupId.value);
     }
     if (d.memberId.present) {
-      map['member_id'] = Variable<String, StringType>(d.memberId.value);
+      map['memberId'] = Variable<String, StringType>(d.memberId.value);
     }
     if (d.createdOn.present) {
-      map['created_on'] = Variable<DateTime, DateTimeType>(d.createdOn.value);
+      map['createdOn'] = Variable<DateTime, DateTimeType>(d.createdOn.value);
     }
     if (d.updatedOn.present) {
-      map['updated_on'] = Variable<DateTime, DateTimeType>(d.updatedOn.value);
+      map['updatedOn'] = Variable<DateTime, DateTimeType>(d.updatedOn.value);
     }
     return map;
   }
@@ -1075,12 +1073,12 @@ class Account extends DataClass implements Insertable<Account> {
       id: intType.mapFromDatabaseResponse(data['${effectivePrefix}id']),
       name: stringType.mapFromDatabaseResponse(data['${effectivePrefix}name']),
       parentId:
-          intType.mapFromDatabaseResponse(data['${effectivePrefix}parent_id']),
+          intType.mapFromDatabaseResponse(data['${effectivePrefix}parentId']),
       type: stringType.mapFromDatabaseResponse(data['${effectivePrefix}type']),
       createdOn: dateTimeType
-          .mapFromDatabaseResponse(data['${effectivePrefix}created_on']),
+          .mapFromDatabaseResponse(data['${effectivePrefix}createdOn']),
       updatedOn: dateTimeType
-          .mapFromDatabaseResponse(data['${effectivePrefix}updated_on']),
+          .mapFromDatabaseResponse(data['${effectivePrefix}updatedOn']),
     );
   }
   factory Account.fromJson(Map<String, dynamic> json,
@@ -1242,7 +1240,7 @@ class $AccountsTable extends Accounts with TableInfo<$AccountsTable, Account> {
   @override
   GeneratedIntColumn get parentId => _parentId ??= _constructParentId();
   GeneratedIntColumn _constructParentId() {
-    return GeneratedIntColumn('parent_id', $tableName, true,
+    return GeneratedIntColumn('parentId', $tableName, true,
         $customConstraints: 'REFERENCES Accounts(id) NULLABLE');
   }
 
@@ -1262,7 +1260,7 @@ class $AccountsTable extends Accounts with TableInfo<$AccountsTable, Account> {
   GeneratedDateTimeColumn get createdOn => _createdOn ??= _constructCreatedOn();
   GeneratedDateTimeColumn _constructCreatedOn() {
     return GeneratedDateTimeColumn(
-      'created_on',
+      'createdOn',
       $tableName,
       false,
     )..clientDefault = () => DateTime.now().toUtc();
@@ -1274,7 +1272,7 @@ class $AccountsTable extends Accounts with TableInfo<$AccountsTable, Account> {
   GeneratedDateTimeColumn get updatedOn => _updatedOn ??= _constructUpdatedOn();
   GeneratedDateTimeColumn _constructUpdatedOn() {
     return GeneratedDateTimeColumn(
-      'updated_on',
+      'updatedOn',
       $tableName,
       false,
     )..clientDefault = () => DateTime.now().toUtc();
@@ -1286,9 +1284,9 @@ class $AccountsTable extends Accounts with TableInfo<$AccountsTable, Account> {
   @override
   $AccountsTable get asDslTable => this;
   @override
-  String get $tableName => _alias ?? 'accounts';
+  String get $tableName => _alias ?? 'Accounts';
   @override
-  final String actualTableName = 'accounts';
+  final String actualTableName = 'Accounts';
   @override
   VerificationContext validateIntegrity(AccountsCompanion d,
       {bool isInserting = false}) {
@@ -1339,16 +1337,16 @@ class $AccountsTable extends Accounts with TableInfo<$AccountsTable, Account> {
       map['name'] = Variable<String, StringType>(d.name.value);
     }
     if (d.parentId.present) {
-      map['parent_id'] = Variable<int, IntType>(d.parentId.value);
+      map['parentId'] = Variable<int, IntType>(d.parentId.value);
     }
     if (d.type.present) {
       map['type'] = Variable<String, StringType>(d.type.value);
     }
     if (d.createdOn.present) {
-      map['created_on'] = Variable<DateTime, DateTimeType>(d.createdOn.value);
+      map['createdOn'] = Variable<DateTime, DateTimeType>(d.createdOn.value);
     }
     if (d.updatedOn.present) {
-      map['updated_on'] = Variable<DateTime, DateTimeType>(d.updatedOn.value);
+      map['updatedOn'] = Variable<DateTime, DateTimeType>(d.updatedOn.value);
     }
     return map;
   }
@@ -1383,12 +1381,12 @@ class Category extends DataClass implements Insertable<Category> {
       id: intType.mapFromDatabaseResponse(data['${effectivePrefix}id']),
       name: stringType.mapFromDatabaseResponse(data['${effectivePrefix}name']),
       parentId:
-          intType.mapFromDatabaseResponse(data['${effectivePrefix}parent_id']),
+          intType.mapFromDatabaseResponse(data['${effectivePrefix}parentId']),
       type: stringType.mapFromDatabaseResponse(data['${effectivePrefix}type']),
       createdOn: dateTimeType
-          .mapFromDatabaseResponse(data['${effectivePrefix}created_on']),
+          .mapFromDatabaseResponse(data['${effectivePrefix}createdOn']),
       updatedOn: dateTimeType
-          .mapFromDatabaseResponse(data['${effectivePrefix}updated_on']),
+          .mapFromDatabaseResponse(data['${effectivePrefix}updatedOn']),
     );
   }
   factory Category.fromJson(Map<String, dynamic> json,
@@ -1551,7 +1549,7 @@ class $CategoriesTable extends Categories
   @override
   GeneratedIntColumn get parentId => _parentId ??= _constructParentId();
   GeneratedIntColumn _constructParentId() {
-    return GeneratedIntColumn('parent_id', $tableName, true,
+    return GeneratedIntColumn('parentId', $tableName, true,
         $customConstraints: 'REFERENCES Categories(id) NULLABLE');
   }
 
@@ -1571,7 +1569,7 @@ class $CategoriesTable extends Categories
   GeneratedDateTimeColumn get createdOn => _createdOn ??= _constructCreatedOn();
   GeneratedDateTimeColumn _constructCreatedOn() {
     return GeneratedDateTimeColumn(
-      'created_on',
+      'createdOn',
       $tableName,
       false,
     )..clientDefault = () => DateTime.now().toUtc();
@@ -1583,7 +1581,7 @@ class $CategoriesTable extends Categories
   GeneratedDateTimeColumn get updatedOn => _updatedOn ??= _constructUpdatedOn();
   GeneratedDateTimeColumn _constructUpdatedOn() {
     return GeneratedDateTimeColumn(
-      'updated_on',
+      'updatedOn',
       $tableName,
       false,
     )..clientDefault = () => DateTime.now().toUtc();
@@ -1595,9 +1593,9 @@ class $CategoriesTable extends Categories
   @override
   $CategoriesTable get asDslTable => this;
   @override
-  String get $tableName => _alias ?? 'categories';
+  String get $tableName => _alias ?? 'Categories';
   @override
-  final String actualTableName = 'categories';
+  final String actualTableName = 'Categories';
   @override
   VerificationContext validateIntegrity(CategoriesCompanion d,
       {bool isInserting = false}) {
@@ -1648,16 +1646,16 @@ class $CategoriesTable extends Categories
       map['name'] = Variable<String, StringType>(d.name.value);
     }
     if (d.parentId.present) {
-      map['parent_id'] = Variable<int, IntType>(d.parentId.value);
+      map['parentId'] = Variable<int, IntType>(d.parentId.value);
     }
     if (d.type.present) {
       map['type'] = Variable<String, StringType>(d.type.value);
     }
     if (d.createdOn.present) {
-      map['created_on'] = Variable<DateTime, DateTimeType>(d.createdOn.value);
+      map['createdOn'] = Variable<DateTime, DateTimeType>(d.createdOn.value);
     }
     if (d.updatedOn.present) {
-      map['updated_on'] = Variable<DateTime, DateTimeType>(d.updatedOn.value);
+      map['updatedOn'] = Variable<DateTime, DateTimeType>(d.updatedOn.value);
     }
     return map;
   }
@@ -1686,7 +1684,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       @required this.amount,
       this.categoryId,
       @required this.groupId,
-      @required this.fromAccountId,
+      this.fromAccountId,
       this.toAccountId,
       this.notes,
       this.attachments,
@@ -1702,25 +1700,25 @@ class Transaction extends DataClass implements Insertable<Transaction> {
     return Transaction(
       id: stringType.mapFromDatabaseResponse(data['${effectivePrefix}id']),
       memberId: stringType
-          .mapFromDatabaseResponse(data['${effectivePrefix}member_id']),
+          .mapFromDatabaseResponse(data['${effectivePrefix}memberId']),
       amount:
           doubleType.mapFromDatabaseResponse(data['${effectivePrefix}amount']),
-      categoryId: intType
-          .mapFromDatabaseResponse(data['${effectivePrefix}category_id']),
-      groupId: stringType
-          .mapFromDatabaseResponse(data['${effectivePrefix}group_id']),
+      categoryId:
+          intType.mapFromDatabaseResponse(data['${effectivePrefix}categoryId']),
+      groupId:
+          stringType.mapFromDatabaseResponse(data['${effectivePrefix}groupId']),
       fromAccountId: intType
-          .mapFromDatabaseResponse(data['${effectivePrefix}from_account_id']),
+          .mapFromDatabaseResponse(data['${effectivePrefix}fromAccountId']),
       toAccountId: intType
-          .mapFromDatabaseResponse(data['${effectivePrefix}to_account_id']),
+          .mapFromDatabaseResponse(data['${effectivePrefix}toAccountId']),
       notes:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}notes']),
       attachments: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}attachments']),
       createdOn: dateTimeType
-          .mapFromDatabaseResponse(data['${effectivePrefix}created_on']),
+          .mapFromDatabaseResponse(data['${effectivePrefix}createdOn']),
       updatedOn: dateTimeType
-          .mapFromDatabaseResponse(data['${effectivePrefix}updated_on']),
+          .mapFromDatabaseResponse(data['${effectivePrefix}updatedOn']),
     );
   }
   factory Transaction.fromJson(Map<String, dynamic> json,
@@ -1905,7 +1903,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     @required double amount,
     this.categoryId = const Value.absent(),
     @required String groupId,
-    @required int fromAccountId,
+    this.fromAccountId = const Value.absent(),
     this.toAccountId = const Value.absent(),
     this.notes = const Value.absent(),
     this.attachments = const Value.absent(),
@@ -1914,8 +1912,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
   })  : id = Value(id),
         memberId = Value(memberId),
         amount = Value(amount),
-        groupId = Value(groupId),
-        fromAccountId = Value(fromAccountId);
+        groupId = Value(groupId);
   TransactionsCompanion copyWith(
       {Value<String> id,
       Value<String> memberId,
@@ -1954,7 +1951,7 @@ class $TransactionsTable extends Transactions
   @override
   GeneratedTextColumn get id => _id ??= _constructId();
   GeneratedTextColumn _constructId() {
-    return GeneratedTextColumn('id', $tableName, false, maxTextLength: 18);
+    return GeneratedTextColumn('id', $tableName, false, minTextLength: 18);
   }
 
   final VerificationMeta _memberIdMeta = const VerificationMeta('memberId');
@@ -1962,8 +1959,8 @@ class $TransactionsTable extends Transactions
   @override
   GeneratedTextColumn get memberId => _memberId ??= _constructMemberId();
   GeneratedTextColumn _constructMemberId() {
-    return GeneratedTextColumn('member_id', $tableName, false,
-        maxTextLength: 16,
+    return GeneratedTextColumn('memberId', $tableName, false,
+        minTextLength: 16,
         $customConstraints: 'REFERENCES Members(id) NOT NULL');
   }
 
@@ -1984,7 +1981,7 @@ class $TransactionsTable extends Transactions
   @override
   GeneratedIntColumn get categoryId => _categoryId ??= _constructCategoryId();
   GeneratedIntColumn _constructCategoryId() {
-    return GeneratedIntColumn('category_id', $tableName, true,
+    return GeneratedIntColumn('categoryId', $tableName, true,
         $customConstraints: 'REFERENCES Categories(id) NULLABLE');
   }
 
@@ -1993,8 +1990,8 @@ class $TransactionsTable extends Transactions
   @override
   GeneratedTextColumn get groupId => _groupId ??= _constructGroupId();
   GeneratedTextColumn _constructGroupId() {
-    return GeneratedTextColumn('group_id', $tableName, false,
-        maxTextLength: 16,
+    return GeneratedTextColumn('groupId', $tableName, false,
+        minTextLength: 16,
         $customConstraints: 'REFERENCES Groups(id) NOT NULL');
   }
 
@@ -2005,8 +2002,8 @@ class $TransactionsTable extends Transactions
   GeneratedIntColumn get fromAccountId =>
       _fromAccountId ??= _constructFromAccountId();
   GeneratedIntColumn _constructFromAccountId() {
-    return GeneratedIntColumn('from_account_id', $tableName, false,
-        $customConstraints: 'REFERENCES Accounts(id) NOT NULL');
+    return GeneratedIntColumn('fromAccountId', $tableName, true,
+        $customConstraints: 'REFERENCES Accounts(id) NULLABLE');
   }
 
   final VerificationMeta _toAccountIdMeta =
@@ -2016,7 +2013,7 @@ class $TransactionsTable extends Transactions
   GeneratedIntColumn get toAccountId =>
       _toAccountId ??= _constructToAccountId();
   GeneratedIntColumn _constructToAccountId() {
-    return GeneratedIntColumn('to_account_id', $tableName, true,
+    return GeneratedIntColumn('toAccountId', $tableName, true,
         $customConstraints: 'REFERENCES Accounts(id) NULLABLE');
   }
 
@@ -2052,7 +2049,7 @@ class $TransactionsTable extends Transactions
   GeneratedDateTimeColumn get createdOn => _createdOn ??= _constructCreatedOn();
   GeneratedDateTimeColumn _constructCreatedOn() {
     return GeneratedDateTimeColumn(
-      'created_on',
+      'createdOn',
       $tableName,
       false,
     )..clientDefault = () => DateTime.now().toUtc();
@@ -2064,7 +2061,7 @@ class $TransactionsTable extends Transactions
   GeneratedDateTimeColumn get updatedOn => _updatedOn ??= _constructUpdatedOn();
   GeneratedDateTimeColumn _constructUpdatedOn() {
     return GeneratedDateTimeColumn(
-      'updated_on',
+      'updatedOn',
       $tableName,
       false,
     )..clientDefault = () => DateTime.now().toUtc();
@@ -2087,9 +2084,9 @@ class $TransactionsTable extends Transactions
   @override
   $TransactionsTable get asDslTable => this;
   @override
-  String get $tableName => _alias ?? 'transactions';
+  String get $tableName => _alias ?? 'Transactions';
   @override
-  final String actualTableName = 'transactions';
+  final String actualTableName = 'Transactions';
   @override
   VerificationContext validateIntegrity(TransactionsCompanion d,
       {bool isInserting = false}) {
@@ -2126,8 +2123,6 @@ class $TransactionsTable extends Transactions
           _fromAccountIdMeta,
           fromAccountId.isAcceptableValue(
               d.fromAccountId.value, _fromAccountIdMeta));
-    } else if (isInserting) {
-      context.missing(_fromAccountIdMeta);
     }
     if (d.toAccountId.present) {
       context.handle(_toAccountIdMeta,
@@ -2167,22 +2162,22 @@ class $TransactionsTable extends Transactions
       map['id'] = Variable<String, StringType>(d.id.value);
     }
     if (d.memberId.present) {
-      map['member_id'] = Variable<String, StringType>(d.memberId.value);
+      map['memberId'] = Variable<String, StringType>(d.memberId.value);
     }
     if (d.amount.present) {
       map['amount'] = Variable<double, RealType>(d.amount.value);
     }
     if (d.categoryId.present) {
-      map['category_id'] = Variable<int, IntType>(d.categoryId.value);
+      map['categoryId'] = Variable<int, IntType>(d.categoryId.value);
     }
     if (d.groupId.present) {
-      map['group_id'] = Variable<String, StringType>(d.groupId.value);
+      map['groupId'] = Variable<String, StringType>(d.groupId.value);
     }
     if (d.fromAccountId.present) {
-      map['from_account_id'] = Variable<int, IntType>(d.fromAccountId.value);
+      map['fromAccountId'] = Variable<int, IntType>(d.fromAccountId.value);
     }
     if (d.toAccountId.present) {
-      map['to_account_id'] = Variable<int, IntType>(d.toAccountId.value);
+      map['toAccountId'] = Variable<int, IntType>(d.toAccountId.value);
     }
     if (d.notes.present) {
       map['notes'] = Variable<String, StringType>(d.notes.value);
@@ -2191,10 +2186,10 @@ class $TransactionsTable extends Transactions
       map['attachments'] = Variable<String, StringType>(d.attachments.value);
     }
     if (d.createdOn.present) {
-      map['created_on'] = Variable<DateTime, DateTimeType>(d.createdOn.value);
+      map['createdOn'] = Variable<DateTime, DateTimeType>(d.createdOn.value);
     }
     if (d.updatedOn.present) {
-      map['updated_on'] = Variable<DateTime, DateTimeType>(d.updatedOn.value);
+      map['updatedOn'] = Variable<DateTime, DateTimeType>(d.updatedOn.value);
     }
     return map;
   }
@@ -2221,9 +2216,434 @@ abstract class _$SprightlyData extends GeneratedDatabase {
   $TransactionsTable _transactions;
   $TransactionsTable get transactions =>
       _transactions ??= $TransactionsTable(this);
+  Member _rowToMember(QueryRow row) {
+    return Member(
+      id: row.readString('id'),
+      name: row.readString('name'),
+      nickName: row.readString('nickName'),
+      avatar: row.readBlob('avatar'),
+      idType: row.readString('idType'),
+      idValue: row.readString('idValue'),
+      secondaryIdValue: row.readString('secondaryIdValue'),
+      isGroupExpense: row.readBool('isGroupExpense'),
+      createdOn: row.readDateTime('createdOn'),
+      updatedOn: row.readDateTime('updatedOn'),
+    );
+  }
+
+  Selectable<Member> groupOnlyMembersQuery(String groupId) {
+    return customSelectQuery(
+        'SELECT m.* FROM Members m JOIN GroupMembers gm ON gm.memberId=m.id WHERE idType=\'Group\' AND gm.groupId=:groupId',
+        variables: [Variable.withString(groupId)],
+        readsFrom: {members, groupMembers}).map(_rowToMember);
+  }
+
+  Future<List<Member>> groupOnlyMembers(String groupId) {
+    return groupOnlyMembersQuery(groupId).get();
+  }
+
+  Stream<List<Member>> watchGroupOnlyMembers(String groupId) {
+    return groupOnlyMembersQuery(groupId).watch();
+  }
+
   @override
   Iterable<TableInfo> get allTables => allSchemaEntities.whereType<TableInfo>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities =>
       [members, groups, groupMembers, accounts, categories, transactions];
+}
+
+class AppFont extends DataClass implements Insertable<AppFont> {
+  final int id;
+  final String name;
+  final String family;
+  final String type;
+  final String style;
+  final int weight;
+  final DateTime createdOn;
+  final DateTime updatedOn;
+  AppFont(
+      {@required this.id,
+      @required this.name,
+      @required this.family,
+      @required this.type,
+      @required this.style,
+      @required this.weight,
+      @required this.createdOn,
+      @required this.updatedOn});
+  factory AppFont.fromData(Map<String, dynamic> data, GeneratedDatabase db,
+      {String prefix}) {
+    final effectivePrefix = prefix ?? '';
+    final intType = db.typeSystem.forDartType<int>();
+    final stringType = db.typeSystem.forDartType<String>();
+    final dateTimeType = db.typeSystem.forDartType<DateTime>();
+    return AppFont(
+      id: intType.mapFromDatabaseResponse(data['${effectivePrefix}id']),
+      name: stringType.mapFromDatabaseResponse(data['${effectivePrefix}name']),
+      family:
+          stringType.mapFromDatabaseResponse(data['${effectivePrefix}family']),
+      type: stringType.mapFromDatabaseResponse(data['${effectivePrefix}type']),
+      style:
+          stringType.mapFromDatabaseResponse(data['${effectivePrefix}style']),
+      weight: intType.mapFromDatabaseResponse(data['${effectivePrefix}weight']),
+      createdOn: dateTimeType
+          .mapFromDatabaseResponse(data['${effectivePrefix}createdOn']),
+      updatedOn: dateTimeType
+          .mapFromDatabaseResponse(data['${effectivePrefix}updatedOn']),
+    );
+  }
+  factory AppFont.fromJson(Map<String, dynamic> json,
+      {ValueSerializer serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return AppFont(
+      id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      family: serializer.fromJson<String>(json['family']),
+      type: serializer.fromJson<String>(json['type']),
+      style: serializer.fromJson<String>(json['style']),
+      weight: serializer.fromJson<int>(json['weight']),
+      createdOn: serializer.fromJson<DateTime>(json['createdOn']),
+      updatedOn: serializer.fromJson<DateTime>(json['updatedOn']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String>(name),
+      'family': serializer.toJson<String>(family),
+      'type': serializer.toJson<String>(type),
+      'style': serializer.toJson<String>(style),
+      'weight': serializer.toJson<int>(weight),
+      'createdOn': serializer.toJson<DateTime>(createdOn),
+      'updatedOn': serializer.toJson<DateTime>(updatedOn),
+    };
+  }
+
+  @override
+  AppFontsCompanion createCompanion(bool nullToAbsent) {
+    return AppFontsCompanion(
+      id: id == null && nullToAbsent ? const Value.absent() : Value(id),
+      name: name == null && nullToAbsent ? const Value.absent() : Value(name),
+      family:
+          family == null && nullToAbsent ? const Value.absent() : Value(family),
+      type: type == null && nullToAbsent ? const Value.absent() : Value(type),
+      style:
+          style == null && nullToAbsent ? const Value.absent() : Value(style),
+      weight:
+          weight == null && nullToAbsent ? const Value.absent() : Value(weight),
+      createdOn: createdOn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdOn),
+      updatedOn: updatedOn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedOn),
+    );
+  }
+
+  AppFont copyWith(
+          {int id,
+          String name,
+          String family,
+          String type,
+          String style,
+          int weight,
+          DateTime createdOn,
+          DateTime updatedOn}) =>
+      AppFont(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        family: family ?? this.family,
+        type: type ?? this.type,
+        style: style ?? this.style,
+        weight: weight ?? this.weight,
+        createdOn: createdOn ?? this.createdOn,
+        updatedOn: updatedOn ?? this.updatedOn,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('AppFont(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('family: $family, ')
+          ..write('type: $type, ')
+          ..write('style: $style, ')
+          ..write('weight: $weight, ')
+          ..write('createdOn: $createdOn, ')
+          ..write('updatedOn: $updatedOn')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => $mrjf($mrjc(
+      id.hashCode,
+      $mrjc(
+          name.hashCode,
+          $mrjc(
+              family.hashCode,
+              $mrjc(
+                  type.hashCode,
+                  $mrjc(
+                      style.hashCode,
+                      $mrjc(weight.hashCode,
+                          $mrjc(createdOn.hashCode, updatedOn.hashCode))))))));
+  @override
+  bool operator ==(dynamic other) =>
+      identical(this, other) ||
+      (other is AppFont &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.family == this.family &&
+          other.type == this.type &&
+          other.style == this.style &&
+          other.weight == this.weight &&
+          other.createdOn == this.createdOn &&
+          other.updatedOn == this.updatedOn);
+}
+
+class AppFontsCompanion extends UpdateCompanion<AppFont> {
+  final Value<int> id;
+  final Value<String> name;
+  final Value<String> family;
+  final Value<String> type;
+  final Value<String> style;
+  final Value<int> weight;
+  final Value<DateTime> createdOn;
+  final Value<DateTime> updatedOn;
+  const AppFontsCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.family = const Value.absent(),
+    this.type = const Value.absent(),
+    this.style = const Value.absent(),
+    this.weight = const Value.absent(),
+    this.createdOn = const Value.absent(),
+    this.updatedOn = const Value.absent(),
+  });
+  AppFontsCompanion.insert({
+    this.id = const Value.absent(),
+    @required String name,
+    @required String family,
+    @required String type,
+    @required String style,
+    this.weight = const Value.absent(),
+    this.createdOn = const Value.absent(),
+    this.updatedOn = const Value.absent(),
+  })  : name = Value(name),
+        family = Value(family),
+        type = Value(type),
+        style = Value(style);
+  AppFontsCompanion copyWith(
+      {Value<int> id,
+      Value<String> name,
+      Value<String> family,
+      Value<String> type,
+      Value<String> style,
+      Value<int> weight,
+      Value<DateTime> createdOn,
+      Value<DateTime> updatedOn}) {
+    return AppFontsCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      family: family ?? this.family,
+      type: type ?? this.type,
+      style: style ?? this.style,
+      weight: weight ?? this.weight,
+      createdOn: createdOn ?? this.createdOn,
+      updatedOn: updatedOn ?? this.updatedOn,
+    );
+  }
+}
+
+class $AppFontsTable extends AppFonts with TableInfo<$AppFontsTable, AppFont> {
+  final GeneratedDatabase _db;
+  final String _alias;
+  $AppFontsTable(this._db, [this._alias]);
+  final VerificationMeta _idMeta = const VerificationMeta('id');
+  GeneratedIntColumn _id;
+  @override
+  GeneratedIntColumn get id => _id ??= _constructId();
+  GeneratedIntColumn _constructId() {
+    return GeneratedIntColumn('id', $tableName, false,
+        hasAutoIncrement: true, declaredAsPrimaryKey: true);
+  }
+
+  final VerificationMeta _nameMeta = const VerificationMeta('name');
+  GeneratedTextColumn _name;
+  @override
+  GeneratedTextColumn get name => _name ??= _constructName();
+  GeneratedTextColumn _constructName() {
+    return GeneratedTextColumn('name', $tableName, false, maxTextLength: 50);
+  }
+
+  final VerificationMeta _familyMeta = const VerificationMeta('family');
+  GeneratedTextColumn _family;
+  @override
+  GeneratedTextColumn get family => _family ??= _constructFamily();
+  GeneratedTextColumn _constructFamily() {
+    return GeneratedTextColumn('family', $tableName, false, maxTextLength: 20);
+  }
+
+  final VerificationMeta _typeMeta = const VerificationMeta('type');
+  GeneratedTextColumn _type;
+  @override
+  GeneratedTextColumn get type => _type ??= _constructType();
+  GeneratedTextColumn _constructType() {
+    return GeneratedTextColumn('type', $tableName, false,
+        $customConstraints: 'CHECK (type IN (\'Regular\', \'Mono\')) NOT NULL');
+  }
+
+  final VerificationMeta _styleMeta = const VerificationMeta('style');
+  GeneratedTextColumn _style;
+  @override
+  GeneratedTextColumn get style => _style ??= _constructStyle();
+  GeneratedTextColumn _constructStyle() {
+    return GeneratedTextColumn('style', $tableName, false,
+        $customConstraints:
+            'CHECK (style IN (\'Regular\', \'Italic\', \'Bold\', \'BoldItalic\')) NOT NULL');
+  }
+
+  final VerificationMeta _weightMeta = const VerificationMeta('weight');
+  GeneratedIntColumn _weight;
+  @override
+  GeneratedIntColumn get weight => _weight ??= _constructWeight();
+  GeneratedIntColumn _constructWeight() {
+    return GeneratedIntColumn('weight', $tableName, false,
+        defaultValue: const Constant(100));
+  }
+
+  final VerificationMeta _createdOnMeta = const VerificationMeta('createdOn');
+  GeneratedDateTimeColumn _createdOn;
+  @override
+  GeneratedDateTimeColumn get createdOn => _createdOn ??= _constructCreatedOn();
+  GeneratedDateTimeColumn _constructCreatedOn() {
+    return GeneratedDateTimeColumn(
+      'createdOn',
+      $tableName,
+      false,
+    )..clientDefault = () => DateTime.now().toUtc();
+  }
+
+  final VerificationMeta _updatedOnMeta = const VerificationMeta('updatedOn');
+  GeneratedDateTimeColumn _updatedOn;
+  @override
+  GeneratedDateTimeColumn get updatedOn => _updatedOn ??= _constructUpdatedOn();
+  GeneratedDateTimeColumn _constructUpdatedOn() {
+    return GeneratedDateTimeColumn(
+      'updatedOn',
+      $tableName,
+      false,
+    )..clientDefault = () => DateTime.now().toUtc();
+  }
+
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, name, family, type, style, weight, createdOn, updatedOn];
+  @override
+  $AppFontsTable get asDslTable => this;
+  @override
+  String get $tableName => _alias ?? 'AppFonts';
+  @override
+  final String actualTableName = 'AppFonts';
+  @override
+  VerificationContext validateIntegrity(AppFontsCompanion d,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    if (d.id.present) {
+      context.handle(_idMeta, id.isAcceptableValue(d.id.value, _idMeta));
+    }
+    if (d.name.present) {
+      context.handle(
+          _nameMeta, name.isAcceptableValue(d.name.value, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (d.family.present) {
+      context.handle(
+          _familyMeta, family.isAcceptableValue(d.family.value, _familyMeta));
+    } else if (isInserting) {
+      context.missing(_familyMeta);
+    }
+    if (d.type.present) {
+      context.handle(
+          _typeMeta, type.isAcceptableValue(d.type.value, _typeMeta));
+    } else if (isInserting) {
+      context.missing(_typeMeta);
+    }
+    if (d.style.present) {
+      context.handle(
+          _styleMeta, style.isAcceptableValue(d.style.value, _styleMeta));
+    } else if (isInserting) {
+      context.missing(_styleMeta);
+    }
+    if (d.weight.present) {
+      context.handle(
+          _weightMeta, weight.isAcceptableValue(d.weight.value, _weightMeta));
+    }
+    if (d.createdOn.present) {
+      context.handle(_createdOnMeta,
+          createdOn.isAcceptableValue(d.createdOn.value, _createdOnMeta));
+    }
+    if (d.updatedOn.present) {
+      context.handle(_updatedOnMeta,
+          updatedOn.isAcceptableValue(d.updatedOn.value, _updatedOnMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  AppFont map(Map<String, dynamic> data, {String tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
+    return AppFont.fromData(data, _db, prefix: effectivePrefix);
+  }
+
+  @override
+  Map<String, Variable> entityToSql(AppFontsCompanion d) {
+    final map = <String, Variable>{};
+    if (d.id.present) {
+      map['id'] = Variable<int, IntType>(d.id.value);
+    }
+    if (d.name.present) {
+      map['name'] = Variable<String, StringType>(d.name.value);
+    }
+    if (d.family.present) {
+      map['family'] = Variable<String, StringType>(d.family.value);
+    }
+    if (d.type.present) {
+      map['type'] = Variable<String, StringType>(d.type.value);
+    }
+    if (d.style.present) {
+      map['style'] = Variable<String, StringType>(d.style.value);
+    }
+    if (d.weight.present) {
+      map['weight'] = Variable<int, IntType>(d.weight.value);
+    }
+    if (d.createdOn.present) {
+      map['createdOn'] = Variable<DateTime, DateTimeType>(d.createdOn.value);
+    }
+    if (d.updatedOn.present) {
+      map['updatedOn'] = Variable<DateTime, DateTimeType>(d.updatedOn.value);
+    }
+    return map;
+  }
+
+  @override
+  $AppFontsTable createAlias(String alias) {
+    return $AppFontsTable(_db, alias);
+  }
+}
+
+abstract class _$SprightlySetupData extends GeneratedDatabase {
+  _$SprightlySetupData(QueryExecutor e)
+      : super(SqlTypeSystem.defaultInstance, e);
+  $AppFontsTable _appFonts;
+  $AppFontsTable get appFonts => _appFonts ??= $AppFontsTable(this);
+  @override
+  Iterable<TableInfo> get allTables => allSchemaEntities.whereType<TableInfo>();
+  @override
+  List<DatabaseSchemaEntity> get allSchemaEntities => [appFonts];
 }
