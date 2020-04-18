@@ -3,6 +3,7 @@ import 'package:moor_ffi/moor_ffi.dart';
 import 'package:sprightly/utils/file_provider.dart';
 
 part 'database.g.dart';
+part '../models.dart';
 
 const String appDataDbFile = 'sprightly_db.lite';
 const String setupDataDbFile = 'sprightly_setup.lite';
@@ -199,23 +200,6 @@ const String groupOnlyMembersQuery = "SELECT m.* "
     "FROM Members m"
     " JOIN GroupMembers gm ON gm.memberId=m.id"
     " WHERE idType='Group' AND gm.groupId=:groupId";
-
-class GroupOnlyMembers {
-  final String groupId;
-  List<Member> _members;
-  List<Member> get members => _members;
-
-  GroupOnlyMembers(this.groupId);
-}
-
-class Settlement {
-  final double amount;
-  double settledAmount;
-  final Member fromMember;
-  final Member toMember;
-
-  Settlement(this.amount, this.fromMember, this.toMember);
-}
 //#endregion Custom query & classes
 
 LazyDatabase _openConnection(String dbFile, [bool isSupportFile = false]) =>
