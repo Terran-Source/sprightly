@@ -2216,36 +2216,9 @@ abstract class _$SprightlyData extends GeneratedDatabase {
   $TransactionsTable _transactions;
   $TransactionsTable get transactions =>
       _transactions ??= $TransactionsTable(this);
-  Member _rowToMember(QueryRow row) {
-    return Member(
-      id: row.readString('id'),
-      name: row.readString('name'),
-      nickName: row.readString('nickName'),
-      avatar: row.readBlob('avatar'),
-      idType: row.readString('idType'),
-      idValue: row.readString('idValue'),
-      secondaryIdValue: row.readString('secondaryIdValue'),
-      isGroupExpense: row.readBool('isGroupExpense'),
-      createdOn: row.readDateTime('createdOn'),
-      updatedOn: row.readDateTime('updatedOn'),
-    );
-  }
-
-  Selectable<Member> groupOnlyMembersQuery(String groupId) {
-    return customSelectQuery(
-        'SELECT m.* FROM Members m JOIN GroupMembers gm ON gm.memberId=m.id WHERE idType=\'Group\' AND gm.groupId=:groupId',
-        variables: [Variable.withString(groupId)],
-        readsFrom: {members, groupMembers}).map(_rowToMember);
-  }
-
-  Future<List<Member>> groupOnlyMembers(String groupId) {
-    return groupOnlyMembersQuery(groupId).get();
-  }
-
-  Stream<List<Member>> watchGroupOnlyMembers(String groupId) {
-    return groupOnlyMembersQuery(groupId).watch();
-  }
-
+  SprightlyDao _sprightlyDao;
+  SprightlyDao get sprightlyDao =>
+      _sprightlyDao ??= SprightlyDao(this as SprightlyData);
   @override
   Iterable<TableInfo> get allTables => allSchemaEntities.whereType<TableInfo>();
   @override
@@ -2637,13 +2610,1114 @@ class $AppFontsTable extends AppFonts with TableInfo<$AppFontsTable, AppFont> {
   }
 }
 
+class FontCombo extends DataClass implements Insertable<FontCombo> {
+  final int id;
+  final String name;
+  final int headerFont;
+  final int bodyFont;
+  final int bodyFontBig;
+  final int bodyFontMedium;
+  final int bodyFontSmall;
+  final int bodyFontTiny;
+  final int valueFont;
+  final int valueFontBig;
+  final int valueFontMedium;
+  final int valueFontSmall;
+  final int valueFontTiny;
+  final DateTime createdOn;
+  final DateTime updatedOn;
+  FontCombo(
+      {@required this.id,
+      @required this.name,
+      @required this.headerFont,
+      @required this.bodyFont,
+      this.bodyFontBig,
+      this.bodyFontMedium,
+      this.bodyFontSmall,
+      this.bodyFontTiny,
+      @required this.valueFont,
+      this.valueFontBig,
+      this.valueFontMedium,
+      this.valueFontSmall,
+      this.valueFontTiny,
+      @required this.createdOn,
+      @required this.updatedOn});
+  factory FontCombo.fromData(Map<String, dynamic> data, GeneratedDatabase db,
+      {String prefix}) {
+    final effectivePrefix = prefix ?? '';
+    final intType = db.typeSystem.forDartType<int>();
+    final stringType = db.typeSystem.forDartType<String>();
+    final dateTimeType = db.typeSystem.forDartType<DateTime>();
+    return FontCombo(
+      id: intType.mapFromDatabaseResponse(data['${effectivePrefix}id']),
+      name: stringType.mapFromDatabaseResponse(data['${effectivePrefix}name']),
+      headerFont:
+          intType.mapFromDatabaseResponse(data['${effectivePrefix}headerFont']),
+      bodyFont:
+          intType.mapFromDatabaseResponse(data['${effectivePrefix}bodyFont']),
+      bodyFontBig: intType
+          .mapFromDatabaseResponse(data['${effectivePrefix}bodyFontBig']),
+      bodyFontMedium: intType
+          .mapFromDatabaseResponse(data['${effectivePrefix}bodyFontMedium']),
+      bodyFontSmall: intType
+          .mapFromDatabaseResponse(data['${effectivePrefix}bodyFontSmall']),
+      bodyFontTiny: intType
+          .mapFromDatabaseResponse(data['${effectivePrefix}bodyFontTiny']),
+      valueFont:
+          intType.mapFromDatabaseResponse(data['${effectivePrefix}valueFont']),
+      valueFontBig: intType
+          .mapFromDatabaseResponse(data['${effectivePrefix}valueFontBig']),
+      valueFontMedium: intType
+          .mapFromDatabaseResponse(data['${effectivePrefix}valueFontMedium']),
+      valueFontSmall: intType
+          .mapFromDatabaseResponse(data['${effectivePrefix}valueFontSmall']),
+      valueFontTiny: intType
+          .mapFromDatabaseResponse(data['${effectivePrefix}valueFontTiny']),
+      createdOn: dateTimeType
+          .mapFromDatabaseResponse(data['${effectivePrefix}createdOn']),
+      updatedOn: dateTimeType
+          .mapFromDatabaseResponse(data['${effectivePrefix}updatedOn']),
+    );
+  }
+  factory FontCombo.fromJson(Map<String, dynamic> json,
+      {ValueSerializer serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return FontCombo(
+      id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      headerFont: serializer.fromJson<int>(json['headerFont']),
+      bodyFont: serializer.fromJson<int>(json['bodyFont']),
+      bodyFontBig: serializer.fromJson<int>(json['bodyFontBig']),
+      bodyFontMedium: serializer.fromJson<int>(json['bodyFontMedium']),
+      bodyFontSmall: serializer.fromJson<int>(json['bodyFontSmall']),
+      bodyFontTiny: serializer.fromJson<int>(json['bodyFontTiny']),
+      valueFont: serializer.fromJson<int>(json['valueFont']),
+      valueFontBig: serializer.fromJson<int>(json['valueFontBig']),
+      valueFontMedium: serializer.fromJson<int>(json['valueFontMedium']),
+      valueFontSmall: serializer.fromJson<int>(json['valueFontSmall']),
+      valueFontTiny: serializer.fromJson<int>(json['valueFontTiny']),
+      createdOn: serializer.fromJson<DateTime>(json['createdOn']),
+      updatedOn: serializer.fromJson<DateTime>(json['updatedOn']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String>(name),
+      'headerFont': serializer.toJson<int>(headerFont),
+      'bodyFont': serializer.toJson<int>(bodyFont),
+      'bodyFontBig': serializer.toJson<int>(bodyFontBig),
+      'bodyFontMedium': serializer.toJson<int>(bodyFontMedium),
+      'bodyFontSmall': serializer.toJson<int>(bodyFontSmall),
+      'bodyFontTiny': serializer.toJson<int>(bodyFontTiny),
+      'valueFont': serializer.toJson<int>(valueFont),
+      'valueFontBig': serializer.toJson<int>(valueFontBig),
+      'valueFontMedium': serializer.toJson<int>(valueFontMedium),
+      'valueFontSmall': serializer.toJson<int>(valueFontSmall),
+      'valueFontTiny': serializer.toJson<int>(valueFontTiny),
+      'createdOn': serializer.toJson<DateTime>(createdOn),
+      'updatedOn': serializer.toJson<DateTime>(updatedOn),
+    };
+  }
+
+  @override
+  FontCombosCompanion createCompanion(bool nullToAbsent) {
+    return FontCombosCompanion(
+      id: id == null && nullToAbsent ? const Value.absent() : Value(id),
+      name: name == null && nullToAbsent ? const Value.absent() : Value(name),
+      headerFont: headerFont == null && nullToAbsent
+          ? const Value.absent()
+          : Value(headerFont),
+      bodyFont: bodyFont == null && nullToAbsent
+          ? const Value.absent()
+          : Value(bodyFont),
+      bodyFontBig: bodyFontBig == null && nullToAbsent
+          ? const Value.absent()
+          : Value(bodyFontBig),
+      bodyFontMedium: bodyFontMedium == null && nullToAbsent
+          ? const Value.absent()
+          : Value(bodyFontMedium),
+      bodyFontSmall: bodyFontSmall == null && nullToAbsent
+          ? const Value.absent()
+          : Value(bodyFontSmall),
+      bodyFontTiny: bodyFontTiny == null && nullToAbsent
+          ? const Value.absent()
+          : Value(bodyFontTiny),
+      valueFont: valueFont == null && nullToAbsent
+          ? const Value.absent()
+          : Value(valueFont),
+      valueFontBig: valueFontBig == null && nullToAbsent
+          ? const Value.absent()
+          : Value(valueFontBig),
+      valueFontMedium: valueFontMedium == null && nullToAbsent
+          ? const Value.absent()
+          : Value(valueFontMedium),
+      valueFontSmall: valueFontSmall == null && nullToAbsent
+          ? const Value.absent()
+          : Value(valueFontSmall),
+      valueFontTiny: valueFontTiny == null && nullToAbsent
+          ? const Value.absent()
+          : Value(valueFontTiny),
+      createdOn: createdOn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdOn),
+      updatedOn: updatedOn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedOn),
+    );
+  }
+
+  FontCombo copyWith(
+          {int id,
+          String name,
+          int headerFont,
+          int bodyFont,
+          int bodyFontBig,
+          int bodyFontMedium,
+          int bodyFontSmall,
+          int bodyFontTiny,
+          int valueFont,
+          int valueFontBig,
+          int valueFontMedium,
+          int valueFontSmall,
+          int valueFontTiny,
+          DateTime createdOn,
+          DateTime updatedOn}) =>
+      FontCombo(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        headerFont: headerFont ?? this.headerFont,
+        bodyFont: bodyFont ?? this.bodyFont,
+        bodyFontBig: bodyFontBig ?? this.bodyFontBig,
+        bodyFontMedium: bodyFontMedium ?? this.bodyFontMedium,
+        bodyFontSmall: bodyFontSmall ?? this.bodyFontSmall,
+        bodyFontTiny: bodyFontTiny ?? this.bodyFontTiny,
+        valueFont: valueFont ?? this.valueFont,
+        valueFontBig: valueFontBig ?? this.valueFontBig,
+        valueFontMedium: valueFontMedium ?? this.valueFontMedium,
+        valueFontSmall: valueFontSmall ?? this.valueFontSmall,
+        valueFontTiny: valueFontTiny ?? this.valueFontTiny,
+        createdOn: createdOn ?? this.createdOn,
+        updatedOn: updatedOn ?? this.updatedOn,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('FontCombo(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('headerFont: $headerFont, ')
+          ..write('bodyFont: $bodyFont, ')
+          ..write('bodyFontBig: $bodyFontBig, ')
+          ..write('bodyFontMedium: $bodyFontMedium, ')
+          ..write('bodyFontSmall: $bodyFontSmall, ')
+          ..write('bodyFontTiny: $bodyFontTiny, ')
+          ..write('valueFont: $valueFont, ')
+          ..write('valueFontBig: $valueFontBig, ')
+          ..write('valueFontMedium: $valueFontMedium, ')
+          ..write('valueFontSmall: $valueFontSmall, ')
+          ..write('valueFontTiny: $valueFontTiny, ')
+          ..write('createdOn: $createdOn, ')
+          ..write('updatedOn: $updatedOn')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => $mrjf($mrjc(
+      id.hashCode,
+      $mrjc(
+          name.hashCode,
+          $mrjc(
+              headerFont.hashCode,
+              $mrjc(
+                  bodyFont.hashCode,
+                  $mrjc(
+                      bodyFontBig.hashCode,
+                      $mrjc(
+                          bodyFontMedium.hashCode,
+                          $mrjc(
+                              bodyFontSmall.hashCode,
+                              $mrjc(
+                                  bodyFontTiny.hashCode,
+                                  $mrjc(
+                                      valueFont.hashCode,
+                                      $mrjc(
+                                          valueFontBig.hashCode,
+                                          $mrjc(
+                                              valueFontMedium.hashCode,
+                                              $mrjc(
+                                                  valueFontSmall.hashCode,
+                                                  $mrjc(
+                                                      valueFontTiny.hashCode,
+                                                      $mrjc(
+                                                          createdOn.hashCode,
+                                                          updatedOn
+                                                              .hashCode)))))))))))))));
+  @override
+  bool operator ==(dynamic other) =>
+      identical(this, other) ||
+      (other is FontCombo &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.headerFont == this.headerFont &&
+          other.bodyFont == this.bodyFont &&
+          other.bodyFontBig == this.bodyFontBig &&
+          other.bodyFontMedium == this.bodyFontMedium &&
+          other.bodyFontSmall == this.bodyFontSmall &&
+          other.bodyFontTiny == this.bodyFontTiny &&
+          other.valueFont == this.valueFont &&
+          other.valueFontBig == this.valueFontBig &&
+          other.valueFontMedium == this.valueFontMedium &&
+          other.valueFontSmall == this.valueFontSmall &&
+          other.valueFontTiny == this.valueFontTiny &&
+          other.createdOn == this.createdOn &&
+          other.updatedOn == this.updatedOn);
+}
+
+class FontCombosCompanion extends UpdateCompanion<FontCombo> {
+  final Value<int> id;
+  final Value<String> name;
+  final Value<int> headerFont;
+  final Value<int> bodyFont;
+  final Value<int> bodyFontBig;
+  final Value<int> bodyFontMedium;
+  final Value<int> bodyFontSmall;
+  final Value<int> bodyFontTiny;
+  final Value<int> valueFont;
+  final Value<int> valueFontBig;
+  final Value<int> valueFontMedium;
+  final Value<int> valueFontSmall;
+  final Value<int> valueFontTiny;
+  final Value<DateTime> createdOn;
+  final Value<DateTime> updatedOn;
+  const FontCombosCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.headerFont = const Value.absent(),
+    this.bodyFont = const Value.absent(),
+    this.bodyFontBig = const Value.absent(),
+    this.bodyFontMedium = const Value.absent(),
+    this.bodyFontSmall = const Value.absent(),
+    this.bodyFontTiny = const Value.absent(),
+    this.valueFont = const Value.absent(),
+    this.valueFontBig = const Value.absent(),
+    this.valueFontMedium = const Value.absent(),
+    this.valueFontSmall = const Value.absent(),
+    this.valueFontTiny = const Value.absent(),
+    this.createdOn = const Value.absent(),
+    this.updatedOn = const Value.absent(),
+  });
+  FontCombosCompanion.insert({
+    this.id = const Value.absent(),
+    @required String name,
+    @required int headerFont,
+    @required int bodyFont,
+    this.bodyFontBig = const Value.absent(),
+    this.bodyFontMedium = const Value.absent(),
+    this.bodyFontSmall = const Value.absent(),
+    this.bodyFontTiny = const Value.absent(),
+    @required int valueFont,
+    this.valueFontBig = const Value.absent(),
+    this.valueFontMedium = const Value.absent(),
+    this.valueFontSmall = const Value.absent(),
+    this.valueFontTiny = const Value.absent(),
+    this.createdOn = const Value.absent(),
+    this.updatedOn = const Value.absent(),
+  })  : name = Value(name),
+        headerFont = Value(headerFont),
+        bodyFont = Value(bodyFont),
+        valueFont = Value(valueFont);
+  FontCombosCompanion copyWith(
+      {Value<int> id,
+      Value<String> name,
+      Value<int> headerFont,
+      Value<int> bodyFont,
+      Value<int> bodyFontBig,
+      Value<int> bodyFontMedium,
+      Value<int> bodyFontSmall,
+      Value<int> bodyFontTiny,
+      Value<int> valueFont,
+      Value<int> valueFontBig,
+      Value<int> valueFontMedium,
+      Value<int> valueFontSmall,
+      Value<int> valueFontTiny,
+      Value<DateTime> createdOn,
+      Value<DateTime> updatedOn}) {
+    return FontCombosCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      headerFont: headerFont ?? this.headerFont,
+      bodyFont: bodyFont ?? this.bodyFont,
+      bodyFontBig: bodyFontBig ?? this.bodyFontBig,
+      bodyFontMedium: bodyFontMedium ?? this.bodyFontMedium,
+      bodyFontSmall: bodyFontSmall ?? this.bodyFontSmall,
+      bodyFontTiny: bodyFontTiny ?? this.bodyFontTiny,
+      valueFont: valueFont ?? this.valueFont,
+      valueFontBig: valueFontBig ?? this.valueFontBig,
+      valueFontMedium: valueFontMedium ?? this.valueFontMedium,
+      valueFontSmall: valueFontSmall ?? this.valueFontSmall,
+      valueFontTiny: valueFontTiny ?? this.valueFontTiny,
+      createdOn: createdOn ?? this.createdOn,
+      updatedOn: updatedOn ?? this.updatedOn,
+    );
+  }
+}
+
+class $FontCombosTable extends FontCombos
+    with TableInfo<$FontCombosTable, FontCombo> {
+  final GeneratedDatabase _db;
+  final String _alias;
+  $FontCombosTable(this._db, [this._alias]);
+  final VerificationMeta _idMeta = const VerificationMeta('id');
+  GeneratedIntColumn _id;
+  @override
+  GeneratedIntColumn get id => _id ??= _constructId();
+  GeneratedIntColumn _constructId() {
+    return GeneratedIntColumn('id', $tableName, false,
+        hasAutoIncrement: true, declaredAsPrimaryKey: true);
+  }
+
+  final VerificationMeta _nameMeta = const VerificationMeta('name');
+  GeneratedTextColumn _name;
+  @override
+  GeneratedTextColumn get name => _name ??= _constructName();
+  GeneratedTextColumn _constructName() {
+    return GeneratedTextColumn('name', $tableName, false, maxTextLength: 50);
+  }
+
+  final VerificationMeta _headerFontMeta = const VerificationMeta('headerFont');
+  GeneratedIntColumn _headerFont;
+  @override
+  GeneratedIntColumn get headerFont => _headerFont ??= _constructHeaderFont();
+  GeneratedIntColumn _constructHeaderFont() {
+    return GeneratedIntColumn('headerFont', $tableName, false,
+        $customConstraints: 'REFERENCES AppFonts(id) NOT NULL');
+  }
+
+  final VerificationMeta _bodyFontMeta = const VerificationMeta('bodyFont');
+  GeneratedIntColumn _bodyFont;
+  @override
+  GeneratedIntColumn get bodyFont => _bodyFont ??= _constructBodyFont();
+  GeneratedIntColumn _constructBodyFont() {
+    return GeneratedIntColumn('bodyFont', $tableName, false,
+        $customConstraints: 'REFERENCES AppFonts(id) NOT NULL');
+  }
+
+  final VerificationMeta _bodyFontBigMeta =
+      const VerificationMeta('bodyFontBig');
+  GeneratedIntColumn _bodyFontBig;
+  @override
+  GeneratedIntColumn get bodyFontBig =>
+      _bodyFontBig ??= _constructBodyFontBig();
+  GeneratedIntColumn _constructBodyFontBig() {
+    return GeneratedIntColumn('bodyFontBig', $tableName, true,
+        $customConstraints: 'REFERENCES AppFonts(id)');
+  }
+
+  final VerificationMeta _bodyFontMediumMeta =
+      const VerificationMeta('bodyFontMedium');
+  GeneratedIntColumn _bodyFontMedium;
+  @override
+  GeneratedIntColumn get bodyFontMedium =>
+      _bodyFontMedium ??= _constructBodyFontMedium();
+  GeneratedIntColumn _constructBodyFontMedium() {
+    return GeneratedIntColumn('bodyFontMedium', $tableName, true,
+        $customConstraints: 'REFERENCES AppFonts(id)');
+  }
+
+  final VerificationMeta _bodyFontSmallMeta =
+      const VerificationMeta('bodyFontSmall');
+  GeneratedIntColumn _bodyFontSmall;
+  @override
+  GeneratedIntColumn get bodyFontSmall =>
+      _bodyFontSmall ??= _constructBodyFontSmall();
+  GeneratedIntColumn _constructBodyFontSmall() {
+    return GeneratedIntColumn('bodyFontSmall', $tableName, true,
+        $customConstraints: 'REFERENCES AppFonts(id)');
+  }
+
+  final VerificationMeta _bodyFontTinyMeta =
+      const VerificationMeta('bodyFontTiny');
+  GeneratedIntColumn _bodyFontTiny;
+  @override
+  GeneratedIntColumn get bodyFontTiny =>
+      _bodyFontTiny ??= _constructBodyFontTiny();
+  GeneratedIntColumn _constructBodyFontTiny() {
+    return GeneratedIntColumn('bodyFontTiny', $tableName, true,
+        $customConstraints: 'REFERENCES AppFonts(id)');
+  }
+
+  final VerificationMeta _valueFontMeta = const VerificationMeta('valueFont');
+  GeneratedIntColumn _valueFont;
+  @override
+  GeneratedIntColumn get valueFont => _valueFont ??= _constructValueFont();
+  GeneratedIntColumn _constructValueFont() {
+    return GeneratedIntColumn('valueFont', $tableName, false,
+        $customConstraints: 'REFERENCES AppFonts(id) NOT NULL');
+  }
+
+  final VerificationMeta _valueFontBigMeta =
+      const VerificationMeta('valueFontBig');
+  GeneratedIntColumn _valueFontBig;
+  @override
+  GeneratedIntColumn get valueFontBig =>
+      _valueFontBig ??= _constructValueFontBig();
+  GeneratedIntColumn _constructValueFontBig() {
+    return GeneratedIntColumn('valueFontBig', $tableName, true,
+        $customConstraints: 'REFERENCES AppFonts(id)');
+  }
+
+  final VerificationMeta _valueFontMediumMeta =
+      const VerificationMeta('valueFontMedium');
+  GeneratedIntColumn _valueFontMedium;
+  @override
+  GeneratedIntColumn get valueFontMedium =>
+      _valueFontMedium ??= _constructValueFontMedium();
+  GeneratedIntColumn _constructValueFontMedium() {
+    return GeneratedIntColumn('valueFontMedium', $tableName, true,
+        $customConstraints: 'REFERENCES AppFonts(id)');
+  }
+
+  final VerificationMeta _valueFontSmallMeta =
+      const VerificationMeta('valueFontSmall');
+  GeneratedIntColumn _valueFontSmall;
+  @override
+  GeneratedIntColumn get valueFontSmall =>
+      _valueFontSmall ??= _constructValueFontSmall();
+  GeneratedIntColumn _constructValueFontSmall() {
+    return GeneratedIntColumn('valueFontSmall', $tableName, true,
+        $customConstraints: 'REFERENCES AppFonts(id)');
+  }
+
+  final VerificationMeta _valueFontTinyMeta =
+      const VerificationMeta('valueFontTiny');
+  GeneratedIntColumn _valueFontTiny;
+  @override
+  GeneratedIntColumn get valueFontTiny =>
+      _valueFontTiny ??= _constructValueFontTiny();
+  GeneratedIntColumn _constructValueFontTiny() {
+    return GeneratedIntColumn('valueFontTiny', $tableName, true,
+        $customConstraints: 'REFERENCES AppFonts(id)');
+  }
+
+  final VerificationMeta _createdOnMeta = const VerificationMeta('createdOn');
+  GeneratedDateTimeColumn _createdOn;
+  @override
+  GeneratedDateTimeColumn get createdOn => _createdOn ??= _constructCreatedOn();
+  GeneratedDateTimeColumn _constructCreatedOn() {
+    return GeneratedDateTimeColumn(
+      'createdOn',
+      $tableName,
+      false,
+    )..clientDefault = () => DateTime.now().toUtc();
+  }
+
+  final VerificationMeta _updatedOnMeta = const VerificationMeta('updatedOn');
+  GeneratedDateTimeColumn _updatedOn;
+  @override
+  GeneratedDateTimeColumn get updatedOn => _updatedOn ??= _constructUpdatedOn();
+  GeneratedDateTimeColumn _constructUpdatedOn() {
+    return GeneratedDateTimeColumn(
+      'updatedOn',
+      $tableName,
+      false,
+    )..clientDefault = () => DateTime.now().toUtc();
+  }
+
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        name,
+        headerFont,
+        bodyFont,
+        bodyFontBig,
+        bodyFontMedium,
+        bodyFontSmall,
+        bodyFontTiny,
+        valueFont,
+        valueFontBig,
+        valueFontMedium,
+        valueFontSmall,
+        valueFontTiny,
+        createdOn,
+        updatedOn
+      ];
+  @override
+  $FontCombosTable get asDslTable => this;
+  @override
+  String get $tableName => _alias ?? 'FontCombos';
+  @override
+  final String actualTableName = 'FontCombos';
+  @override
+  VerificationContext validateIntegrity(FontCombosCompanion d,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    if (d.id.present) {
+      context.handle(_idMeta, id.isAcceptableValue(d.id.value, _idMeta));
+    }
+    if (d.name.present) {
+      context.handle(
+          _nameMeta, name.isAcceptableValue(d.name.value, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (d.headerFont.present) {
+      context.handle(_headerFontMeta,
+          headerFont.isAcceptableValue(d.headerFont.value, _headerFontMeta));
+    } else if (isInserting) {
+      context.missing(_headerFontMeta);
+    }
+    if (d.bodyFont.present) {
+      context.handle(_bodyFontMeta,
+          bodyFont.isAcceptableValue(d.bodyFont.value, _bodyFontMeta));
+    } else if (isInserting) {
+      context.missing(_bodyFontMeta);
+    }
+    if (d.bodyFontBig.present) {
+      context.handle(_bodyFontBigMeta,
+          bodyFontBig.isAcceptableValue(d.bodyFontBig.value, _bodyFontBigMeta));
+    }
+    if (d.bodyFontMedium.present) {
+      context.handle(
+          _bodyFontMediumMeta,
+          bodyFontMedium.isAcceptableValue(
+              d.bodyFontMedium.value, _bodyFontMediumMeta));
+    }
+    if (d.bodyFontSmall.present) {
+      context.handle(
+          _bodyFontSmallMeta,
+          bodyFontSmall.isAcceptableValue(
+              d.bodyFontSmall.value, _bodyFontSmallMeta));
+    }
+    if (d.bodyFontTiny.present) {
+      context.handle(
+          _bodyFontTinyMeta,
+          bodyFontTiny.isAcceptableValue(
+              d.bodyFontTiny.value, _bodyFontTinyMeta));
+    }
+    if (d.valueFont.present) {
+      context.handle(_valueFontMeta,
+          valueFont.isAcceptableValue(d.valueFont.value, _valueFontMeta));
+    } else if (isInserting) {
+      context.missing(_valueFontMeta);
+    }
+    if (d.valueFontBig.present) {
+      context.handle(
+          _valueFontBigMeta,
+          valueFontBig.isAcceptableValue(
+              d.valueFontBig.value, _valueFontBigMeta));
+    }
+    if (d.valueFontMedium.present) {
+      context.handle(
+          _valueFontMediumMeta,
+          valueFontMedium.isAcceptableValue(
+              d.valueFontMedium.value, _valueFontMediumMeta));
+    }
+    if (d.valueFontSmall.present) {
+      context.handle(
+          _valueFontSmallMeta,
+          valueFontSmall.isAcceptableValue(
+              d.valueFontSmall.value, _valueFontSmallMeta));
+    }
+    if (d.valueFontTiny.present) {
+      context.handle(
+          _valueFontTinyMeta,
+          valueFontTiny.isAcceptableValue(
+              d.valueFontTiny.value, _valueFontTinyMeta));
+    }
+    if (d.createdOn.present) {
+      context.handle(_createdOnMeta,
+          createdOn.isAcceptableValue(d.createdOn.value, _createdOnMeta));
+    }
+    if (d.updatedOn.present) {
+      context.handle(_updatedOnMeta,
+          updatedOn.isAcceptableValue(d.updatedOn.value, _updatedOnMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  FontCombo map(Map<String, dynamic> data, {String tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
+    return FontCombo.fromData(data, _db, prefix: effectivePrefix);
+  }
+
+  @override
+  Map<String, Variable> entityToSql(FontCombosCompanion d) {
+    final map = <String, Variable>{};
+    if (d.id.present) {
+      map['id'] = Variable<int, IntType>(d.id.value);
+    }
+    if (d.name.present) {
+      map['name'] = Variable<String, StringType>(d.name.value);
+    }
+    if (d.headerFont.present) {
+      map['headerFont'] = Variable<int, IntType>(d.headerFont.value);
+    }
+    if (d.bodyFont.present) {
+      map['bodyFont'] = Variable<int, IntType>(d.bodyFont.value);
+    }
+    if (d.bodyFontBig.present) {
+      map['bodyFontBig'] = Variable<int, IntType>(d.bodyFontBig.value);
+    }
+    if (d.bodyFontMedium.present) {
+      map['bodyFontMedium'] = Variable<int, IntType>(d.bodyFontMedium.value);
+    }
+    if (d.bodyFontSmall.present) {
+      map['bodyFontSmall'] = Variable<int, IntType>(d.bodyFontSmall.value);
+    }
+    if (d.bodyFontTiny.present) {
+      map['bodyFontTiny'] = Variable<int, IntType>(d.bodyFontTiny.value);
+    }
+    if (d.valueFont.present) {
+      map['valueFont'] = Variable<int, IntType>(d.valueFont.value);
+    }
+    if (d.valueFontBig.present) {
+      map['valueFontBig'] = Variable<int, IntType>(d.valueFontBig.value);
+    }
+    if (d.valueFontMedium.present) {
+      map['valueFontMedium'] = Variable<int, IntType>(d.valueFontMedium.value);
+    }
+    if (d.valueFontSmall.present) {
+      map['valueFontSmall'] = Variable<int, IntType>(d.valueFontSmall.value);
+    }
+    if (d.valueFontTiny.present) {
+      map['valueFontTiny'] = Variable<int, IntType>(d.valueFontTiny.value);
+    }
+    if (d.createdOn.present) {
+      map['createdOn'] = Variable<DateTime, DateTimeType>(d.createdOn.value);
+    }
+    if (d.updatedOn.present) {
+      map['updatedOn'] = Variable<DateTime, DateTimeType>(d.updatedOn.value);
+    }
+    return map;
+  }
+
+  @override
+  $FontCombosTable createAlias(String alias) {
+    return $FontCombosTable(_db, alias);
+  }
+}
+
+class ColorCombo extends DataClass implements Insertable<ColorCombo> {
+  final int id;
+  final String name;
+  final String mode;
+  final String backColor;
+  final String foreColor;
+  final DateTime createdOn;
+  final DateTime updatedOn;
+  ColorCombo(
+      {@required this.id,
+      @required this.name,
+      @required this.mode,
+      @required this.backColor,
+      @required this.foreColor,
+      @required this.createdOn,
+      @required this.updatedOn});
+  factory ColorCombo.fromData(Map<String, dynamic> data, GeneratedDatabase db,
+      {String prefix}) {
+    final effectivePrefix = prefix ?? '';
+    final intType = db.typeSystem.forDartType<int>();
+    final stringType = db.typeSystem.forDartType<String>();
+    final dateTimeType = db.typeSystem.forDartType<DateTime>();
+    return ColorCombo(
+      id: intType.mapFromDatabaseResponse(data['${effectivePrefix}id']),
+      name: stringType.mapFromDatabaseResponse(data['${effectivePrefix}name']),
+      mode: stringType.mapFromDatabaseResponse(data['${effectivePrefix}mode']),
+      backColor: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}backColor']),
+      foreColor: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}foreColor']),
+      createdOn: dateTimeType
+          .mapFromDatabaseResponse(data['${effectivePrefix}createdOn']),
+      updatedOn: dateTimeType
+          .mapFromDatabaseResponse(data['${effectivePrefix}updatedOn']),
+    );
+  }
+  factory ColorCombo.fromJson(Map<String, dynamic> json,
+      {ValueSerializer serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return ColorCombo(
+      id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      mode: serializer.fromJson<String>(json['mode']),
+      backColor: serializer.fromJson<String>(json['backColor']),
+      foreColor: serializer.fromJson<String>(json['foreColor']),
+      createdOn: serializer.fromJson<DateTime>(json['createdOn']),
+      updatedOn: serializer.fromJson<DateTime>(json['updatedOn']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String>(name),
+      'mode': serializer.toJson<String>(mode),
+      'backColor': serializer.toJson<String>(backColor),
+      'foreColor': serializer.toJson<String>(foreColor),
+      'createdOn': serializer.toJson<DateTime>(createdOn),
+      'updatedOn': serializer.toJson<DateTime>(updatedOn),
+    };
+  }
+
+  @override
+  ColorCombosCompanion createCompanion(bool nullToAbsent) {
+    return ColorCombosCompanion(
+      id: id == null && nullToAbsent ? const Value.absent() : Value(id),
+      name: name == null && nullToAbsent ? const Value.absent() : Value(name),
+      mode: mode == null && nullToAbsent ? const Value.absent() : Value(mode),
+      backColor: backColor == null && nullToAbsent
+          ? const Value.absent()
+          : Value(backColor),
+      foreColor: foreColor == null && nullToAbsent
+          ? const Value.absent()
+          : Value(foreColor),
+      createdOn: createdOn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdOn),
+      updatedOn: updatedOn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedOn),
+    );
+  }
+
+  ColorCombo copyWith(
+          {int id,
+          String name,
+          String mode,
+          String backColor,
+          String foreColor,
+          DateTime createdOn,
+          DateTime updatedOn}) =>
+      ColorCombo(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        mode: mode ?? this.mode,
+        backColor: backColor ?? this.backColor,
+        foreColor: foreColor ?? this.foreColor,
+        createdOn: createdOn ?? this.createdOn,
+        updatedOn: updatedOn ?? this.updatedOn,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('ColorCombo(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('mode: $mode, ')
+          ..write('backColor: $backColor, ')
+          ..write('foreColor: $foreColor, ')
+          ..write('createdOn: $createdOn, ')
+          ..write('updatedOn: $updatedOn')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => $mrjf($mrjc(
+      id.hashCode,
+      $mrjc(
+          name.hashCode,
+          $mrjc(
+              mode.hashCode,
+              $mrjc(
+                  backColor.hashCode,
+                  $mrjc(foreColor.hashCode,
+                      $mrjc(createdOn.hashCode, updatedOn.hashCode)))))));
+  @override
+  bool operator ==(dynamic other) =>
+      identical(this, other) ||
+      (other is ColorCombo &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.mode == this.mode &&
+          other.backColor == this.backColor &&
+          other.foreColor == this.foreColor &&
+          other.createdOn == this.createdOn &&
+          other.updatedOn == this.updatedOn);
+}
+
+class ColorCombosCompanion extends UpdateCompanion<ColorCombo> {
+  final Value<int> id;
+  final Value<String> name;
+  final Value<String> mode;
+  final Value<String> backColor;
+  final Value<String> foreColor;
+  final Value<DateTime> createdOn;
+  final Value<DateTime> updatedOn;
+  const ColorCombosCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.mode = const Value.absent(),
+    this.backColor = const Value.absent(),
+    this.foreColor = const Value.absent(),
+    this.createdOn = const Value.absent(),
+    this.updatedOn = const Value.absent(),
+  });
+  ColorCombosCompanion.insert({
+    this.id = const Value.absent(),
+    @required String name,
+    @required String mode,
+    @required String backColor,
+    @required String foreColor,
+    this.createdOn = const Value.absent(),
+    this.updatedOn = const Value.absent(),
+  })  : name = Value(name),
+        mode = Value(mode),
+        backColor = Value(backColor),
+        foreColor = Value(foreColor);
+  ColorCombosCompanion copyWith(
+      {Value<int> id,
+      Value<String> name,
+      Value<String> mode,
+      Value<String> backColor,
+      Value<String> foreColor,
+      Value<DateTime> createdOn,
+      Value<DateTime> updatedOn}) {
+    return ColorCombosCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      mode: mode ?? this.mode,
+      backColor: backColor ?? this.backColor,
+      foreColor: foreColor ?? this.foreColor,
+      createdOn: createdOn ?? this.createdOn,
+      updatedOn: updatedOn ?? this.updatedOn,
+    );
+  }
+}
+
+class $ColorCombosTable extends ColorCombos
+    with TableInfo<$ColorCombosTable, ColorCombo> {
+  final GeneratedDatabase _db;
+  final String _alias;
+  $ColorCombosTable(this._db, [this._alias]);
+  final VerificationMeta _idMeta = const VerificationMeta('id');
+  GeneratedIntColumn _id;
+  @override
+  GeneratedIntColumn get id => _id ??= _constructId();
+  GeneratedIntColumn _constructId() {
+    return GeneratedIntColumn('id', $tableName, false,
+        hasAutoIncrement: true, declaredAsPrimaryKey: true);
+  }
+
+  final VerificationMeta _nameMeta = const VerificationMeta('name');
+  GeneratedTextColumn _name;
+  @override
+  GeneratedTextColumn get name => _name ??= _constructName();
+  GeneratedTextColumn _constructName() {
+    return GeneratedTextColumn('name', $tableName, false, maxTextLength: 50);
+  }
+
+  final VerificationMeta _modeMeta = const VerificationMeta('mode');
+  GeneratedTextColumn _mode;
+  @override
+  GeneratedTextColumn get mode => _mode ??= _constructMode();
+  GeneratedTextColumn _constructMode() {
+    return GeneratedTextColumn('mode', $tableName, false,
+        $customConstraints: 'CHECK (mode IN (\'Bright\', \'Dark\')) NOT NULL');
+  }
+
+  final VerificationMeta _backColorMeta = const VerificationMeta('backColor');
+  GeneratedTextColumn _backColor;
+  @override
+  GeneratedTextColumn get backColor => _backColor ??= _constructBackColor();
+  GeneratedTextColumn _constructBackColor() {
+    return GeneratedTextColumn('backColor', $tableName, false,
+        minTextLength: 3, maxTextLength: 6);
+  }
+
+  final VerificationMeta _foreColorMeta = const VerificationMeta('foreColor');
+  GeneratedTextColumn _foreColor;
+  @override
+  GeneratedTextColumn get foreColor => _foreColor ??= _constructForeColor();
+  GeneratedTextColumn _constructForeColor() {
+    return GeneratedTextColumn('foreColor', $tableName, false,
+        minTextLength: 3, maxTextLength: 6);
+  }
+
+  final VerificationMeta _createdOnMeta = const VerificationMeta('createdOn');
+  GeneratedDateTimeColumn _createdOn;
+  @override
+  GeneratedDateTimeColumn get createdOn => _createdOn ??= _constructCreatedOn();
+  GeneratedDateTimeColumn _constructCreatedOn() {
+    return GeneratedDateTimeColumn(
+      'createdOn',
+      $tableName,
+      false,
+    )..clientDefault = () => DateTime.now().toUtc();
+  }
+
+  final VerificationMeta _updatedOnMeta = const VerificationMeta('updatedOn');
+  GeneratedDateTimeColumn _updatedOn;
+  @override
+  GeneratedDateTimeColumn get updatedOn => _updatedOn ??= _constructUpdatedOn();
+  GeneratedDateTimeColumn _constructUpdatedOn() {
+    return GeneratedDateTimeColumn(
+      'updatedOn',
+      $tableName,
+      false,
+    )..clientDefault = () => DateTime.now().toUtc();
+  }
+
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, name, mode, backColor, foreColor, createdOn, updatedOn];
+  @override
+  $ColorCombosTable get asDslTable => this;
+  @override
+  String get $tableName => _alias ?? 'ColorCombos';
+  @override
+  final String actualTableName = 'ColorCombos';
+  @override
+  VerificationContext validateIntegrity(ColorCombosCompanion d,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    if (d.id.present) {
+      context.handle(_idMeta, id.isAcceptableValue(d.id.value, _idMeta));
+    }
+    if (d.name.present) {
+      context.handle(
+          _nameMeta, name.isAcceptableValue(d.name.value, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (d.mode.present) {
+      context.handle(
+          _modeMeta, mode.isAcceptableValue(d.mode.value, _modeMeta));
+    } else if (isInserting) {
+      context.missing(_modeMeta);
+    }
+    if (d.backColor.present) {
+      context.handle(_backColorMeta,
+          backColor.isAcceptableValue(d.backColor.value, _backColorMeta));
+    } else if (isInserting) {
+      context.missing(_backColorMeta);
+    }
+    if (d.foreColor.present) {
+      context.handle(_foreColorMeta,
+          foreColor.isAcceptableValue(d.foreColor.value, _foreColorMeta));
+    } else if (isInserting) {
+      context.missing(_foreColorMeta);
+    }
+    if (d.createdOn.present) {
+      context.handle(_createdOnMeta,
+          createdOn.isAcceptableValue(d.createdOn.value, _createdOnMeta));
+    }
+    if (d.updatedOn.present) {
+      context.handle(_updatedOnMeta,
+          updatedOn.isAcceptableValue(d.updatedOn.value, _updatedOnMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ColorCombo map(Map<String, dynamic> data, {String tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
+    return ColorCombo.fromData(data, _db, prefix: effectivePrefix);
+  }
+
+  @override
+  Map<String, Variable> entityToSql(ColorCombosCompanion d) {
+    final map = <String, Variable>{};
+    if (d.id.present) {
+      map['id'] = Variable<int, IntType>(d.id.value);
+    }
+    if (d.name.present) {
+      map['name'] = Variable<String, StringType>(d.name.value);
+    }
+    if (d.mode.present) {
+      map['mode'] = Variable<String, StringType>(d.mode.value);
+    }
+    if (d.backColor.present) {
+      map['backColor'] = Variable<String, StringType>(d.backColor.value);
+    }
+    if (d.foreColor.present) {
+      map['foreColor'] = Variable<String, StringType>(d.foreColor.value);
+    }
+    if (d.createdOn.present) {
+      map['createdOn'] = Variable<DateTime, DateTimeType>(d.createdOn.value);
+    }
+    if (d.updatedOn.present) {
+      map['updatedOn'] = Variable<DateTime, DateTimeType>(d.updatedOn.value);
+    }
+    return map;
+  }
+
+  @override
+  $ColorCombosTable createAlias(String alias) {
+    return $ColorCombosTable(_db, alias);
+  }
+}
+
 abstract class _$SprightlySetupData extends GeneratedDatabase {
   _$SprightlySetupData(QueryExecutor e)
       : super(SqlTypeSystem.defaultInstance, e);
   $AppFontsTable _appFonts;
   $AppFontsTable get appFonts => _appFonts ??= $AppFontsTable(this);
+  $FontCombosTable _fontCombos;
+  $FontCombosTable get fontCombos => _fontCombos ??= $FontCombosTable(this);
+  $ColorCombosTable _colorCombos;
+  $ColorCombosTable get colorCombos => _colorCombos ??= $ColorCombosTable(this);
+  SprightlySetupDao _sprightlySetupDao;
+  SprightlySetupDao get sprightlySetupDao =>
+      _sprightlySetupDao ??= SprightlySetupDao(this as SprightlySetupData);
   @override
   Iterable<TableInfo> get allTables => allSchemaEntities.whereType<TableInfo>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities => [appFonts];
+  List<DatabaseSchemaEntity> get allSchemaEntities =>
+      [appFonts, fontCombos, colorCombos];
+}
+
+// **************************************************************************
+// DaoGenerator
+// **************************************************************************
+
+mixin _$SprightlyDaoMixin on DatabaseAccessor<SprightlyData> {
+  $MembersTable get members => db.members;
+  $GroupsTable get groups => db.groups;
+  $GroupMembersTable get groupMembers => db.groupMembers;
+  $AccountsTable get accounts => db.accounts;
+  $CategoriesTable get categories => db.categories;
+  $TransactionsTable get transactions => db.transactions;
+  Member _rowToMember(QueryRow row) {
+    return Member(
+      id: row.readString('id'),
+      name: row.readString('name'),
+      nickName: row.readString('nickName'),
+      avatar: row.readBlob('avatar'),
+      idType: row.readString('idType'),
+      idValue: row.readString('idValue'),
+      secondaryIdValue: row.readString('secondaryIdValue'),
+      isGroupExpense: row.readBool('isGroupExpense'),
+      createdOn: row.readDateTime('createdOn'),
+      updatedOn: row.readDateTime('updatedOn'),
+    );
+  }
+
+  Selectable<Member> groupOnlyMembersQuery(String groupId) {
+    return customSelectQuery(
+        'SELECT m.* FROM Members m JOIN GroupMembers gm ON gm.memberId=m.id WHERE idType=\'Group\' AND gm.groupId=:groupId',
+        variables: [Variable.withString(groupId)],
+        readsFrom: {members, groupMembers}).map(_rowToMember);
+  }
+
+  Future<List<Member>> groupOnlyMembers(String groupId) {
+    return groupOnlyMembersQuery(groupId).get();
+  }
+
+  Stream<List<Member>> watchGroupOnlyMembers(String groupId) {
+    return groupOnlyMembersQuery(groupId).watch();
+  }
+}
+mixin _$SprightlySetupDaoMixin on DatabaseAccessor<SprightlySetupData> {
+  $AppFontsTable get appFonts => db.appFonts;
+  $FontCombosTable get fontCombos => db.fontCombos;
+  $ColorCombosTable get colorCombos => db.colorCombos;
 }

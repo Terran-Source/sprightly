@@ -22,3 +22,4 @@ enum CategoryType { Expense, Liability, Income, Investment, Misc }
 // Setup DB
 enum FontType { Regular, Mono }
 enum FontStyle { Regular, Italic, Bold, BoldItalic }
+enum ThemeMode { Bright, Dark }

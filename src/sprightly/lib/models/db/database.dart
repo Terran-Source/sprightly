@@ -192,6 +192,84 @@ class AppFonts extends Table {
       .named('updatedOn')
       .clientDefault(() => DateTime.now().toUtc())();
 }
+
+@DataClassName("FontCombo")
+class FontCombos extends Table {
+  @override
+  String get tableName => "FontCombos";
+
+  IntColumn get id => integer().named('id').autoIncrement()();
+  TextColumn get name => text().named('name').withLength(max: 50)();
+  IntColumn get headerFont => integer()
+      .named('headerFont')
+      .customConstraint('REFERENCES AppFonts(id) NOT NULL')();
+  IntColumn get bodyFont => integer()
+      .named('bodyFont')
+      .customConstraint('REFERENCES AppFonts(id) NOT NULL')();
+  IntColumn get bodyFontBig => integer()
+      .named('bodyFontBig')
+      .nullable()
+      .customConstraint('REFERENCES AppFonts(id)')();
+  IntColumn get bodyFontMedium => integer()
+      .named('bodyFontMedium')
+      .nullable()
+      .customConstraint('REFERENCES AppFonts(id)')();
+  IntColumn get bodyFontSmall => integer()
+      .named('bodyFontSmall')
+      .nullable()
+      .customConstraint('REFERENCES AppFonts(id)')();
+  IntColumn get bodyFontTiny => integer()
+      .named('bodyFontTiny')
+      .nullable()
+      .customConstraint('REFERENCES AppFonts(id)')();
+  IntColumn get valueFont => integer()
+      .named('valueFont')
+      .customConstraint('REFERENCES AppFonts(id) NOT NULL')();
+  IntColumn get valueFontBig => integer()
+      .named('valueFontBig')
+      .nullable()
+      .customConstraint('REFERENCES AppFonts(id)')();
+  IntColumn get valueFontMedium => integer()
+      .named('valueFontMedium')
+      .nullable()
+      .customConstraint('REFERENCES AppFonts(id)')();
+  IntColumn get valueFontSmall => integer()
+      .named('valueFontSmall')
+      .nullable()
+      .customConstraint('REFERENCES AppFonts(id)')();
+  IntColumn get valueFontTiny => integer()
+      .named('valueFontTiny')
+      .nullable()
+      .customConstraint('REFERENCES AppFonts(id)')();
+  DateTimeColumn get createdOn => dateTime()
+      .named('createdOn')
+      .clientDefault(() => DateTime.now().toUtc())();
+  DateTimeColumn get updatedOn => dateTime()
+      .named('updatedOn')
+      .clientDefault(() => DateTime.now().toUtc())();
+}
+
+@DataClassName("ColorCombo")
+class ColorCombos extends Table {
+  @override
+  String get tableName => "ColorCombos";
+
+  IntColumn get id => integer().named('id').autoIncrement()();
+  TextColumn get name => text().named('name').withLength(max: 50)();
+  TextColumn get mode => text()
+      .named('mode')
+      .customConstraint("CHECK (mode IN ('Bright', 'Dark')) NOT NULL")();
+  TextColumn get backColor =>
+      text().named('backColor').withLength(min: 3, max: 6)();
+  TextColumn get foreColor =>
+      text().named('foreColor').withLength(min: 3, max: 6)();
+  DateTimeColumn get createdOn => dateTime()
+      .named('createdOn')
+      .clientDefault(() => DateTime.now().toUtc())();
+  DateTimeColumn get updatedOn => dateTime()
+      .named('updatedOn')
+      .clientDefault(() => DateTime.now().toUtc())();
+}
 //#endregion Database: sprightly_setup
 //#endregion Database
 
@@ -202,22 +280,42 @@ const String groupOnlyMembersQuery = "SELECT m.* "
     " WHERE idType='Group' AND gm.groupId=:groupId";
 //#endregion Custom query & classes
 
-LazyDatabase _openConnection(String dbFile, [bool isSupportFile = false]) =>
-    LazyDatabase(() async => VmDatabase(await getFile(dbFile, isSupportFile)));
+LazyDatabase _openConnection(String dbFile,
+        {bool isSupportFile = false, bool logStatements = false}) =>
+    LazyDatabase(() async => VmDatabase(await getFile(dbFile, isSupportFile),
+        logStatements: logStatements));
+
+@UseDao(
+    tables: [Members, Groups, GroupMembers, Accounts, Categories, Transactions],
+    queries: {'groupOnlyMembers': groupOnlyMembersQuery})
+class SprightlyDao extends DatabaseAccessor<SprightlyData>
+    with _$SprightlyDaoMixin {
+  final SprightlyData _db;
+  SprightlyDao(this._db) : super(_db);
+}
+
+@UseDao(tables: [AppFonts, FontCombos, ColorCombos])
+class SprightlySetupDao extends DatabaseAccessor<SprightlySetupData>
+    with _$SprightlySetupDaoMixin {
+  final SprightlySetupData _db;
+  SprightlySetupDao(this._db) : super(_db);
+}
 
 @UseMoor(
     tables: [Members, Groups, GroupMembers, Accounts, Categories, Transactions],
-    queries: {'groupOnlyMembers': groupOnlyMembersQuery})
+    daos: [SprightlyDao])
 class SprightlyData extends _$SprightlyData {
-  SprightlyData() : super(_openConnection(appDataDbFile));
+  SprightlyData({bool enableDebug = false})
+      : super(_openConnection(appDataDbFile, logStatements: enableDebug));
 
   @override
   int get schemaVersion => 1;
 }
 
-@UseMoor(tables: [AppFonts])
+@UseMoor(tables: [AppFonts, FontCombos, ColorCombos], daos: [SprightlySetupDao])
 class SprightlySetupData extends _$SprightlySetupData {
-  SprightlySetupData() : super(_openConnection(setupDataDbFile));
+  SprightlySetupData({bool enableDebug = false})
+      : super(_openConnection(setupDataDbFile, logStatements: enableDebug));
 
   @override
   int get schemaVersion => 1;
