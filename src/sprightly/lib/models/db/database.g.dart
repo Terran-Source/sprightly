@@ -307,7 +307,7 @@ class $MembersTable extends Members with TableInfo<$MembersTable, Member> {
   GeneratedTextColumn _constructIdType() {
     return GeneratedTextColumn('idType', $tableName, false,
         $customConstraints:
-            'CHECK (idType IN (\'Phone\', \'Email\', \'NickName\', \'Group\')) NOT NULL');
+            'CHECK (idType IN (\'Phone\',\'Email\',\'NickName\',\'Group\',\'GroupMember\')) NOT NULL');
   }
 
   final VerificationMeta _idValueMeta = const VerificationMeta('idValue');
@@ -664,7 +664,7 @@ class $GroupsTable extends Groups with TableInfo<$GroupsTable, Group> {
   GeneratedTextColumn _constructType() {
     return GeneratedTextColumn('type', $tableName, true,
         $customConstraints:
-            'CHECK (type IN (\'Personal\', \'Budget\', \'Shared\')) NOT NULL DEFAULT \'Shared\'');
+            'CHECK (type IN (\'Personal\',\'Budget\',\'Shared\')) NOT NULL DEFAULT \'Shared\'');
   }
 
   final VerificationMeta _createdOnMeta = const VerificationMeta('createdOn');
@@ -1251,7 +1251,7 @@ class $AccountsTable extends Accounts with TableInfo<$AccountsTable, Account> {
   GeneratedTextColumn _constructType() {
     return GeneratedTextColumn('type', $tableName, true,
         $customConstraints:
-            'CHECK (type IN (\'Group\', \'Cash\', \'Credit\', \'Bank\', \'Investment\')) NULLABLE');
+            'CHECK (type IN (\'Group\',\'Cash\',\'Credit\',\'Bank\',\'Investment\')) NULLABLE');
   }
 
   final VerificationMeta _createdOnMeta = const VerificationMeta('createdOn');
@@ -1560,7 +1560,7 @@ class $CategoriesTable extends Categories
   GeneratedTextColumn _constructType() {
     return GeneratedTextColumn('type', $tableName, true,
         $customConstraints:
-            'CHECK (type IN (\'Expense\', \'Liability\', \'Income\', \'Investment\', \'Misc\')) NOT NULL DEFAULT \'Misc\'');
+            'CHECK (type IN (\'Expense\',\'Liability\',\'Income\',\'Investment\',\'Misc\')) NOT NULL DEFAULT \'Misc\'');
   }
 
   final VerificationMeta _createdOnMeta = const VerificationMeta('createdOn');
@@ -1670,10 +1670,11 @@ class Transaction extends DataClass implements Insertable<Transaction> {
   final String id;
   final String memberId;
   final double amount;
-  final int categoryId;
   final String groupId;
+  final String groupMemberIds;
   final int fromAccountId;
   final int toAccountId;
+  final int categoryId;
   final String notes;
   final String attachments;
   final DateTime createdOn;
@@ -1682,10 +1683,11 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       {@required this.id,
       @required this.memberId,
       @required this.amount,
-      this.categoryId,
       @required this.groupId,
+      this.groupMemberIds,
       this.fromAccountId,
       this.toAccountId,
+      this.categoryId,
       this.notes,
       this.attachments,
       @required this.createdOn,
@@ -1703,14 +1705,16 @@ class Transaction extends DataClass implements Insertable<Transaction> {
           .mapFromDatabaseResponse(data['${effectivePrefix}memberId']),
       amount:
           doubleType.mapFromDatabaseResponse(data['${effectivePrefix}amount']),
-      categoryId:
-          intType.mapFromDatabaseResponse(data['${effectivePrefix}categoryId']),
       groupId:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}groupId']),
+      groupMemberIds: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}groupMemberIds']),
       fromAccountId: intType
           .mapFromDatabaseResponse(data['${effectivePrefix}fromAccountId']),
       toAccountId: intType
           .mapFromDatabaseResponse(data['${effectivePrefix}toAccountId']),
+      categoryId:
+          intType.mapFromDatabaseResponse(data['${effectivePrefix}categoryId']),
       notes:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}notes']),
       attachments: stringType
@@ -1728,10 +1732,11 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       id: serializer.fromJson<String>(json['id']),
       memberId: serializer.fromJson<String>(json['memberId']),
       amount: serializer.fromJson<double>(json['amount']),
-      categoryId: serializer.fromJson<int>(json['categoryId']),
       groupId: serializer.fromJson<String>(json['groupId']),
+      groupMemberIds: serializer.fromJson<String>(json['groupMemberIds']),
       fromAccountId: serializer.fromJson<int>(json['fromAccountId']),
       toAccountId: serializer.fromJson<int>(json['toAccountId']),
+      categoryId: serializer.fromJson<int>(json['categoryId']),
       notes: serializer.fromJson<String>(json['notes']),
       attachments: serializer.fromJson<String>(json['attachments']),
       createdOn: serializer.fromJson<DateTime>(json['createdOn']),
@@ -1745,10 +1750,11 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       'id': serializer.toJson<String>(id),
       'memberId': serializer.toJson<String>(memberId),
       'amount': serializer.toJson<double>(amount),
-      'categoryId': serializer.toJson<int>(categoryId),
       'groupId': serializer.toJson<String>(groupId),
+      'groupMemberIds': serializer.toJson<String>(groupMemberIds),
       'fromAccountId': serializer.toJson<int>(fromAccountId),
       'toAccountId': serializer.toJson<int>(toAccountId),
+      'categoryId': serializer.toJson<int>(categoryId),
       'notes': serializer.toJson<String>(notes),
       'attachments': serializer.toJson<String>(attachments),
       'createdOn': serializer.toJson<DateTime>(createdOn),
@@ -1765,18 +1771,21 @@ class Transaction extends DataClass implements Insertable<Transaction> {
           : Value(memberId),
       amount:
           amount == null && nullToAbsent ? const Value.absent() : Value(amount),
-      categoryId: categoryId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(categoryId),
       groupId: groupId == null && nullToAbsent
           ? const Value.absent()
           : Value(groupId),
+      groupMemberIds: groupMemberIds == null && nullToAbsent
+          ? const Value.absent()
+          : Value(groupMemberIds),
       fromAccountId: fromAccountId == null && nullToAbsent
           ? const Value.absent()
           : Value(fromAccountId),
       toAccountId: toAccountId == null && nullToAbsent
           ? const Value.absent()
           : Value(toAccountId),
+      categoryId: categoryId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(categoryId),
       notes:
           notes == null && nullToAbsent ? const Value.absent() : Value(notes),
       attachments: attachments == null && nullToAbsent
@@ -1795,10 +1804,11 @@ class Transaction extends DataClass implements Insertable<Transaction> {
           {String id,
           String memberId,
           double amount,
-          int categoryId,
           String groupId,
+          String groupMemberIds,
           int fromAccountId,
           int toAccountId,
+          int categoryId,
           String notes,
           String attachments,
           DateTime createdOn,
@@ -1807,10 +1817,11 @@ class Transaction extends DataClass implements Insertable<Transaction> {
         id: id ?? this.id,
         memberId: memberId ?? this.memberId,
         amount: amount ?? this.amount,
-        categoryId: categoryId ?? this.categoryId,
         groupId: groupId ?? this.groupId,
+        groupMemberIds: groupMemberIds ?? this.groupMemberIds,
         fromAccountId: fromAccountId ?? this.fromAccountId,
         toAccountId: toAccountId ?? this.toAccountId,
+        categoryId: categoryId ?? this.categoryId,
         notes: notes ?? this.notes,
         attachments: attachments ?? this.attachments,
         createdOn: createdOn ?? this.createdOn,
@@ -1822,10 +1833,11 @@ class Transaction extends DataClass implements Insertable<Transaction> {
           ..write('id: $id, ')
           ..write('memberId: $memberId, ')
           ..write('amount: $amount, ')
-          ..write('categoryId: $categoryId, ')
           ..write('groupId: $groupId, ')
+          ..write('groupMemberIds: $groupMemberIds, ')
           ..write('fromAccountId: $fromAccountId, ')
           ..write('toAccountId: $toAccountId, ')
+          ..write('categoryId: $categoryId, ')
           ..write('notes: $notes, ')
           ..write('attachments: $attachments, ')
           ..write('createdOn: $createdOn, ')
@@ -1842,19 +1854,21 @@ class Transaction extends DataClass implements Insertable<Transaction> {
           $mrjc(
               amount.hashCode,
               $mrjc(
-                  categoryId.hashCode,
+                  groupId.hashCode,
                   $mrjc(
-                      groupId.hashCode,
+                      groupMemberIds.hashCode,
                       $mrjc(
                           fromAccountId.hashCode,
                           $mrjc(
                               toAccountId.hashCode,
                               $mrjc(
-                                  notes.hashCode,
+                                  categoryId.hashCode,
                                   $mrjc(
-                                      attachments.hashCode,
-                                      $mrjc(createdOn.hashCode,
-                                          updatedOn.hashCode)))))))))));
+                                      notes.hashCode,
+                                      $mrjc(
+                                          attachments.hashCode,
+                                          $mrjc(createdOn.hashCode,
+                                              updatedOn.hashCode))))))))))));
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
@@ -1862,10 +1876,11 @@ class Transaction extends DataClass implements Insertable<Transaction> {
           other.id == this.id &&
           other.memberId == this.memberId &&
           other.amount == this.amount &&
-          other.categoryId == this.categoryId &&
           other.groupId == this.groupId &&
+          other.groupMemberIds == this.groupMemberIds &&
           other.fromAccountId == this.fromAccountId &&
           other.toAccountId == this.toAccountId &&
+          other.categoryId == this.categoryId &&
           other.notes == this.notes &&
           other.attachments == this.attachments &&
           other.createdOn == this.createdOn &&
@@ -1876,10 +1891,11 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
   final Value<String> id;
   final Value<String> memberId;
   final Value<double> amount;
-  final Value<int> categoryId;
   final Value<String> groupId;
+  final Value<String> groupMemberIds;
   final Value<int> fromAccountId;
   final Value<int> toAccountId;
+  final Value<int> categoryId;
   final Value<String> notes;
   final Value<String> attachments;
   final Value<DateTime> createdOn;
@@ -1888,10 +1904,11 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     this.id = const Value.absent(),
     this.memberId = const Value.absent(),
     this.amount = const Value.absent(),
-    this.categoryId = const Value.absent(),
     this.groupId = const Value.absent(),
+    this.groupMemberIds = const Value.absent(),
     this.fromAccountId = const Value.absent(),
     this.toAccountId = const Value.absent(),
+    this.categoryId = const Value.absent(),
     this.notes = const Value.absent(),
     this.attachments = const Value.absent(),
     this.createdOn = const Value.absent(),
@@ -1901,10 +1918,11 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     @required String id,
     @required String memberId,
     @required double amount,
-    this.categoryId = const Value.absent(),
     @required String groupId,
+    this.groupMemberIds = const Value.absent(),
     this.fromAccountId = const Value.absent(),
     this.toAccountId = const Value.absent(),
+    this.categoryId = const Value.absent(),
     this.notes = const Value.absent(),
     this.attachments = const Value.absent(),
     this.createdOn = const Value.absent(),
@@ -1917,10 +1935,11 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
       {Value<String> id,
       Value<String> memberId,
       Value<double> amount,
-      Value<int> categoryId,
       Value<String> groupId,
+      Value<String> groupMemberIds,
       Value<int> fromAccountId,
       Value<int> toAccountId,
+      Value<int> categoryId,
       Value<String> notes,
       Value<String> attachments,
       Value<DateTime> createdOn,
@@ -1929,10 +1948,11 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
       id: id ?? this.id,
       memberId: memberId ?? this.memberId,
       amount: amount ?? this.amount,
-      categoryId: categoryId ?? this.categoryId,
       groupId: groupId ?? this.groupId,
+      groupMemberIds: groupMemberIds ?? this.groupMemberIds,
       fromAccountId: fromAccountId ?? this.fromAccountId,
       toAccountId: toAccountId ?? this.toAccountId,
+      categoryId: categoryId ?? this.categoryId,
       notes: notes ?? this.notes,
       attachments: attachments ?? this.attachments,
       createdOn: createdOn ?? this.createdOn,
@@ -1951,7 +1971,7 @@ class $TransactionsTable extends Transactions
   @override
   GeneratedTextColumn get id => _id ??= _constructId();
   GeneratedTextColumn _constructId() {
-    return GeneratedTextColumn('id', $tableName, false, minTextLength: 18);
+    return GeneratedTextColumn('id', $tableName, false, minTextLength: 16);
   }
 
   final VerificationMeta _memberIdMeta = const VerificationMeta('memberId');
@@ -1976,15 +1996,6 @@ class $TransactionsTable extends Transactions
     );
   }
 
-  final VerificationMeta _categoryIdMeta = const VerificationMeta('categoryId');
-  GeneratedIntColumn _categoryId;
-  @override
-  GeneratedIntColumn get categoryId => _categoryId ??= _constructCategoryId();
-  GeneratedIntColumn _constructCategoryId() {
-    return GeneratedIntColumn('categoryId', $tableName, true,
-        $customConstraints: 'REFERENCES Categories(id) NULLABLE');
-  }
-
   final VerificationMeta _groupIdMeta = const VerificationMeta('groupId');
   GeneratedTextColumn _groupId;
   @override
@@ -1993,6 +2004,20 @@ class $TransactionsTable extends Transactions
     return GeneratedTextColumn('groupId', $tableName, false,
         minTextLength: 16,
         $customConstraints: 'REFERENCES Groups(id) NOT NULL');
+  }
+
+  final VerificationMeta _groupMemberIdsMeta =
+      const VerificationMeta('groupMemberIds');
+  GeneratedTextColumn _groupMemberIds;
+  @override
+  GeneratedTextColumn get groupMemberIds =>
+      _groupMemberIds ??= _constructGroupMemberIds();
+  GeneratedTextColumn _constructGroupMemberIds() {
+    return GeneratedTextColumn(
+      'groupMemberIds',
+      $tableName,
+      true,
+    );
   }
 
   final VerificationMeta _fromAccountIdMeta =
@@ -2015,6 +2040,15 @@ class $TransactionsTable extends Transactions
   GeneratedIntColumn _constructToAccountId() {
     return GeneratedIntColumn('toAccountId', $tableName, true,
         $customConstraints: 'REFERENCES Accounts(id) NULLABLE');
+  }
+
+  final VerificationMeta _categoryIdMeta = const VerificationMeta('categoryId');
+  GeneratedIntColumn _categoryId;
+  @override
+  GeneratedIntColumn get categoryId => _categoryId ??= _constructCategoryId();
+  GeneratedIntColumn _constructCategoryId() {
+    return GeneratedIntColumn('categoryId', $tableName, true,
+        $customConstraints: 'REFERENCES Categories(id) NULLABLE');
   }
 
   final VerificationMeta _notesMeta = const VerificationMeta('notes');
@@ -2072,10 +2106,11 @@ class $TransactionsTable extends Transactions
         id,
         memberId,
         amount,
-        categoryId,
         groupId,
+        groupMemberIds,
         fromAccountId,
         toAccountId,
+        categoryId,
         notes,
         attachments,
         createdOn,
@@ -2108,15 +2143,17 @@ class $TransactionsTable extends Transactions
     } else if (isInserting) {
       context.missing(_amountMeta);
     }
-    if (d.categoryId.present) {
-      context.handle(_categoryIdMeta,
-          categoryId.isAcceptableValue(d.categoryId.value, _categoryIdMeta));
-    }
     if (d.groupId.present) {
       context.handle(_groupIdMeta,
           groupId.isAcceptableValue(d.groupId.value, _groupIdMeta));
     } else if (isInserting) {
       context.missing(_groupIdMeta);
+    }
+    if (d.groupMemberIds.present) {
+      context.handle(
+          _groupMemberIdsMeta,
+          groupMemberIds.isAcceptableValue(
+              d.groupMemberIds.value, _groupMemberIdsMeta));
     }
     if (d.fromAccountId.present) {
       context.handle(
@@ -2127,6 +2164,10 @@ class $TransactionsTable extends Transactions
     if (d.toAccountId.present) {
       context.handle(_toAccountIdMeta,
           toAccountId.isAcceptableValue(d.toAccountId.value, _toAccountIdMeta));
+    }
+    if (d.categoryId.present) {
+      context.handle(_categoryIdMeta,
+          categoryId.isAcceptableValue(d.categoryId.value, _categoryIdMeta));
     }
     if (d.notes.present) {
       context.handle(
@@ -2167,17 +2208,21 @@ class $TransactionsTable extends Transactions
     if (d.amount.present) {
       map['amount'] = Variable<double, RealType>(d.amount.value);
     }
-    if (d.categoryId.present) {
-      map['categoryId'] = Variable<int, IntType>(d.categoryId.value);
-    }
     if (d.groupId.present) {
       map['groupId'] = Variable<String, StringType>(d.groupId.value);
+    }
+    if (d.groupMemberIds.present) {
+      map['groupMemberIds'] =
+          Variable<String, StringType>(d.groupMemberIds.value);
     }
     if (d.fromAccountId.present) {
       map['fromAccountId'] = Variable<int, IntType>(d.fromAccountId.value);
     }
     if (d.toAccountId.present) {
       map['toAccountId'] = Variable<int, IntType>(d.toAccountId.value);
+    }
+    if (d.categoryId.present) {
+      map['categoryId'] = Variable<int, IntType>(d.categoryId.value);
     }
     if (d.notes.present) {
       map['notes'] = Variable<String, StringType>(d.notes.value);
@@ -2200,8 +2245,9 @@ class $TransactionsTable extends Transactions
   }
 }
 
-abstract class _$SprightlyData extends GeneratedDatabase {
-  _$SprightlyData(QueryExecutor e) : super(SqlTypeSystem.defaultInstance, e);
+abstract class _$SprightlyDatabase extends GeneratedDatabase {
+  _$SprightlyDatabase(QueryExecutor e)
+      : super(SqlTypeSystem.defaultInstance, e);
   $MembersTable _members;
   $MembersTable get members => _members ??= $MembersTable(this);
   $GroupsTable _groups;
@@ -2218,7 +2264,7 @@ abstract class _$SprightlyData extends GeneratedDatabase {
       _transactions ??= $TransactionsTable(this);
   SprightlyDao _sprightlyDao;
   SprightlyDao get sprightlyDao =>
-      _sprightlyDao ??= SprightlyDao(this as SprightlyData);
+      _sprightlyDao ??= SprightlyDao(this as SprightlyDatabase);
   @override
   Iterable<TableInfo> get allTables => allSchemaEntities.whereType<TableInfo>();
   @override
@@ -2465,7 +2511,7 @@ class $AppFontsTable extends AppFonts with TableInfo<$AppFontsTable, AppFont> {
   GeneratedTextColumn get type => _type ??= _constructType();
   GeneratedTextColumn _constructType() {
     return GeneratedTextColumn('type', $tableName, false,
-        $customConstraints: 'CHECK (type IN (\'Regular\', \'Mono\')) NOT NULL');
+        $customConstraints: 'CHECK (type IN (\'Regular\',\'Mono\')) NOT NULL');
   }
 
   final VerificationMeta _styleMeta = const VerificationMeta('style');
@@ -2475,7 +2521,7 @@ class $AppFontsTable extends AppFonts with TableInfo<$AppFontsTable, AppFont> {
   GeneratedTextColumn _constructStyle() {
     return GeneratedTextColumn('style', $tableName, false,
         $customConstraints:
-            'CHECK (style IN (\'Regular\', \'Italic\', \'Bold\', \'BoldItalic\')) NOT NULL');
+            'CHECK (style IN (\'Regular\',\'Italic\',\'Bold\',\'BoldItalic\')) NOT NULL');
   }
 
   final VerificationMeta _weightMeta = const VerificationMeta('weight');
@@ -3519,7 +3565,7 @@ class $ColorCombosTable extends ColorCombos
   GeneratedTextColumn get mode => _mode ??= _constructMode();
   GeneratedTextColumn _constructMode() {
     return GeneratedTextColumn('mode', $tableName, false,
-        $customConstraints: 'CHECK (mode IN (\'Bright\', \'Dark\')) NOT NULL');
+        $customConstraints: 'CHECK (mode IN (\'Bright\',\'Dark\')) NOT NULL');
   }
 
   final VerificationMeta _backColorMeta = const VerificationMeta('backColor');
@@ -3656,8 +3702,8 @@ class $ColorCombosTable extends ColorCombos
   }
 }
 
-abstract class _$SprightlySetupData extends GeneratedDatabase {
-  _$SprightlySetupData(QueryExecutor e)
+abstract class _$SprightlySetupDatabase extends GeneratedDatabase {
+  _$SprightlySetupDatabase(QueryExecutor e)
       : super(SqlTypeSystem.defaultInstance, e);
   $AppFontsTable _appFonts;
   $AppFontsTable get appFonts => _appFonts ??= $AppFontsTable(this);
@@ -3667,7 +3713,7 @@ abstract class _$SprightlySetupData extends GeneratedDatabase {
   $ColorCombosTable get colorCombos => _colorCombos ??= $ColorCombosTable(this);
   SprightlySetupDao _sprightlySetupDao;
   SprightlySetupDao get sprightlySetupDao =>
-      _sprightlySetupDao ??= SprightlySetupDao(this as SprightlySetupData);
+      _sprightlySetupDao ??= SprightlySetupDao(this as SprightlySetupDatabase);
   @override
   Iterable<TableInfo> get allTables => allSchemaEntities.whereType<TableInfo>();
   @override
@@ -3679,44 +3725,15 @@ abstract class _$SprightlySetupData extends GeneratedDatabase {
 // DaoGenerator
 // **************************************************************************
 
-mixin _$SprightlyDaoMixin on DatabaseAccessor<SprightlyData> {
+mixin _$SprightlyDaoMixin on DatabaseAccessor<SprightlyDatabase> {
   $MembersTable get members => db.members;
   $GroupsTable get groups => db.groups;
   $GroupMembersTable get groupMembers => db.groupMembers;
   $AccountsTable get accounts => db.accounts;
   $CategoriesTable get categories => db.categories;
   $TransactionsTable get transactions => db.transactions;
-  Member _rowToMember(QueryRow row) {
-    return Member(
-      id: row.readString('id'),
-      name: row.readString('name'),
-      nickName: row.readString('nickName'),
-      avatar: row.readBlob('avatar'),
-      idType: row.readString('idType'),
-      idValue: row.readString('idValue'),
-      secondaryIdValue: row.readString('secondaryIdValue'),
-      isGroupExpense: row.readBool('isGroupExpense'),
-      createdOn: row.readDateTime('createdOn'),
-      updatedOn: row.readDateTime('updatedOn'),
-    );
-  }
-
-  Selectable<Member> groupOnlyMembersQuery(String groupId) {
-    return customSelectQuery(
-        'SELECT m.* FROM Members m JOIN GroupMembers gm ON gm.memberId=m.id WHERE idType=\'Group\' AND gm.groupId=:groupId',
-        variables: [Variable.withString(groupId)],
-        readsFrom: {members, groupMembers}).map(_rowToMember);
-  }
-
-  Future<List<Member>> groupOnlyMembers(String groupId) {
-    return groupOnlyMembersQuery(groupId).get();
-  }
-
-  Stream<List<Member>> watchGroupOnlyMembers(String groupId) {
-    return groupOnlyMembersQuery(groupId).watch();
-  }
 }
-mixin _$SprightlySetupDaoMixin on DatabaseAccessor<SprightlySetupData> {
+mixin _$SprightlySetupDaoMixin on DatabaseAccessor<SprightlySetupDatabase> {
   $AppFontsTable get appFonts => db.appFonts;
   $FontCombosTable get fontCombos => db.fontCombos;
   $ColorCombosTable get colorCombos => db.colorCombos;

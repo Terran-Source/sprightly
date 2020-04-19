@@ -20,7 +20,7 @@ class Members extends Table {
   TextColumn get nickName => text().named('nickName').withLength(max: 10)();
   BlobColumn get avatar => blob().named('avatar').nullable()();
   TextColumn get idType => text().named('idType').customConstraint(
-      "CHECK (idType IN ('Phone', 'Email', 'NickName', 'Group')) NOT NULL")();
+      "CHECK (idType IN ('Phone','Email','NickName','Group','GroupMember')) NOT NULL")();
   TextColumn get idValue => text().named('idValue').withLength(max: 50)();
   TextColumn get secondaryIdValue =>
       text().named('secondaryIdValue').nullable().withLength(max: 50)();
@@ -47,7 +47,7 @@ class Groups extends Table {
   TextColumn get type => text()
       .named('type')
       .nullable()
-      .customConstraint("CHECK (type IN ('Personal', 'Budget', 'Shared'))"
+      .customConstraint("CHECK (type IN ('Personal','Budget','Shared'))"
           " NOT NULL DEFAULT 'Shared'")();
   DateTimeColumn get createdOn => dateTime()
       .named('createdOn')
@@ -97,7 +97,7 @@ class Accounts extends Table {
       .nullable()
       .customConstraint('REFERENCES Accounts(id) NULLABLE')();
   TextColumn get type => text().named('type').nullable().customConstraint(
-      "CHECK (type IN ('Group', 'Cash', 'Credit', 'Bank', 'Investment')) NULLABLE")();
+      "CHECK (type IN ('Group','Cash','Credit','Bank','Investment')) NULLABLE")();
   DateTimeColumn get createdOn => dateTime()
       .named('createdOn')
       .clientDefault(() => DateTime.now().toUtc())();
@@ -118,7 +118,7 @@ class Categories extends Table {
       .nullable()
       .customConstraint('REFERENCES Categories(id) NULLABLE')();
   TextColumn get type => text().named('type').nullable().customConstraint(
-      "CHECK (type IN ('Expense', 'Liability', 'Income', 'Investment', 'Misc'))"
+      "CHECK (type IN ('Expense','Liability','Income','Investment','Misc'))"
       " NOT NULL DEFAULT 'Misc'")();
   DateTimeColumn get createdOn => dateTime()
       .named('createdOn')
@@ -133,20 +133,17 @@ class Transactions extends Table {
   @override
   String get tableName => "Transactions";
 
-  TextColumn get id => text().named('id').withLength(min: 18)();
+  TextColumn get id => text().named('id').withLength(min: 16)();
   TextColumn get memberId => text()
       .named('memberId')
       .withLength(min: 16)
       .customConstraint('REFERENCES Members(id) NOT NULL')();
   RealColumn get amount => real().named('amount')();
-  IntColumn get categoryId => integer()
-      .named('categoryId')
-      .nullable()
-      .customConstraint('REFERENCES Categories(id) NULLABLE')();
   TextColumn get groupId => text()
       .named('groupId')
       .withLength(min: 16)
       .customConstraint('REFERENCES Groups(id) NOT NULL')();
+  TextColumn get groupMemberIds => text().named('groupMemberIds').nullable()();
   IntColumn get fromAccountId => integer()
       .named('fromAccountId')
       .nullable()
@@ -155,6 +152,10 @@ class Transactions extends Table {
       .named('toAccountId')
       .nullable()
       .customConstraint('REFERENCES Accounts(id) NULLABLE')();
+  IntColumn get categoryId => integer()
+      .named('categoryId')
+      .nullable()
+      .customConstraint('REFERENCES Categories(id) NULLABLE')();
   TextColumn get notes => text().named('notes').nullable()();
   TextColumn get attachments => text().named('attachments').nullable()();
   DateTimeColumn get createdOn => dateTime()
@@ -180,9 +181,9 @@ class AppFonts extends Table {
   TextColumn get family => text().named('family').withLength(max: 20)();
   TextColumn get type => text()
       .named('type')
-      .customConstraint("CHECK (type IN ('Regular', 'Mono')) NOT NULL")();
+      .customConstraint("CHECK (type IN ('Regular','Mono')) NOT NULL")();
   TextColumn get style => text().named('style').customConstraint(
-      "CHECK (style IN ('Regular', 'Italic', 'Bold', 'BoldItalic')) NOT NULL")();
+      "CHECK (style IN ('Regular','Italic','Bold','BoldItalic')) NOT NULL")();
   IntColumn get weight =>
       integer().named('weight').withDefault(const Constant(100))();
   DateTimeColumn get createdOn => dateTime()
@@ -258,7 +259,7 @@ class ColorCombos extends Table {
   TextColumn get name => text().named('name').withLength(max: 50)();
   TextColumn get mode => text()
       .named('mode')
-      .customConstraint("CHECK (mode IN ('Bright', 'Dark')) NOT NULL")();
+      .customConstraint("CHECK (mode IN ('Bright','Dark')) NOT NULL")();
   TextColumn get backColor =>
       text().named('backColor').withLength(min: 3, max: 6)();
   TextColumn get foreColor =>
@@ -274,10 +275,10 @@ class ColorCombos extends Table {
 //#endregion Database
 
 //#region Custom query & classes
-const String groupOnlyMembersQuery = "SELECT m.* "
-    "FROM Members m"
+String get groupOnlyMembersQuery => "SELECT m.*"
+    " FROM Members m"
     " JOIN GroupMembers gm ON gm.memberId=m.id"
-    " WHERE idType='Group' AND gm.groupId=:groupId";
+    " WHERE idType='GroupMember' AND gm.groupId=:groupId";
 //#endregion Custom query & classes
 
 LazyDatabase _openConnection(String dbFile,
@@ -286,35 +287,54 @@ LazyDatabase _openConnection(String dbFile,
         logStatements: logStatements));
 
 @UseDao(
-    tables: [Members, Groups, GroupMembers, Accounts, Categories, Transactions],
-    queries: {'groupOnlyMembers': groupOnlyMembersQuery})
-class SprightlyDao extends DatabaseAccessor<SprightlyData>
+  tables: [Members, Groups, GroupMembers, Accounts, Categories, Transactions],
+)
+class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
     with _$SprightlyDaoMixin {
-  final SprightlyData _db;
-  SprightlyDao(this._db) : super(_db);
+  SprightlyDao(SprightlyDatabase _db) : super(_db);
+
+  Selectable<Member> selectGroupOnlyMembers(String groupId) =>
+      customSelectQuery(
+        groupOnlyMembersQuery,
+        variables: [Variable.withString(groupId)],
+        readsFrom: {members, groupMembers},
+      ).map((row) => Member.fromJson(row.data));
+
+  Future<List<Member>> getGroupOnlyMembers(String groupId) {
+    return selectGroupOnlyMembers(groupId).get();
+  }
+
+  Stream<List<Member>> watchGroupOnlyMembers(String groupId) {
+    return selectGroupOnlyMembers(groupId).watch();
+  }
 }
 
-@UseDao(tables: [AppFonts, FontCombos, ColorCombos])
-class SprightlySetupDao extends DatabaseAccessor<SprightlySetupData>
+@UseDao(
+  tables: [AppFonts, FontCombos, ColorCombos],
+)
+class SprightlySetupDao extends DatabaseAccessor<SprightlySetupDatabase>
     with _$SprightlySetupDaoMixin {
-  final SprightlySetupData _db;
-  SprightlySetupDao(this._db) : super(_db);
+  SprightlySetupDao(SprightlySetupDatabase _db) : super(_db);
 }
 
 @UseMoor(
-    tables: [Members, Groups, GroupMembers, Accounts, Categories, Transactions],
-    daos: [SprightlyDao])
-class SprightlyData extends _$SprightlyData {
-  SprightlyData({bool enableDebug = false})
+  tables: [Members, Groups, GroupMembers, Accounts, Categories, Transactions],
+  daos: [SprightlyDao],
+)
+class SprightlyDatabase extends _$SprightlyDatabase {
+  SprightlyDatabase({bool enableDebug = false})
       : super(_openConnection(appDataDbFile, logStatements: enableDebug));
 
   @override
   int get schemaVersion => 1;
 }
 
-@UseMoor(tables: [AppFonts, FontCombos, ColorCombos], daos: [SprightlySetupDao])
-class SprightlySetupData extends _$SprightlySetupData {
-  SprightlySetupData({bool enableDebug = false})
+@UseMoor(
+  tables: [AppFonts, FontCombos, ColorCombos],
+  daos: [SprightlySetupDao],
+)
+class SprightlySetupDatabase extends _$SprightlySetupDatabase {
+  SprightlySetupDatabase({bool enableDebug = false})
       : super(_openConnection(setupDataDbFile, logStatements: enableDebug));
 
   @override

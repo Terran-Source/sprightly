@@ -1,9 +1,9 @@
-//// sprightly_db
+-- -- sprightly_db
 
-// groupOnlyMembers
+-- groupOnlyMembers
 SELECT m.*
  FROM Members m
  JOIN GroupMembers gm ON gm.memberId=m.id
- WHERE idType='Group' AND gm.groupId=:groupId;
+ WHERE idType='GroupMember' AND gm.groupId=:groupId;
 
-//// sprightly_setup
+-- -- sprightly_setup
