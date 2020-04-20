@@ -1,6 +1,6 @@
 -- -- sprightly_db
 
--- groupOnlyMembers
+-- selectGroupOnlyMembers
 SELECT m.*
  FROM Members m
  JOIN GroupMembers gm ON gm.memberId=m.id

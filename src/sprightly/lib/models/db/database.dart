@@ -1,12 +1,19 @@
+import 'dart:async';
+
 import 'package:moor/moor.dart';
 import 'package:moor_ffi/moor_ffi.dart';
+import 'package:sprightly/extensions/enum_extensions.dart';
+import 'package:sprightly/models/constants/enums.dart';
 import 'package:sprightly/utils/file_provider.dart';
+import 'package:sprightly/utils/happy_hash.dart';
 
 part 'database.g.dart';
 part '../models.dart';
 
 const String appDataDbFile = 'sprightly_db.lite';
 const String setupDataDbFile = 'sprightly_setup.lite';
+const int hashedIdMinLength = 16;
+const int uniqueRetry = 5;
 
 //#region Database
 //#region Database: sprightly_db
@@ -31,6 +38,7 @@ class Members extends Table {
       .clientDefault(() => DateTime.now().toUtc())();
   DateTimeColumn get updatedOn => dateTime()
       .named('updatedOn')
+      .nullable()
       .clientDefault(() => DateTime.now().toUtc())();
 
   @override
@@ -54,6 +62,7 @@ class Groups extends Table {
       .clientDefault(() => DateTime.now().toUtc())();
   DateTimeColumn get updatedOn => dateTime()
       .named('updatedOn')
+      .nullable()
       .clientDefault(() => DateTime.now().toUtc())();
 
   @override
@@ -79,6 +88,7 @@ class GroupMembers extends Table {
       .clientDefault(() => DateTime.now().toUtc())();
   DateTimeColumn get updatedOn => dateTime()
       .named('updatedOn')
+      .nullable()
       .clientDefault(() => DateTime.now().toUtc())();
 
   @override
@@ -103,6 +113,7 @@ class Accounts extends Table {
       .clientDefault(() => DateTime.now().toUtc())();
   DateTimeColumn get updatedOn => dateTime()
       .named('updatedOn')
+      .nullable()
       .clientDefault(() => DateTime.now().toUtc())();
 }
 
@@ -125,7 +136,40 @@ class Categories extends Table {
       .clientDefault(() => DateTime.now().toUtc())();
   DateTimeColumn get updatedOn => dateTime()
       .named('updatedOn')
+      .nullable()
       .clientDefault(() => DateTime.now().toUtc())();
+}
+
+@DataClassName("Settlement")
+class Settlements extends Table {
+  @override
+  String get tableName => "Settlements";
+
+  TextColumn get id => text().named('id').withLength(min: 16)();
+  TextColumn get groupId => text()
+      .named('groupId')
+      .withLength(min: 16)
+      .customConstraint('REFERENCES Groups(id) NOT NULL')();
+  TextColumn get fromMemberId => text()
+      .named('fromMemberId')
+      .withLength(min: 16)
+      .customConstraint('REFERENCES Members(id) NOT NULL')();
+  TextColumn get toMemberId => text()
+      .named('toMemberId')
+      .withLength(min: 16)
+      .customConstraint('REFERENCES Members(id) NOT NULL')();
+  RealColumn get amount => real().named('amount')();
+  RealColumn get settledAmount => real().named('settledAmount').nullable()();
+  DateTimeColumn get createdOn => dateTime()
+      .named('createdOn')
+      .clientDefault(() => DateTime.now().toUtc())();
+  DateTimeColumn get updatedOn => dateTime()
+      .named('updatedOn')
+      .nullable()
+      .clientDefault(() => DateTime.now().toUtc())();
+
+  @override
+  Set<Column> get primaryKey => {id};
 }
 
 @DataClassName("Transaction")
@@ -156,6 +200,10 @@ class Transactions extends Table {
       .named('categoryId')
       .nullable()
       .customConstraint('REFERENCES Categories(id) NULLABLE')();
+  IntColumn get settlementId => integer()
+      .named('settlementId')
+      .nullable()
+      .customConstraint('REFERENCES Settlements(id) NULLABLE')();
   TextColumn get notes => text().named('notes').nullable()();
   TextColumn get attachments => text().named('attachments').nullable()();
   DateTimeColumn get createdOn => dateTime()
@@ -163,6 +211,7 @@ class Transactions extends Table {
       .clientDefault(() => DateTime.now().toUtc())();
   DateTimeColumn get updatedOn => dateTime()
       .named('updatedOn')
+      .nullable()
       .clientDefault(() => DateTime.now().toUtc())();
 
   @override
@@ -191,6 +240,7 @@ class AppFonts extends Table {
       .clientDefault(() => DateTime.now().toUtc())();
   DateTimeColumn get updatedOn => dateTime()
       .named('updatedOn')
+      .nullable()
       .clientDefault(() => DateTime.now().toUtc())();
 }
 
@@ -247,6 +297,7 @@ class FontCombos extends Table {
       .clientDefault(() => DateTime.now().toUtc())();
   DateTimeColumn get updatedOn => dateTime()
       .named('updatedOn')
+      .nullable()
       .clientDefault(() => DateTime.now().toUtc())();
 }
 
@@ -269,43 +320,124 @@ class ColorCombos extends Table {
       .clientDefault(() => DateTime.now().toUtc())();
   DateTimeColumn get updatedOn => dateTime()
       .named('updatedOn')
+      .nullable()
       .clientDefault(() => DateTime.now().toUtc())();
 }
 //#endregion Database: sprightly_setup
 //#endregion Database
 
 //#region Custom query & classes
-String get groupOnlyMembersQuery => "SELECT m.*"
-    " FROM Members m"
-    " JOIN GroupMembers gm ON gm.memberId=m.id"
-    " WHERE idType='GroupMember' AND gm.groupId=:groupId";
+class SprightlyQueries {
+  static SprightlyQueries _cache = SprightlyQueries();
+  bool initialized = false;
+  bool _working = false;
+  String _selectGroupOnlyMembers = "selectGroupOnlyMembers";
+  String get selectGroupOnlyMembers => _selectGroupOnlyMembers;
+  String _selectGroupTransactions = "selectGroupTransactions";
+  String get selectGroupTransactions => _selectGroupTransactions;
+
+  factory SprightlyQueries() => _cache;
+
+  Future _init() async {
+    if (!initialized && !_working) {
+      _working = true;
+      _selectGroupOnlyMembers = await getSqlQuery(_selectGroupOnlyMembers);
+      _selectGroupTransactions = await getSqlQuery(_selectGroupTransactions);
+      initialized = true;
+      _working = false;
+    }
+  }
+}
+
+mixin _GenericDaoMixin<T extends GeneratedDatabase> on DatabaseAccessor<T> {
+  SprightlyQueries _queries = SprightlyQueries();
+
+  bool get ready => _queries.initialized;
+
+  Future getReady() => _queries._init();
+
+  Future<String> uniqueId(String tableName, List<String> items) async {
+    var result = '';
+    var foundUnique = false;
+    var attempts = 0;
+    do {
+      var hashFunc = HashLibrary.values.random;
+      result =
+          hashedAll(items, hashLength: hashedIdMinLength, library: hashFunc);
+      foundUnique = !await recordWithIdExists(tableName, result);
+      attempts++;
+    } while (attempts < uniqueRetry && !foundUnique);
+    throw TimeoutException(
+        'Can not found a suitable unique Id for $tableName after $attempts attempts');
+  }
+
+  Future<bool> recordWithIdExists(String tableName, String id) async =>
+      await customSelectQuery(
+        "SELECT COUNT(1) AS counting FROM $tableName g WHERE g.id=:id",
+        variables: [Variable.withString(id)],
+      ).map((row) => row.readInt("counting")).getSingle() >
+      0;
+}
 //#endregion Custom query & classes
 
-LazyDatabase _openConnection(String dbFile,
-        {bool isSupportFile = false, bool logStatements = false}) =>
-    LazyDatabase(() async => VmDatabase(await getFile(dbFile, isSupportFile),
-        logStatements: logStatements));
-
 @UseDao(
-  tables: [Members, Groups, GroupMembers, Accounts, Categories, Transactions],
+  tables: [
+    Members,
+    Groups,
+    GroupMembers,
+    Accounts,
+    Categories,
+    Settlements,
+    Transactions
+  ],
 )
 class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
-    with _$SprightlyDaoMixin {
+    with _$SprightlyDaoMixin, _GenericDaoMixin {
   SprightlyDao(SprightlyDatabase _db) : super(_db);
 
-  Selectable<Member> selectGroupOnlyMembers(String groupId) =>
+  Selectable<Member> _selectGroupOnlyMembers(String groupId) =>
       customSelectQuery(
-        groupOnlyMembersQuery,
+        _queries.selectGroupOnlyMembers,
         variables: [Variable.withString(groupId)],
         readsFrom: {members, groupMembers},
       ).map((row) => Member.fromJson(row.data));
 
-  Future<List<Member>> getGroupOnlyMembers(String groupId) {
-    return selectGroupOnlyMembers(groupId).get();
-  }
+  Future<List<Member>> getGroupOnlyMembers(String groupId) =>
+      _selectGroupOnlyMembers(groupId).get();
 
-  Stream<List<Member>> watchGroupOnlyMembers(String groupId) {
-    return selectGroupOnlyMembers(groupId).watch();
+  Stream<List<Member>> watchGroupOnlyMembers(String groupId) =>
+      _selectGroupOnlyMembers(groupId).watch();
+
+  Selectable<Transaction> _selectGroupTransactions(String groupId) =>
+      customSelectQuery(
+        _queries.selectGroupTransactions,
+        variables: [Variable.withString(groupId)],
+        readsFrom: {transactions, groups},
+      ).map((row) => Transaction.fromJson(row.data));
+
+  Future<List<Transaction>> getGroupTransactions(String groupId) =>
+      _selectGroupTransactions(groupId).get();
+
+  Stream<List<Transaction>> watchGroupTransactions(String groupId) =>
+      _selectGroupTransactions(groupId).watch();
+
+  Future<Group> getGroup(String groupId) =>
+      (select(groups)..where((g) => g.id.equals(groupId))).getSingle();
+
+  Future<bool> groupWithNameExists(String groupName) async =>
+      await customSelectQuery(
+        "SELECT COUNT(1) AS counting FROM Groups g WHERE g.name=:groupName",
+        variables: [Variable.withString(groupName)],
+        readsFrom: {groups},
+      ).map((row) => row.readInt("counting")).getSingle() >
+      0;
+
+  Future<Group> createGroup(String name, String type) async {
+    var groupId = await uniqueId('Groups', [name]);
+    var newGroupComp = GroupsCompanion(
+        id: Value(groupId), name: Value(name), type: Value(type));
+    await into(groups).insert(newGroupComp);
+    return getGroup(groupId);
   }
 }
 
@@ -313,12 +445,25 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
   tables: [AppFonts, FontCombos, ColorCombos],
 )
 class SprightlySetupDao extends DatabaseAccessor<SprightlySetupDatabase>
-    with _$SprightlySetupDaoMixin {
+    with _$SprightlySetupDaoMixin, _GenericDaoMixin {
   SprightlySetupDao(SprightlySetupDatabase _db) : super(_db);
 }
 
+LazyDatabase _openConnection(String dbFile,
+        {bool isSupportFile = false, bool logStatements = false}) =>
+    LazyDatabase(() async => VmDatabase(await getFile(dbFile, isSupportFile),
+        logStatements: logStatements));
+
 @UseMoor(
-  tables: [Members, Groups, GroupMembers, Accounts, Categories, Transactions],
+  tables: [
+    Members,
+    Groups,
+    GroupMembers,
+    Accounts,
+    Categories,
+    Settlements,
+    Transactions
+  ],
   daos: [SprightlyDao],
 )
 class SprightlyDatabase extends _$SprightlyDatabase {

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 extension Enums<T> on List<T> {
   static String convertToString<T>(T value, [bool withQuote = false]) {
     final val = value.toString().split(".")[1];
@@ -10,6 +12,10 @@ extension Enums<T> on List<T> {
 
   List<String> toStrings([bool withQuote = false]) =>
       this.map((item) => convertToString(item, withQuote));
+
+  T get random => this[Random().nextInt(this.length)];
+
+  String get randomString => convertToString(this.random);
 
   String getConstraints(String columnName) =>
       'CHECK ($columnName IN (${this.toStrings(true).join(',')}))';
