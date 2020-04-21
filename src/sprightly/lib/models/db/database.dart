@@ -8,7 +8,7 @@ import 'package:sprightly/utils/file_provider.dart';
 import 'package:sprightly/utils/happy_hash.dart';
 
 part 'database.g.dart';
-part '../models.dart';
+part 'daos.dart';
 
 const String appDataDbFile = 'sprightly_db.lite';
 const String setupDataDbFile = 'sprightly_setup.lite';
@@ -373,21 +373,29 @@ mixin _GenericDaoMixin<T extends GeneratedDatabase> on DatabaseAccessor<T> {
   }
 
   Future<bool> recordWithIdExists(String tableName, String id) =>
-      recordWithNameExists(tableName, id, 'id');
+      recordWithColumnValueExists(tableName, 'id', id);
 
-  Future<bool> recordWithNameExists(String tableName, String value,
-          [String nameColumn = "name"]) async =>
+  Future<bool> recordWithColumnValueExists(
+          String tableName, String column, String value) async =>
       await customSelectQuery(
-        "SELECT COUNT(1) AS counting FROM $tableName t WHERE t.$nameColumn=:value",
+        "SELECT COUNT(1) AS counting FROM $tableName t WHERE t.$column=:value",
         variables: [Variable.withString(value)],
       ).map((row) => row.readInt("counting")).getSingle() >
       0;
 
-  Future<Map<String, dynamic>> getRecord(String tableName, String id) async =>
-      (await customSelectQuery(
-        "SELECT T.* FROM $tableName T WHERE T.id=:id",
-        variables: [Variable.withString(id)],
-      ).getSingle())
+  Selectable<QueryRow> getRecordsWithColumnValue(
+          String tableName, String column, String value,
+          {TableInfo table}) =>
+      customSelectQuery(
+        "SELECT t.* AS counting FROM $tableName t WHERE t.$column=:value",
+        variables: [Variable.withString(value)],
+        readsFrom: null == table ? null : {table},
+      );
+
+  Future<Map<String, dynamic>> getRecord(String tableName, String id,
+          {TableInfo table}) async =>
+      (await getRecordsWithColumnValue(tableName, 'id', id, table: table)
+              .getSingle())
           .data;
 }
 //#endregion Custom query & classes
@@ -404,8 +412,19 @@ mixin _GenericDaoMixin<T extends GeneratedDatabase> on DatabaseAccessor<T> {
   ],
 )
 class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
-    with _$SprightlyDaoMixin, _GenericDaoMixin {
+    with _$SprightlyDaoMixin, _GenericDaoMixin
+    implements SystemDao {
   SprightlyDao(SprightlyDatabase _db) : super(_db);
+
+  List<Group> _sharedGroupList;
+
+  List<Group> get sharedGroupList => _sharedGroupList;
+
+  @override
+  Future getReady() async {
+    _sharedGroupList = await getGroups(GroupType.Shared);
+    await super.getReady();
+  }
 
   Selectable<Member> _selectGroupOnlyMembers(String groupId) =>
       customSelectQuery(
@@ -433,6 +452,23 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
   Stream<List<Transaction>> watchGroupTransactions(String groupId) =>
       _selectGroupTransactions(groupId).watch();
 
+  Selectable<Group> _selectGroupBy(
+    String column,
+    String value,
+  ) =>
+      getRecordsWithColumnValue(
+        groups.actualTableName,
+        column,
+        value,
+        table: groups,
+      ).map((row) => Group.fromJson(row.data));
+
+  Future<List<Group>> getGroups(GroupType type) async =>
+      await _selectGroupBy('type', type.toEnumString()).get();
+
+  Stream<List<Group>> watchGroups(GroupType type) =>
+      _selectGroupBy('type', type.toEnumString()).watch();
+
   Future<Group> getGroup(String groupId) async =>
       Group.fromJson(await getRecord(groups.actualTableName, groupId));
 
@@ -443,7 +479,7 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
       Account.fromJson(await getRecord(accounts.actualTableName, accountId));
 
   Future<bool> groupWithNameExists(String groupName) =>
-      recordWithNameExists(groups.actualTableName, groupName);
+      recordWithColumnValueExists(groups.actualTableName, 'name', groupName);
 
   Future<Group> createGroup(String name,
       [GroupType type = GroupType.Shared]) async {
@@ -511,7 +547,8 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
   tables: [AppFonts, FontCombos, ColorCombos],
 )
 class SprightlySetupDao extends DatabaseAccessor<SprightlySetupDatabase>
-    with _$SprightlySetupDaoMixin, _GenericDaoMixin {
+    with _$SprightlySetupDaoMixin, _GenericDaoMixin
+    implements SettingsDao {
   SprightlySetupDao(SprightlySetupDatabase _db) : super(_db);
 }
 
@@ -528,7 +565,7 @@ LazyDatabase _openConnection(String dbFile,
     Accounts,
     Categories,
     Settlements,
-    Transactions
+    Transactions,
   ],
   daos: [SprightlyDao],
 )
@@ -541,7 +578,11 @@ class SprightlyDatabase extends _$SprightlyDatabase {
 }
 
 @UseMoor(
-  tables: [AppFonts, FontCombos, ColorCombos],
+  tables: [
+    AppFonts,
+    FontCombos,
+    ColorCombos,
+  ],
   daos: [SprightlySetupDao],
 )
 class SprightlySetupDatabase extends _$SprightlySetupDatabase {
