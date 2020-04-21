@@ -9,6 +9,10 @@ dependencies:
   flutter:
     sdk: flutter
 
+  # languages & internationalization
+  applocale: ^1.0.2
+  interpolation: ^1.0.0
+
   # The following adds the Cupertino Icons font to your application.
   cupertino_icons: ^0.1.3
 
@@ -72,4 +76,5 @@ flutter:
           style: italic
 
   assets:
-    - assets/queries_min/
+    - assets/queries_min/ # custom & complex sql queries
+    - assets/i18n/ # internationalization (i18n) & language support
