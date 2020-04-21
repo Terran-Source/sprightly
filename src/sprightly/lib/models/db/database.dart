@@ -439,6 +439,9 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
   Future<Member> getMember(String memberId) async =>
       Member.fromJson(await getRecord(members.actualTableName, memberId));
 
+  Future<Account> getAccount(String accountId) async =>
+      Account.fromJson(await getRecord(accounts.actualTableName, accountId));
+
   Future<bool> groupWithNameExists(String groupName) =>
       recordWithNameExists(groups.actualTableName, groupName);
 
