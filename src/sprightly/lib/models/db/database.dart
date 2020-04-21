@@ -486,8 +486,8 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
         member = await getMember(id);
         existingMember = true;
       }
-    } else
-      id = await _uniqueId(members.actualTableName, [idValue]);
+    }
+
     if (!existingMember) {
       member = await addMember(idValue,
           id: id,
@@ -498,7 +498,7 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
           isGroupExpense: isGroupExpense);
     }
     var groupMembersComp =
-        GroupMembersCompanion.insert(groupId: groupId, memberId: id);
+        GroupMembersCompanion.insert(groupId: groupId, memberId: member.id);
     await into(groupMembers).insert(groupMembersComp);
     return member;
   }
