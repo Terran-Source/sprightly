@@ -24,7 +24,8 @@ class Members extends Table {
 
   TextColumn get id => text().named('id').withLength(min: 16)();
   TextColumn get name => text().named('name').nullable().withLength(max: 50)();
-  TextColumn get nickName => text().named('nickName').withLength(max: 10)();
+  TextColumn get nickName =>
+      text().named('nickName').nullable().withLength(max: 10)();
   BlobColumn get avatar => blob().named('avatar').nullable()();
   TextColumn get idType => text().named('idType').customConstraint(
       "CHECK (idType IN ('Phone','Email','NickName','Group','GroupMember')) NOT NULL")();
@@ -356,7 +357,7 @@ mixin _GenericDaoMixin<T extends GeneratedDatabase> on DatabaseAccessor<T> {
 
   Future getReady() => _queries._init();
 
-  Future<String> uniqueId(String tableName, List<String> items) async {
+  Future<String> _uniqueId(String tableName, List<String> items) async {
     var result = '';
     var foundUnique = false;
     var attempts = 0;
@@ -371,12 +372,23 @@ mixin _GenericDaoMixin<T extends GeneratedDatabase> on DatabaseAccessor<T> {
         'Can not found a suitable unique Id for $tableName after $attempts attempts');
   }
 
-  Future<bool> recordWithIdExists(String tableName, String id) async =>
+  Future<bool> recordWithIdExists(String tableName, String id) =>
+      recordWithNameExists(tableName, id, 'id');
+
+  Future<bool> recordWithNameExists(String tableName, String value,
+          [String nameColumn = "name"]) async =>
       await customSelectQuery(
-        "SELECT COUNT(1) AS counting FROM $tableName g WHERE g.id=:id",
-        variables: [Variable.withString(id)],
+        "SELECT COUNT(1) AS counting FROM $tableName t WHERE t.$nameColumn=:value",
+        variables: [Variable.withString(value)],
       ).map((row) => row.readInt("counting")).getSingle() >
       0;
+
+  Future<Map<String, dynamic>> getRecord(String tableName, String id) async =>
+      (await customSelectQuery(
+        "SELECT T.* FROM $tableName T WHERE T.id=:id",
+        variables: [Variable.withString(id)],
+      ).getSingle())
+          .data;
 }
 //#endregion Custom query & classes
 
@@ -421,23 +433,74 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
   Stream<List<Transaction>> watchGroupTransactions(String groupId) =>
       _selectGroupTransactions(groupId).watch();
 
-  Future<Group> getGroup(String groupId) =>
-      (select(groups)..where((g) => g.id.equals(groupId))).getSingle();
+  Future<Group> getGroup(String groupId) async =>
+      Group.fromJson(await getRecord(groups.actualTableName, groupId));
 
-  Future<bool> groupWithNameExists(String groupName) async =>
-      await customSelectQuery(
-        "SELECT COUNT(1) AS counting FROM Groups g WHERE g.name=:groupName",
-        variables: [Variable.withString(groupName)],
-        readsFrom: {groups},
-      ).map((row) => row.readInt("counting")).getSingle() >
-      0;
+  Future<Member> getMember(String memberId) async =>
+      Member.fromJson(await getRecord(members.actualTableName, memberId));
 
-  Future<Group> createGroup(String name, String type) async {
-    var groupId = await uniqueId('Groups', [name]);
-    var newGroupComp = GroupsCompanion(
-        id: Value(groupId), name: Value(name), type: Value(type));
+  Future<bool> groupWithNameExists(String groupName) =>
+      recordWithNameExists(groups.actualTableName, groupName);
+
+  Future<Group> createGroup(String name,
+      [GroupType type = GroupType.Shared]) async {
+    var groupId =
+        await _uniqueId(groups.actualTableName, [name, type.toEnumString()]);
+    var newGroupComp = GroupsCompanion.insert(
+        id: groupId, name: name, type: Value(type.toEnumString()));
     await into(groups).insert(newGroupComp);
     return getGroup(groupId);
+  }
+
+  Future<Member> addMember(String idValue,
+      {String id,
+      String name,
+      String nickName,
+      MemberIdType idType,
+      String secondaryIdValue,
+      bool isGroupExpense = false}) async {
+    if (null != id) id = await _uniqueId(members.actualTableName, [idValue]);
+    var membersComp = MembersCompanion.insert(
+        id: id,
+        name: Value(name),
+        nickName: Value(nickName),
+        idType: idType.toEnumString(),
+        idValue: idValue,
+        secondaryIdValue: Value(secondaryIdValue),
+        isGroupExpense: Value(isGroupExpense));
+    await into(members).insert(membersComp);
+    return getMember(id);
+  }
+
+  Future<Member> addGroupMember(String groupId, String idValue,
+      {String id,
+      String name,
+      String nickName,
+      MemberIdType idType = MemberIdType.GroupMember,
+      String secondaryIdValue,
+      bool isGroupExpense = false}) async {
+    Member member;
+    var existingMember = false;
+    if (null != id) {
+      if (await recordWithIdExists(members.actualTableName, id)) {
+        member = await getMember(id);
+        existingMember = true;
+      }
+    } else
+      id = await _uniqueId(members.actualTableName, [idValue]);
+    if (!existingMember) {
+      member = await addMember(idValue,
+          id: id,
+          name: name,
+          nickName: nickName,
+          idType: idType,
+          secondaryIdValue: secondaryIdValue,
+          isGroupExpense: isGroupExpense);
+    }
+    var groupMembersComp =
+        GroupMembersCompanion.insert(groupId: groupId, memberId: id);
+    await into(groupMembers).insert(groupMembersComp);
+    return member;
   }
 }
 

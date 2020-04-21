@@ -41,13 +41,12 @@ class GroupActivities {
       : this.groupMembers = GroupOnlyMembers(_dao, groupId),
         this.groupTransactions = GroupTransactions(_dao, groupId);
 
+  static Future<bool> isUniqueGroupName(SprightlyDao _dao, String name) async =>
+      !(await _dao.groupWithNameExists(name));
+
   static Future<GroupActivities> createNew(
       SprightlyDao _dao, String name) async {
-    if (!await _dao.groupWithNameExists(name)) {
-      var newGroup =
-          await _dao.createGroup(name, GroupType.Shared.toEnumString());
-      return GroupActivities(_dao, newGroup.id);
-    }
-    return null;
+    var newGroup = await _dao.createGroup(name, GroupType.Shared);
+    return GroupActivities(_dao, newGroup.id);
   }
 }

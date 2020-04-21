@@ -21,7 +21,7 @@ class Member extends DataClass implements Insertable<Member> {
   Member(
       {@required this.id,
       this.name,
-      @required this.nickName,
+      this.nickName,
       this.avatar,
       @required this.idType,
       @required this.idValue,
@@ -221,7 +221,7 @@ class MembersCompanion extends UpdateCompanion<Member> {
   MembersCompanion.insert({
     @required String id,
     this.name = const Value.absent(),
-    @required String nickName,
+    this.nickName = const Value.absent(),
     this.avatar = const Value.absent(),
     @required String idType,
     @required String idValue,
@@ -230,7 +230,6 @@ class MembersCompanion extends UpdateCompanion<Member> {
     this.createdOn = const Value.absent(),
     this.updatedOn = const Value.absent(),
   })  : id = Value(id),
-        nickName = Value(nickName),
         idType = Value(idType),
         idValue = Value(idValue);
   MembersCompanion copyWith(
@@ -284,8 +283,7 @@ class $MembersTable extends Members with TableInfo<$MembersTable, Member> {
   @override
   GeneratedTextColumn get nickName => _nickName ??= _constructNickName();
   GeneratedTextColumn _constructNickName() {
-    return GeneratedTextColumn('nickName', $tableName, false,
-        maxTextLength: 10);
+    return GeneratedTextColumn('nickName', $tableName, true, maxTextLength: 10);
   }
 
   final VerificationMeta _avatarMeta = const VerificationMeta('avatar');
@@ -399,8 +397,6 @@ class $MembersTable extends Members with TableInfo<$MembersTable, Member> {
     if (d.nickName.present) {
       context.handle(_nickNameMeta,
           nickName.isAcceptableValue(d.nickName.value, _nickNameMeta));
-    } else if (isInserting) {
-      context.missing(_nickNameMeta);
     }
     if (d.avatar.present) {
       context.handle(
