@@ -75,7 +75,7 @@ String hashedAll(List<String> items,
   }
   byteChunks.forEach((bt) => chunks.add(bt));
   chunks.close();
-  var result = "${Enums.convertToString(library).replaceAll("_", "")}"
+  var result = "${library.toEnumString().replaceAll("_", "")}"
       ":${sink.events.single}";
   if (result.length < hashLength) {
     result += hashed(randomStr,

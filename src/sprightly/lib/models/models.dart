@@ -45,7 +45,7 @@ class GroupActivities {
       SprightlyDao _dao, String name) async {
     if (!await _dao.groupWithNameExists(name)) {
       var newGroup =
-          await _dao.createGroup(name, Enums.convertToString(GroupType.Shared));
+          await _dao.createGroup(name, GroupType.Shared.toEnumString());
       return GroupActivities(_dao, newGroup.id);
     }
     return null;

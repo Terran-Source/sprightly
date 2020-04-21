@@ -1,8 +1,8 @@
 import 'dart:math';
 
 extension Enums<T> on List<T> {
-  static String convertToString<T>(T value, [bool withQuote = false]) {
-    final val = value.toString().split(".")[1];
+  static String toEnumString<T>(T value, [bool withQuote = false]) {
+    final val = value.toString().split(".").last;
     return withQuote ? "'$val'" : val;
   }
 
@@ -11,12 +11,18 @@ extension Enums<T> on List<T> {
           orElse: () => null);
 
   List<String> toStrings([bool withQuote = false]) =>
-      this.map((item) => convertToString(item, withQuote));
+      this.map((item) => toEnumString(item, withQuote));
 
   T get random => this[Random().nextInt(this.length)];
 
-  String get randomString => convertToString(this.random);
+  String randomString([bool withQuote = false]) =>
+      toEnumString(this.random, withQuote);
 
   String getConstraints(String columnName) =>
       'CHECK ($columnName IN (${this.toStrings(true).join(',')}))';
+}
+
+extension EnumExt<T> on T {
+  String toEnumString([bool withQuote = false]) =>
+      Enums.toEnumString(this, withQuote);
 }
