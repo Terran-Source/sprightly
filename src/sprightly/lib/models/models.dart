@@ -68,10 +68,10 @@ class Contribution {
   /// ```dart
   /// List<Contribution> someList;
   /// // do some stuff & populate someList
-  /// someList.sort((a, b) => a > b);
+  /// someList.sort((a, b) => a < b);
   /// ```
   /// You get a list sorted by [amount]
-  operator >(Contribution compared) => this.amount - compared.amount;
+  operator <(Contribution compared) => this.amount - compared.amount;
 
   /// to be used as a comparator operator for **_reverse sort_** i.e. Descending order.
   ///
@@ -79,10 +79,10 @@ class Contribution {
   /// ```dart
   /// List<Contribution> someList;
   /// // do some stuff & populate someList
-  /// someList.sort((a, b) => a < b);
+  /// someList.sort((a, b) => a > b);
   /// ```
   /// You get a list inversely sorted (bigger to smaller) by [amount]
-  operator <(Contribution compared) => compared.amount - this.amount;
+  operator >(Contribution compared) => compared.amount - this.amount;
 }
 
 class GroupActivity extends BaseData {
@@ -171,23 +171,30 @@ class GroupActivity extends BaseData {
           (p) => splitContributions.add(Contribution(p, amount * -1, split)));
     });
     var allMembers = (await members).map((m) => m.id).toSet();
-    var sumContributions = List<Contribution>();
+    var positiveContributions = List<Contribution>();
+    var negativeContributions = List<Contribution>();
     var needSettlement = false;
     allMembers.forEach((m) {
       var memberContributedAmount = splitContributions
           .where((c) => c.memberId == m)
           .fold(0.0, (sum, c) => sum + (c.amount / c.split));
-      sumContributions.add(Contribution(m, memberContributedAmount, 0));
-      if (memberContributedAmount > 0) needSettlement = true;
+      if (memberContributedAmount > 0)
+        positiveContributions.add(Contribution(m, memberContributedAmount, 0));
+      else if (memberContributedAmount < 0)
+        negativeContributions.add(Contribution(m, memberContributedAmount, 0));
     });
-    // sort in descending order
-    sumContributions.sort((a, b) => a < b);
-    var summedThreshold =
-        sumContributions.fold(0.0, (sum, c) => sum + c.amount);
-
-    // todo: calculate optimized settlements
-
+    needSettlement =
+        positiveContributions.length > 0 && negativeContributions.length > 0;
     if (needSettlement) {
+      // sort in descending order for positive contributions
+      positiveContributions.sort((a, b) => a > b);
+      negativeContributions.sort((a, b) => a < b);
+      var summedThreshold =
+          positiveContributions.fold(0.0, (sum, c) => sum + c.amount) -
+              negativeContributions.fold(0.0, (sum, c) => sum + c.amount);
+
+      // todo: calculate optimized settlements
+
       // todo: add new temporary settlements if required
       onGroupActivity(GroupActivityType.Settlement);
     }
