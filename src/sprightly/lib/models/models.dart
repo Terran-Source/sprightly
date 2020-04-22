@@ -72,6 +72,17 @@ class Contribution {
   /// ```
   /// You get a list sorted by [amount]
   operator >(Contribution compared) => this.amount - compared.amount;
+
+  /// to be used as a comparator operator for **_reverse sort_** i.e. Descending order.
+  ///
+  /// Example:
+  /// ```dart
+  /// List<Contribution> someList;
+  /// // do some stuff & populate someList
+  /// someList.sort((a, b) => a < b);
+  /// ```
+  /// You get a list inversely sorted (bigger to smaller) by [amount]
+  operator <(Contribution compared) => compared.amount - this.amount;
 }
 
 class GroupActivity extends BaseData {
@@ -169,7 +180,8 @@ class GroupActivity extends BaseData {
       sumContributions.add(Contribution(m, memberContributedAmount, 0));
       if (memberContributedAmount > 0) needSettlement = true;
     });
-    sumContributions.sort((a, b) => a > b);
+    // sort in descending order
+    sumContributions.sort((a, b) => a < b);
     var summedThreshold =
         sumContributions.fold(0.0, (sum, c) => sum + c.amount);
 
