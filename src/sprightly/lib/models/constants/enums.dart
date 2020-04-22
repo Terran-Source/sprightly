@@ -19,6 +19,14 @@ enum GroupType { Personal, Budget, Shared }
 enum AccountType { Group, Cash, Credit, Bank, Investment }
 enum CategoryType { Expense, Liability, Income, Investment, Misc }
 
+// package:sprightly/models
+enum GroupActivityType {
+  GroupActivity, // GroupActivity created/updated(like name etc.)/deleted
+  Account, // GroupAccountMember operations
+  Member, // GroupOnlyMember operations
+  Transaction, // GroupTransaction operations
+}
+
 // Setup DB
 enum FontType { Regular, Mono }
 enum FontStyle { Regular, Italic, Bold, BoldItalic }

@@ -109,6 +109,11 @@ class Accounts extends Table {
       .customConstraint('REFERENCES Accounts(id) NULLABLE')();
   TextColumn get type => text().named('type').nullable().customConstraint(
       "CHECK (type IN ('Group','Cash','Credit','Bank','Investment')) NULLABLE")();
+  TextColumn get memberId => text()
+      .named('memberId')
+      .nullable()
+      .withLength(min: 16)
+      .customConstraint('REFERENCES Members(id) NULLABLE ON UPDATE CASCADE')();
   DateTimeColumn get createdOn => dateTime()
       .named('createdOn')
       .clientDefault(() => DateTime.now().toUtc())();
@@ -332,6 +337,8 @@ class SprightlyQueries {
   static SprightlyQueries _cache = SprightlyQueries();
   bool initialized = false;
   bool _working = false;
+  String _selectGroupAccountMembers = "selectGroupAccountMembers";
+  String get selectGroupAccountMembers => _selectGroupAccountMembers;
   String _selectGroupOnlyMembers = "selectGroupOnlyMembers";
   String get selectGroupOnlyMembers => _selectGroupOnlyMembers;
   String _selectGroupTransactions = "selectGroupTransactions";
@@ -342,6 +349,8 @@ class SprightlyQueries {
   Future _init() async {
     if (!initialized && !_working) {
       _working = true;
+      _selectGroupAccountMembers =
+          await getSqlQuery(_selectGroupAccountMembers);
       _selectGroupOnlyMembers = await getSqlQuery(_selectGroupOnlyMembers);
       _selectGroupTransactions = await getSqlQuery(_selectGroupTransactions);
       initialized = true;
@@ -417,14 +426,36 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
   SprightlyDao(SprightlyDatabase _db) : super(_db);
 
   List<Group> _sharedGroupList;
-
   List<Group> get sharedGroupList => _sharedGroupList;
 
+  bool _initialized = false;
+  bool _working = false;
+
+  @override
+  bool get ready => super.ready && _initialized;
   @override
   Future getReady() async {
-    _sharedGroupList = await getGroups(GroupType.Shared);
-    await super.getReady();
+    if (!_initialized && !_working) {
+      _working = true;
+      _sharedGroupList = await getGroups(GroupType.Shared);
+      await super.getReady();
+      _initialized = true;
+      _working = false;
+    }
   }
+
+  Selectable<Member> _selectGroupAccountMembers(String groupId) =>
+      customSelectQuery(
+        _queries.selectGroupAccountMembers,
+        variables: [Variable.withString(groupId)],
+        readsFrom: {members, groupMembers},
+      ).map((row) => Member.fromJson(row.data));
+
+  Future<List<Member>> getGroupAccountMembers(String groupId) =>
+      _selectGroupAccountMembers(groupId).get();
+
+  Stream<List<Member>> watchGroupAccountMembers(String groupId) =>
+      _selectGroupAccountMembers(groupId).watch();
 
   Selectable<Member> _selectGroupOnlyMembers(String groupId) =>
       customSelectQuery(
@@ -475,11 +506,14 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
   Future<Member> getMember(String memberId) async =>
       Member.fromJson(await getRecord(members.actualTableName, memberId));
 
-  Future<Account> getAccount(String accountId) async =>
-      Account.fromJson(await getRecord(accounts.actualTableName, accountId));
+  Future<Account> getAccount(int accountId) async => Account.fromJson(
+      await getRecord(accounts.actualTableName, accountId.toString()));
 
   Future<bool> groupWithNameExists(String groupName) =>
       recordWithColumnValueExists(groups.actualTableName, 'name', groupName);
+
+  Future<bool> memberWithNameExists(String name) =>
+      recordWithColumnValueExists(members.actualTableName, 'name', name);
 
   Future<Group> createGroup(String name,
       [GroupType type = GroupType.Shared]) async {
@@ -488,7 +522,20 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
     var newGroupComp = GroupsCompanion.insert(
         id: groupId, name: name, type: Value(type.toEnumString()));
     await into(groups).insert(newGroupComp);
-    return getGroup(groupId);
+    var newGroup = await getGroup(groupId);
+    sharedGroupList.add(newGroup);
+    return newGroup;
+  }
+
+  Future<Account> addAccount(String name,
+      {int parentId, AccountType type, String memberId}) async {
+    var accountsComp = AccountsCompanion.insert(
+        name: name,
+        parentId: Value(parentId),
+        type: Value(type.toEnumString()),
+        memberId: Value(memberId));
+    var accountId = await into(accounts).insert(accountsComp);
+    return getAccount(accountId);
   }
 
   Future<Member> addMember(String idValue,
@@ -528,6 +575,8 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
     }
 
     if (!existingMember) {
+      if (idType == MemberIdType.Group) isGroupExpense = true;
+
       member = await addMember(idValue,
           id: id,
           name: name,
@@ -535,6 +584,9 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
           idType: idType,
           secondaryIdValue: secondaryIdValue,
           isGroupExpense: isGroupExpense);
+
+      if (idType == MemberIdType.Group)
+        await addAccount(idValue, memberId: member.id, type: AccountType.Group);
     }
     var groupMembersComp =
         GroupMembersCompanion.insert(groupId: groupId, memberId: member.id);

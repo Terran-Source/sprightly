@@ -1,9 +1,13 @@
 part of 'database.dart';
 
+String get groupAccountPrefix => 'GroupAccount';
+
 abstract class SystemDao {
   bool get ready;
   Future getReady();
   List<Group> get sharedGroupList;
+  Future<List<Member>> getGroupAccountMembers(String groupId);
+  Stream<List<Member>> watchGroupAccountMembers(String groupId);
   Future<List<Member>> getGroupOnlyMembers(String groupId);
   Stream<List<Member>> watchGroupOnlyMembers(String groupId);
   Future<List<Transaction>> getGroupTransactions(String groupId);
@@ -12,9 +16,12 @@ abstract class SystemDao {
   Stream<List<Group>> watchGroups(GroupType type);
   Future<Group> getGroup(String groupId);
   Future<Member> getMember(String memberId);
-  Future<Account> getAccount(String accountId);
+  Future<Account> getAccount(int accountId);
   Future<bool> groupWithNameExists(String groupName);
+  Future<bool> memberWithNameExists(String name);
   Future<Group> createGroup(String name, [GroupType type = GroupType.Shared]);
+  Future<Account> addAccount(String name,
+      {int parentId, AccountType type, String memberId});
   Future<Member> addMember(String idValue,
       {String id,
       String name,

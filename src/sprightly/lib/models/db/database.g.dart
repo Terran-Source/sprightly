@@ -1050,6 +1050,7 @@ class Account extends DataClass implements Insertable<Account> {
   final String name;
   final int parentId;
   final String type;
+  final String memberId;
   final DateTime createdOn;
   final DateTime updatedOn;
   Account(
@@ -1057,6 +1058,7 @@ class Account extends DataClass implements Insertable<Account> {
       @required this.name,
       this.parentId,
       this.type,
+      this.memberId,
       @required this.createdOn,
       this.updatedOn});
   factory Account.fromData(Map<String, dynamic> data, GeneratedDatabase db,
@@ -1071,6 +1073,8 @@ class Account extends DataClass implements Insertable<Account> {
       parentId:
           intType.mapFromDatabaseResponse(data['${effectivePrefix}parentId']),
       type: stringType.mapFromDatabaseResponse(data['${effectivePrefix}type']),
+      memberId: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}memberId']),
       createdOn: dateTimeType
           .mapFromDatabaseResponse(data['${effectivePrefix}createdOn']),
       updatedOn: dateTimeType
@@ -1085,6 +1089,7 @@ class Account extends DataClass implements Insertable<Account> {
       name: serializer.fromJson<String>(json['name']),
       parentId: serializer.fromJson<int>(json['parentId']),
       type: serializer.fromJson<String>(json['type']),
+      memberId: serializer.fromJson<String>(json['memberId']),
       createdOn: serializer.fromJson<DateTime>(json['createdOn']),
       updatedOn: serializer.fromJson<DateTime>(json['updatedOn']),
     );
@@ -1097,6 +1102,7 @@ class Account extends DataClass implements Insertable<Account> {
       'name': serializer.toJson<String>(name),
       'parentId': serializer.toJson<int>(parentId),
       'type': serializer.toJson<String>(type),
+      'memberId': serializer.toJson<String>(memberId),
       'createdOn': serializer.toJson<DateTime>(createdOn),
       'updatedOn': serializer.toJson<DateTime>(updatedOn),
     };
@@ -1111,6 +1117,9 @@ class Account extends DataClass implements Insertable<Account> {
           ? const Value.absent()
           : Value(parentId),
       type: type == null && nullToAbsent ? const Value.absent() : Value(type),
+      memberId: memberId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(memberId),
       createdOn: createdOn == null && nullToAbsent
           ? const Value.absent()
           : Value(createdOn),
@@ -1125,6 +1134,7 @@ class Account extends DataClass implements Insertable<Account> {
           String name,
           int parentId,
           String type,
+          String memberId,
           DateTime createdOn,
           DateTime updatedOn}) =>
       Account(
@@ -1132,6 +1142,7 @@ class Account extends DataClass implements Insertable<Account> {
         name: name ?? this.name,
         parentId: parentId ?? this.parentId,
         type: type ?? this.type,
+        memberId: memberId ?? this.memberId,
         createdOn: createdOn ?? this.createdOn,
         updatedOn: updatedOn ?? this.updatedOn,
       );
@@ -1142,6 +1153,7 @@ class Account extends DataClass implements Insertable<Account> {
           ..write('name: $name, ')
           ..write('parentId: $parentId, ')
           ..write('type: $type, ')
+          ..write('memberId: $memberId, ')
           ..write('createdOn: $createdOn, ')
           ..write('updatedOn: $updatedOn')
           ..write(')'))
@@ -1155,8 +1167,10 @@ class Account extends DataClass implements Insertable<Account> {
           name.hashCode,
           $mrjc(
               parentId.hashCode,
-              $mrjc(type.hashCode,
-                  $mrjc(createdOn.hashCode, updatedOn.hashCode))))));
+              $mrjc(
+                  type.hashCode,
+                  $mrjc(memberId.hashCode,
+                      $mrjc(createdOn.hashCode, updatedOn.hashCode)))))));
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
@@ -1165,6 +1179,7 @@ class Account extends DataClass implements Insertable<Account> {
           other.name == this.name &&
           other.parentId == this.parentId &&
           other.type == this.type &&
+          other.memberId == this.memberId &&
           other.createdOn == this.createdOn &&
           other.updatedOn == this.updatedOn);
 }
@@ -1174,6 +1189,7 @@ class AccountsCompanion extends UpdateCompanion<Account> {
   final Value<String> name;
   final Value<int> parentId;
   final Value<String> type;
+  final Value<String> memberId;
   final Value<DateTime> createdOn;
   final Value<DateTime> updatedOn;
   const AccountsCompanion({
@@ -1181,6 +1197,7 @@ class AccountsCompanion extends UpdateCompanion<Account> {
     this.name = const Value.absent(),
     this.parentId = const Value.absent(),
     this.type = const Value.absent(),
+    this.memberId = const Value.absent(),
     this.createdOn = const Value.absent(),
     this.updatedOn = const Value.absent(),
   });
@@ -1189,6 +1206,7 @@ class AccountsCompanion extends UpdateCompanion<Account> {
     @required String name,
     this.parentId = const Value.absent(),
     this.type = const Value.absent(),
+    this.memberId = const Value.absent(),
     this.createdOn = const Value.absent(),
     this.updatedOn = const Value.absent(),
   }) : name = Value(name);
@@ -1197,6 +1215,7 @@ class AccountsCompanion extends UpdateCompanion<Account> {
       Value<String> name,
       Value<int> parentId,
       Value<String> type,
+      Value<String> memberId,
       Value<DateTime> createdOn,
       Value<DateTime> updatedOn}) {
     return AccountsCompanion(
@@ -1204,6 +1223,7 @@ class AccountsCompanion extends UpdateCompanion<Account> {
       name: name ?? this.name,
       parentId: parentId ?? this.parentId,
       type: type ?? this.type,
+      memberId: memberId ?? this.memberId,
       createdOn: createdOn ?? this.createdOn,
       updatedOn: updatedOn ?? this.updatedOn,
     );
@@ -1250,6 +1270,17 @@ class $AccountsTable extends Accounts with TableInfo<$AccountsTable, Account> {
             'CHECK (type IN (\'Group\',\'Cash\',\'Credit\',\'Bank\',\'Investment\')) NULLABLE');
   }
 
+  final VerificationMeta _memberIdMeta = const VerificationMeta('memberId');
+  GeneratedTextColumn _memberId;
+  @override
+  GeneratedTextColumn get memberId => _memberId ??= _constructMemberId();
+  GeneratedTextColumn _constructMemberId() {
+    return GeneratedTextColumn('memberId', $tableName, true,
+        minTextLength: 16,
+        $customConstraints:
+            'REFERENCES Members(id) NULLABLE ON UPDATE CASCADE');
+  }
+
   final VerificationMeta _createdOnMeta = const VerificationMeta('createdOn');
   GeneratedDateTimeColumn _createdOn;
   @override
@@ -1276,7 +1307,7 @@ class $AccountsTable extends Accounts with TableInfo<$AccountsTable, Account> {
 
   @override
   List<GeneratedColumn> get $columns =>
-      [id, name, parentId, type, createdOn, updatedOn];
+      [id, name, parentId, type, memberId, createdOn, updatedOn];
   @override
   $AccountsTable get asDslTable => this;
   @override
@@ -1303,6 +1334,10 @@ class $AccountsTable extends Accounts with TableInfo<$AccountsTable, Account> {
     if (d.type.present) {
       context.handle(
           _typeMeta, type.isAcceptableValue(d.type.value, _typeMeta));
+    }
+    if (d.memberId.present) {
+      context.handle(_memberIdMeta,
+          memberId.isAcceptableValue(d.memberId.value, _memberIdMeta));
     }
     if (d.createdOn.present) {
       context.handle(_createdOnMeta,
@@ -1337,6 +1372,9 @@ class $AccountsTable extends Accounts with TableInfo<$AccountsTable, Account> {
     }
     if (d.type.present) {
       map['type'] = Variable<String, StringType>(d.type.value);
+    }
+    if (d.memberId.present) {
+      map['memberId'] = Variable<String, StringType>(d.memberId.value);
     }
     if (d.createdOn.present) {
       map['createdOn'] = Variable<DateTime, DateTimeType>(d.createdOn.value);
