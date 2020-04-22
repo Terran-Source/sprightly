@@ -166,6 +166,13 @@ class Settlements extends Table {
       .customConstraint('REFERENCES Members(id) NOT NULL')();
   RealColumn get amount => real().named('amount')();
   RealColumn get settledAmount => real().named('settledAmount').nullable()();
+  BoolColumn get isTemporary =>
+      boolean().named('isTemporary').withDefault(const Constant(true))();
+  TextColumn get transactionId => text()
+      .named('transactionId')
+      .nullable()
+      .withLength(min: 16)
+      .customConstraint('REFERENCES Transactions(id) NULLABLE')();
   DateTimeColumn get createdOn => dateTime()
       .named('createdOn')
       .clientDefault(() => DateTime.now().toUtc())();
@@ -206,7 +213,7 @@ class Transactions extends Table {
       .named('categoryId')
       .nullable()
       .customConstraint('REFERENCES Categories(id) NULLABLE')();
-  IntColumn get settlementId => integer()
+  TextColumn get settlementId => text()
       .named('settlementId')
       .nullable()
       .customConstraint('REFERENCES Settlements(id) NULLABLE')();
@@ -341,6 +348,8 @@ class SprightlyQueries {
   String get selectGroupAccountMembers => _selectGroupAccountMembers;
   String _selectGroupOnlyMembers = "selectGroupOnlyMembers";
   String get selectGroupOnlyMembers => _selectGroupOnlyMembers;
+  String _selectGroupSettlements = "selectGroupSettlements";
+  String get selectGroupSettlements => _selectGroupSettlements;
   String _selectGroupTransactions = "selectGroupTransactions";
   String get selectGroupTransactions => _selectGroupTransactions;
 
@@ -352,6 +361,7 @@ class SprightlyQueries {
       _selectGroupAccountMembers =
           await getSqlQuery(_selectGroupAccountMembers);
       _selectGroupOnlyMembers = await getSqlQuery(_selectGroupOnlyMembers);
+      _selectGroupSettlements = await getSqlQuery(_selectGroupSettlements);
       _selectGroupTransactions = await getSqlQuery(_selectGroupTransactions);
       initialized = true;
       _working = false;
@@ -469,6 +479,31 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
 
   Stream<List<Member>> watchGroupOnlyMembers(String groupId) =>
       _selectGroupOnlyMembers(groupId).watch();
+
+  Selectable<Settlement> _selectGroupSettlements(String groupId,
+          [bool isTemporary]) =>
+      customSelectQuery(
+        _queries.selectGroupSettlements,
+        variables: [
+          Variable.withString(groupId),
+          Variable.withBool(isTemporary)
+        ],
+        readsFrom: {settlements, groups},
+      ).map((row) => Settlement.fromJson(row.data));
+
+  Future<List<Settlement>> getGroupSettlements(String groupId,
+          [bool isTemporary]) =>
+      _selectGroupSettlements(groupId, isTemporary).get();
+
+  Stream<List<Settlement>> watchGroupSettlements(String groupId,
+          [bool isTemporary]) =>
+      _selectGroupSettlements(groupId, isTemporary).watch();
+
+  Future<int> deleteTempSettlements(String groupId) =>
+      transaction(() => (delete(settlements)
+            ..where(
+                (s) => s.groupId.equals(groupId) & s.isTemporary.equals(true)))
+          .go());
 
   Selectable<Transaction> _selectGroupTransactions(String groupId) =>
       customSelectQuery(

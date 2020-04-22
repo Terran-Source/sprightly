@@ -1707,6 +1707,8 @@ class Settlement extends DataClass implements Insertable<Settlement> {
   final String toMemberId;
   final double amount;
   final double settledAmount;
+  final bool isTemporary;
+  final String transactionId;
   final DateTime createdOn;
   final DateTime updatedOn;
   Settlement(
@@ -1716,6 +1718,8 @@ class Settlement extends DataClass implements Insertable<Settlement> {
       @required this.toMemberId,
       @required this.amount,
       this.settledAmount,
+      @required this.isTemporary,
+      this.transactionId,
       @required this.createdOn,
       this.updatedOn});
   factory Settlement.fromData(Map<String, dynamic> data, GeneratedDatabase db,
@@ -1723,6 +1727,7 @@ class Settlement extends DataClass implements Insertable<Settlement> {
     final effectivePrefix = prefix ?? '';
     final stringType = db.typeSystem.forDartType<String>();
     final doubleType = db.typeSystem.forDartType<double>();
+    final boolType = db.typeSystem.forDartType<bool>();
     final dateTimeType = db.typeSystem.forDartType<DateTime>();
     return Settlement(
       id: stringType.mapFromDatabaseResponse(data['${effectivePrefix}id']),
@@ -1736,6 +1741,10 @@ class Settlement extends DataClass implements Insertable<Settlement> {
           doubleType.mapFromDatabaseResponse(data['${effectivePrefix}amount']),
       settledAmount: doubleType
           .mapFromDatabaseResponse(data['${effectivePrefix}settledAmount']),
+      isTemporary: boolType
+          .mapFromDatabaseResponse(data['${effectivePrefix}isTemporary']),
+      transactionId: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}transactionId']),
       createdOn: dateTimeType
           .mapFromDatabaseResponse(data['${effectivePrefix}createdOn']),
       updatedOn: dateTimeType
@@ -1752,6 +1761,8 @@ class Settlement extends DataClass implements Insertable<Settlement> {
       toMemberId: serializer.fromJson<String>(json['toMemberId']),
       amount: serializer.fromJson<double>(json['amount']),
       settledAmount: serializer.fromJson<double>(json['settledAmount']),
+      isTemporary: serializer.fromJson<bool>(json['isTemporary']),
+      transactionId: serializer.fromJson<String>(json['transactionId']),
       createdOn: serializer.fromJson<DateTime>(json['createdOn']),
       updatedOn: serializer.fromJson<DateTime>(json['updatedOn']),
     );
@@ -1766,6 +1777,8 @@ class Settlement extends DataClass implements Insertable<Settlement> {
       'toMemberId': serializer.toJson<String>(toMemberId),
       'amount': serializer.toJson<double>(amount),
       'settledAmount': serializer.toJson<double>(settledAmount),
+      'isTemporary': serializer.toJson<bool>(isTemporary),
+      'transactionId': serializer.toJson<String>(transactionId),
       'createdOn': serializer.toJson<DateTime>(createdOn),
       'updatedOn': serializer.toJson<DateTime>(updatedOn),
     };
@@ -1789,6 +1802,12 @@ class Settlement extends DataClass implements Insertable<Settlement> {
       settledAmount: settledAmount == null && nullToAbsent
           ? const Value.absent()
           : Value(settledAmount),
+      isTemporary: isTemporary == null && nullToAbsent
+          ? const Value.absent()
+          : Value(isTemporary),
+      transactionId: transactionId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(transactionId),
       createdOn: createdOn == null && nullToAbsent
           ? const Value.absent()
           : Value(createdOn),
@@ -1805,6 +1824,8 @@ class Settlement extends DataClass implements Insertable<Settlement> {
           String toMemberId,
           double amount,
           double settledAmount,
+          bool isTemporary,
+          String transactionId,
           DateTime createdOn,
           DateTime updatedOn}) =>
       Settlement(
@@ -1814,6 +1835,8 @@ class Settlement extends DataClass implements Insertable<Settlement> {
         toMemberId: toMemberId ?? this.toMemberId,
         amount: amount ?? this.amount,
         settledAmount: settledAmount ?? this.settledAmount,
+        isTemporary: isTemporary ?? this.isTemporary,
+        transactionId: transactionId ?? this.transactionId,
         createdOn: createdOn ?? this.createdOn,
         updatedOn: updatedOn ?? this.updatedOn,
       );
@@ -1826,6 +1849,8 @@ class Settlement extends DataClass implements Insertable<Settlement> {
           ..write('toMemberId: $toMemberId, ')
           ..write('amount: $amount, ')
           ..write('settledAmount: $settledAmount, ')
+          ..write('isTemporary: $isTemporary, ')
+          ..write('transactionId: $transactionId, ')
           ..write('createdOn: $createdOn, ')
           ..write('updatedOn: $updatedOn')
           ..write(')'))
@@ -1843,8 +1868,14 @@ class Settlement extends DataClass implements Insertable<Settlement> {
                   toMemberId.hashCode,
                   $mrjc(
                       amount.hashCode,
-                      $mrjc(settledAmount.hashCode,
-                          $mrjc(createdOn.hashCode, updatedOn.hashCode))))))));
+                      $mrjc(
+                          settledAmount.hashCode,
+                          $mrjc(
+                              isTemporary.hashCode,
+                              $mrjc(
+                                  transactionId.hashCode,
+                                  $mrjc(createdOn.hashCode,
+                                      updatedOn.hashCode))))))))));
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
@@ -1855,6 +1886,8 @@ class Settlement extends DataClass implements Insertable<Settlement> {
           other.toMemberId == this.toMemberId &&
           other.amount == this.amount &&
           other.settledAmount == this.settledAmount &&
+          other.isTemporary == this.isTemporary &&
+          other.transactionId == this.transactionId &&
           other.createdOn == this.createdOn &&
           other.updatedOn == this.updatedOn);
 }
@@ -1866,6 +1899,8 @@ class SettlementsCompanion extends UpdateCompanion<Settlement> {
   final Value<String> toMemberId;
   final Value<double> amount;
   final Value<double> settledAmount;
+  final Value<bool> isTemporary;
+  final Value<String> transactionId;
   final Value<DateTime> createdOn;
   final Value<DateTime> updatedOn;
   const SettlementsCompanion({
@@ -1875,6 +1910,8 @@ class SettlementsCompanion extends UpdateCompanion<Settlement> {
     this.toMemberId = const Value.absent(),
     this.amount = const Value.absent(),
     this.settledAmount = const Value.absent(),
+    this.isTemporary = const Value.absent(),
+    this.transactionId = const Value.absent(),
     this.createdOn = const Value.absent(),
     this.updatedOn = const Value.absent(),
   });
@@ -1885,6 +1922,8 @@ class SettlementsCompanion extends UpdateCompanion<Settlement> {
     @required String toMemberId,
     @required double amount,
     this.settledAmount = const Value.absent(),
+    this.isTemporary = const Value.absent(),
+    this.transactionId = const Value.absent(),
     this.createdOn = const Value.absent(),
     this.updatedOn = const Value.absent(),
   })  : id = Value(id),
@@ -1899,6 +1938,8 @@ class SettlementsCompanion extends UpdateCompanion<Settlement> {
       Value<String> toMemberId,
       Value<double> amount,
       Value<double> settledAmount,
+      Value<bool> isTemporary,
+      Value<String> transactionId,
       Value<DateTime> createdOn,
       Value<DateTime> updatedOn}) {
     return SettlementsCompanion(
@@ -1908,6 +1949,8 @@ class SettlementsCompanion extends UpdateCompanion<Settlement> {
       toMemberId: toMemberId ?? this.toMemberId,
       amount: amount ?? this.amount,
       settledAmount: settledAmount ?? this.settledAmount,
+      isTemporary: isTemporary ?? this.isTemporary,
+      transactionId: transactionId ?? this.transactionId,
       createdOn: createdOn ?? this.createdOn,
       updatedOn: updatedOn ?? this.updatedOn,
     );
@@ -1985,6 +2028,29 @@ class $SettlementsTable extends Settlements
     );
   }
 
+  final VerificationMeta _isTemporaryMeta =
+      const VerificationMeta('isTemporary');
+  GeneratedBoolColumn _isTemporary;
+  @override
+  GeneratedBoolColumn get isTemporary =>
+      _isTemporary ??= _constructIsTemporary();
+  GeneratedBoolColumn _constructIsTemporary() {
+    return GeneratedBoolColumn('isTemporary', $tableName, false,
+        defaultValue: const Constant(true));
+  }
+
+  final VerificationMeta _transactionIdMeta =
+      const VerificationMeta('transactionId');
+  GeneratedTextColumn _transactionId;
+  @override
+  GeneratedTextColumn get transactionId =>
+      _transactionId ??= _constructTransactionId();
+  GeneratedTextColumn _constructTransactionId() {
+    return GeneratedTextColumn('transactionId', $tableName, true,
+        minTextLength: 16,
+        $customConstraints: 'REFERENCES Transactions(id) NULLABLE');
+  }
+
   final VerificationMeta _createdOnMeta = const VerificationMeta('createdOn');
   GeneratedDateTimeColumn _createdOn;
   @override
@@ -2017,6 +2083,8 @@ class $SettlementsTable extends Settlements
         toMemberId,
         amount,
         settledAmount,
+        isTemporary,
+        transactionId,
         createdOn,
         updatedOn
       ];
@@ -2067,6 +2135,16 @@ class $SettlementsTable extends Settlements
           settledAmount.isAcceptableValue(
               d.settledAmount.value, _settledAmountMeta));
     }
+    if (d.isTemporary.present) {
+      context.handle(_isTemporaryMeta,
+          isTemporary.isAcceptableValue(d.isTemporary.value, _isTemporaryMeta));
+    }
+    if (d.transactionId.present) {
+      context.handle(
+          _transactionIdMeta,
+          transactionId.isAcceptableValue(
+              d.transactionId.value, _transactionIdMeta));
+    }
     if (d.createdOn.present) {
       context.handle(_createdOnMeta,
           createdOn.isAcceptableValue(d.createdOn.value, _createdOnMeta));
@@ -2107,6 +2185,13 @@ class $SettlementsTable extends Settlements
     if (d.settledAmount.present) {
       map['settledAmount'] = Variable<double, RealType>(d.settledAmount.value);
     }
+    if (d.isTemporary.present) {
+      map['isTemporary'] = Variable<bool, BoolType>(d.isTemporary.value);
+    }
+    if (d.transactionId.present) {
+      map['transactionId'] =
+          Variable<String, StringType>(d.transactionId.value);
+    }
     if (d.createdOn.present) {
       map['createdOn'] = Variable<DateTime, DateTimeType>(d.createdOn.value);
     }
@@ -2131,7 +2216,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
   final int fromAccountId;
   final int toAccountId;
   final int categoryId;
-  final int settlementId;
+  final String settlementId;
   final String notes;
   final String attachments;
   final DateTime createdOn;
@@ -2173,7 +2258,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
           .mapFromDatabaseResponse(data['${effectivePrefix}toAccountId']),
       categoryId:
           intType.mapFromDatabaseResponse(data['${effectivePrefix}categoryId']),
-      settlementId: intType
+      settlementId: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}settlementId']),
       notes:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}notes']),
@@ -2197,7 +2282,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       fromAccountId: serializer.fromJson<int>(json['fromAccountId']),
       toAccountId: serializer.fromJson<int>(json['toAccountId']),
       categoryId: serializer.fromJson<int>(json['categoryId']),
-      settlementId: serializer.fromJson<int>(json['settlementId']),
+      settlementId: serializer.fromJson<String>(json['settlementId']),
       notes: serializer.fromJson<String>(json['notes']),
       attachments: serializer.fromJson<String>(json['attachments']),
       createdOn: serializer.fromJson<DateTime>(json['createdOn']),
@@ -2216,7 +2301,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       'fromAccountId': serializer.toJson<int>(fromAccountId),
       'toAccountId': serializer.toJson<int>(toAccountId),
       'categoryId': serializer.toJson<int>(categoryId),
-      'settlementId': serializer.toJson<int>(settlementId),
+      'settlementId': serializer.toJson<String>(settlementId),
       'notes': serializer.toJson<String>(notes),
       'attachments': serializer.toJson<String>(attachments),
       'createdOn': serializer.toJson<DateTime>(createdOn),
@@ -2274,7 +2359,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
           int fromAccountId,
           int toAccountId,
           int categoryId,
-          int settlementId,
+          String settlementId,
           String notes,
           String attachments,
           DateTime createdOn,
@@ -2369,7 +2454,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
   final Value<int> fromAccountId;
   final Value<int> toAccountId;
   final Value<int> categoryId;
-  final Value<int> settlementId;
+  final Value<String> settlementId;
   final Value<String> notes;
   final Value<String> attachments;
   final Value<DateTime> createdOn;
@@ -2416,7 +2501,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
       Value<int> fromAccountId,
       Value<int> toAccountId,
       Value<int> categoryId,
-      Value<int> settlementId,
+      Value<String> settlementId,
       Value<String> notes,
       Value<String> attachments,
       Value<DateTime> createdOn,
@@ -2531,12 +2616,12 @@ class $TransactionsTable extends Transactions
 
   final VerificationMeta _settlementIdMeta =
       const VerificationMeta('settlementId');
-  GeneratedIntColumn _settlementId;
+  GeneratedTextColumn _settlementId;
   @override
-  GeneratedIntColumn get settlementId =>
+  GeneratedTextColumn get settlementId =>
       _settlementId ??= _constructSettlementId();
-  GeneratedIntColumn _constructSettlementId() {
-    return GeneratedIntColumn('settlementId', $tableName, true,
+  GeneratedTextColumn _constructSettlementId() {
+    return GeneratedTextColumn('settlementId', $tableName, true,
         $customConstraints: 'REFERENCES Settlements(id) NULLABLE');
   }
 
@@ -2721,7 +2806,7 @@ class $TransactionsTable extends Transactions
       map['categoryId'] = Variable<int, IntType>(d.categoryId.value);
     }
     if (d.settlementId.present) {
-      map['settlementId'] = Variable<int, IntType>(d.settlementId.value);
+      map['settlementId'] = Variable<String, StringType>(d.settlementId.value);
     }
     if (d.notes.present) {
       map['notes'] = Variable<String, StringType>(d.notes.value);

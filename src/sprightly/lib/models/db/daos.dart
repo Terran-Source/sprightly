@@ -10,6 +10,11 @@ abstract class SystemDao {
   Stream<List<Member>> watchGroupAccountMembers(String groupId);
   Future<List<Member>> getGroupOnlyMembers(String groupId);
   Stream<List<Member>> watchGroupOnlyMembers(String groupId);
+  Future<List<Settlement>> getGroupSettlements(String groupId,
+      [bool isTemporary]);
+  Stream<List<Settlement>> watchGroupSettlements(String groupId,
+      [bool isTemporary]);
+  Future<int> deleteTempSettlements(String groupId);
   Future<List<Transaction>> getGroupTransactions(String groupId);
   Stream<List<Transaction>> watchGroupTransactions(String groupId);
   Future<List<Group>> getGroups(GroupType type);

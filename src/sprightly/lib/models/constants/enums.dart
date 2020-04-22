@@ -32,6 +32,9 @@ enum GroupActivityType {
 
   /// GroupTransaction operations like: created/updated(like name etc.)/deleted
   Transaction,
+
+  /// GroupSettlement operations like: created/updated(like name etc.)/deleted
+  Settlement,
 }
 
 // Setup DB
