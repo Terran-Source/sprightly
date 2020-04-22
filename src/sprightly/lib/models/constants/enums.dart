@@ -21,10 +21,17 @@ enum CategoryType { Expense, Liability, Income, Investment, Misc }
 
 // package:sprightly/models
 enum GroupActivityType {
-  GroupActivity, // GroupActivity created/updated(like name etc.)/deleted
-  Account, // GroupAccountMember operations
-  Member, // GroupOnlyMember operations
-  Transaction, // GroupTransaction operations
+  /// GroupActivity operations like: created/updated(like name etc.)/deleted
+  GroupActivity,
+
+  /// GroupAccountMember operations like: created/updated(like name etc.)/deleted
+  Account,
+
+  /// GroupOnlyMember operations like: created/updated(like name etc.)/deleted
+  Member,
+
+  /// GroupTransaction operations like: created/updated(like name etc.)/deleted
+  Transaction,
 }
 
 // Setup DB
