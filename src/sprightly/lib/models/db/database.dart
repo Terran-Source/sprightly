@@ -4,11 +4,11 @@ import 'package:moor/moor.dart';
 import 'package:moor_ffi/moor_ffi.dart';
 import 'package:sprightly/extensions/enum_extensions.dart';
 import 'package:sprightly/models/constants/enums.dart';
+import 'package:sprightly/models/db/dao.dart';
 import 'package:sprightly/utils/file_provider.dart';
 import 'package:sprightly/utils/happy_hash.dart';
 
 part 'database.g.dart';
-part 'daos.dart';
 
 const String appDataDbFile = 'sprightly_db.lite';
 const String setupDataDbFile = 'sprightly_setup.lite';
@@ -721,7 +721,11 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
 }
 
 @UseDao(
-  tables: [AppFonts, FontCombos, ColorCombos],
+  tables: [
+    AppFonts,
+    FontCombos,
+    ColorCombos,
+  ],
 )
 class SprightlySetupDao extends DatabaseAccessor<SprightlySetupDatabase>
     with _$SprightlySetupDaoMixin, _GenericDaoMixin

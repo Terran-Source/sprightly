@@ -1,4 +1,5 @@
-part of 'database.dart';
+import 'package:sprightly/models/db/database.dart';
+import 'package:sprightly/models/constants/enums.dart';
 
 String get groupAccountPrefix => 'GroupAccount';
 
