@@ -10,6 +10,7 @@ abstract class SystemDao {
   Stream<List<Member>> watchGroupAccountMembers(String groupId);
   Future<List<Member>> getGroupOnlyMembers(String groupId);
   Stream<List<Member>> watchGroupOnlyMembers(String groupId);
+  Future<Settlement> getSettlement(String settlementId);
   Future<List<Settlement>> getGroupSettlements(String groupId,
       [bool isTemporary]);
   Stream<List<Settlement>> watchGroupSettlements(String groupId,
@@ -27,8 +28,23 @@ abstract class SystemDao {
     DateTime createdOn,
     DateTime updatedOn,
   });
+  Future<void> addGroupSettlements(
+      String groupId, List<Settlement> settlementList);
+  Future<bool> finalizeSettlement(String groupId, String id,
+      {double settledAmount, String notes, String attachments});
   Future<List<Transaction>> getGroupTransactions(String groupId);
   Stream<List<Transaction>> watchGroupTransactions(String groupId);
+  Future<Transaction> getTransaction(String transactionId);
+  Future<Transaction> addGroupTransaction(
+      String groupId, String memberId, double amount,
+      {String id,
+      String groupMemberIds,
+      int fromAccountId,
+      int toAccountId,
+      int categoryId,
+      String settlementId,
+      String notes,
+      String attachments});
   Future<List<Group>> getGroups(GroupType type);
   Stream<List<Group>> watchGroups(GroupType type);
   Future<Group> getGroup(String groupId);

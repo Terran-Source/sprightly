@@ -154,6 +154,7 @@ class GroupActivity extends BaseData {
   }
 
   Future<List<Settlement>> calculateSettlements() async {
+    // delete new temporary settlements
     await _dao.deleteTempSettlements(groupId);
     List<Settlement> finalSettlements = await doneSettlements;
     var splitContributions = List<Contribution>();
@@ -186,72 +187,90 @@ class GroupActivity extends BaseData {
     needSettlement =
         positiveContributions.length > 0 && negativeContributions.length > 0;
     if (needSettlement) {
-      // sort in descending order for positive contributions
-      positiveContributions.sort((a, b) => a > b);
-      negativeContributions.sort((a, b) => a < b);
       List<String> settledMember = [];
-      List<Contribution> alfa;
-      List<Contribution> beta;
-      bool isPFwd = true;
-      if (positiveContributions.length <= negativeContributions.length) {
-        alfa = [...positiveContributions];
-        beta = [...negativeContributions];
-      } else {
-        alfa = [...negativeContributions];
-        beta = [...positiveContributions];
-        isPFwd = false;
-      }
-      // var summedThreshold =
-      //     positiveContributions.fold(0.0, (sum, c) => sum + c.amount) +
-      //         negativeContributions.fold(0.0, (sum, c) => sum + c.amount);
 
-      // todo: calculate optimized settlements
-      do {
-        var aCon = alfa[0];
-        var alfaAmountAbs = aCon.amount.abs();
-        var sameBIndex =
-            beta.indexWhere((bCon) => alfaAmountAbs == bCon.amount.abs());
-        if (-1 != sameBIndex) {
-          var sameBCon = beta[sameBIndex];
-          finalSettlements.add(await _dao.newSettlementForGroup(
-              groupId,
-              isPFwd ? sameBCon.memberId : aCon.memberId,
-              isPFwd ? aCon.memberId : sameBCon.memberId,
-              alfaAmountAbs));
-          settledMember.add(sameBCon.memberId);
-          beta.removeAt(sameBIndex);
+      // calculate optimized settlements
+      // cocktail approach ;)
+      while (needSettlement) {
+        // sort in descending order for positive contributions
+        positiveContributions.sort((a, b) => a > b);
+        // sort in ascending order for negative contributions
+        negativeContributions.sort((a, b) => a < b);
+        List<Contribution> alfa;
+        List<Contribution> beta;
+        bool isPFwd = true;
+
+        // Contribution List, having less max amount, should be alfa
+        if (positiveContributions[0].amount.abs() <=
+            negativeContributions[0].amount.abs()) {
+          alfa = [...positiveContributions];
+          beta = [...negativeContributions];
         } else {
-          var greaterBIndex =
-              beta.indexWhere((bCon) => alfaAmountAbs < bCon.amount.abs());
-          if (-1 != greaterBIndex) {
-            var greaterBCon = beta[greaterBIndex];
-            var remainingBConAmount = greaterBCon.amount + aCon.amount;
+          alfa = [...negativeContributions];
+          beta = [...positiveContributions];
+          isPFwd = false;
+        }
+        // var summedThreshold =
+        //     positiveContributions.fold(0.0, (sum, c) => sum + c.amount) +
+        //         negativeContributions.fold(0.0, (sum, c) => sum + c.amount);
+
+        int curIndex = 0;
+        while (curIndex < alfa.length) {
+          var aCon = alfa[curIndex];
+          var alfaAmountAbs = aCon.amount.abs();
+          var sameBIndex =
+              beta.indexWhere((bCon) => alfaAmountAbs == bCon.amount.abs());
+          if (-1 != sameBIndex) {
+            var sameBCon = beta[sameBIndex];
             finalSettlements.add(await _dao.newSettlementForGroup(
                 groupId,
-                isPFwd ? greaterBCon.memberId : aCon.memberId,
-                isPFwd ? aCon.memberId : greaterBCon.memberId,
-                alfaAmountAbs));
-            beta.add(
-                Contribution(greaterBCon.memberId, remainingBConAmount, 0));
-            beta.removeAt(greaterBIndex);
+                isPFwd ? sameBCon.memberId : aCon.memberId,
+                isPFwd ? aCon.memberId : sameBCon.memberId,
+                alfaAmountAbs,
+                isTemporary: true));
+            settledMember.addAll([aCon.memberId, sameBCon.memberId]);
+            beta.removeAt(sameBIndex);
+            alfa.removeAt(curIndex);
+            continue;
+          } else {
+            var greaterBIndex =
+                beta.indexWhere((bCon) => alfaAmountAbs < bCon.amount.abs());
+            if (-1 != greaterBIndex) {
+              var greaterBCon = beta[greaterBIndex];
+              finalSettlements.add(await _dao.newSettlementForGroup(
+                  groupId,
+                  isPFwd ? greaterBCon.memberId : aCon.memberId,
+                  isPFwd ? aCon.memberId : greaterBCon.memberId,
+                  alfaAmountAbs,
+                  isTemporary: true));
+              settledMember.add(aCon.memberId);
+              beta.add(Contribution(
+                  greaterBCon.memberId, greaterBCon.amount + aCon.amount, 0));
+              beta.removeAt(greaterBIndex);
+              alfa.removeAt(curIndex);
+              continue;
+            }
+          }
+          curIndex++;
+        }
+
+        // if all settled, curIndex won't move
+        needSettlement = curIndex > 0;
+        if (needSettlement) {
+          // get ready for next iteration
+          if (isPFwd) {
+            positiveContributions = [...alfa];
+            negativeContributions = [...beta];
+          } else {
+            positiveContributions = [...beta];
+            negativeContributions = [...alfa];
           }
         }
-        settledMember.add(aCon.memberId);
-        alfa.removeAt(0);
-      } while (alfa.length > 0);
+      }
 
-      // positiveContributions.forEach((pCon) async {
-      //   var sameNCon = negativeContributions
-      //       .firstWhere((nCon) => pCon.amount == nCon.amount.abs());
-      //   if (null != sameNCon) {
-      //     finalSettlements.add(await _dao.newSettlementForGroup(
-      //         groupId, sameNCon.memberId, pCon.memberId, pCon.amount));
-      //     settledMember.addAll([sameNCon.memberId, pCon.memberId]);
-      //     //positiveContributions.remove(value)
-      //   } else {}
-      // });
-
-      // todo: add new temporary settlements if required
+      // re-generate new temporary settlements
+      _dao.addGroupSettlements(
+          groupId, finalSettlements.where((s) => s.isTemporary));
       onGroupActivity(GroupActivityType.Settlement);
     }
     return finalSettlements;

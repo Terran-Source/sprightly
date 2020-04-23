@@ -506,6 +506,10 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
                 (s) => s.groupId.equals(groupId) & s.isTemporary.equals(true)))
           .go());
 
+  Future<Settlement> getSettlement(String settlementId) async =>
+      Settlement.fromJson(
+          await getRecord(settlements.actualTableName, settlementId));
+
   Future<Settlement> newSettlementForGroup(
     String groupId,
     String fromMemberId,
@@ -536,6 +540,27 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
         updatedOn: updatedOn);
   }
 
+  Future<void> addGroupSettlements(
+          String groupId, List<Settlement> settlementList) =>
+      batch((b) => b.insertAll(settlements, settlementList));
+
+  Future<bool> finalizeSettlement(String groupId, String id,
+      {double settledAmount, String notes, String attachments}) async {
+    var recordExists =
+        await recordWithIdExists(settlements.actualTableName, id);
+    if (recordExists) {
+      var settleMent = await getSettlement(id);
+      await addGroupTransaction(
+          groupId, settleMent.fromMemberId, settledAmount ?? settleMent.amount,
+          groupMemberIds: settleMent.toMemberId,
+          settlementId: settleMent.id,
+          notes: notes,
+          attachments: attachments);
+      return true;
+    }
+    return false;
+  }
+
   Selectable<Transaction> _selectGroupTransactions(String groupId) =>
       customSelectQuery(
         _queries.selectGroupTransactions,
@@ -548,6 +573,40 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
 
   Stream<List<Transaction>> watchGroupTransactions(String groupId) =>
       _selectGroupTransactions(groupId).watch();
+
+  Future<Transaction> getTransaction(String transactionId) async =>
+      Transaction.fromJson(
+          await getRecord(transactions.actualTableName, transactionId));
+
+  Future<Transaction> addGroupTransaction(
+      String groupId, String memberId, double amount,
+      {String id,
+      String groupMemberIds,
+      int fromAccountId,
+      int toAccountId,
+      int categoryId,
+      String settlementId,
+      String notes,
+      String attachments}) async {
+    if (null != id)
+      id = await _uniqueId(
+          transactions.actualTableName, [groupId, memberId, amount.toString()],
+          hashLibrary: HashLibrary.hmac_sha256);
+    var transactionComp = TransactionsCompanion.insert(
+        id: id,
+        memberId: memberId,
+        amount: amount,
+        groupId: groupId,
+        groupMemberIds: Value(groupMemberIds),
+        fromAccountId: Value(fromAccountId),
+        toAccountId: Value(toAccountId),
+        categoryId: Value(categoryId),
+        settlementId: Value(settlementId),
+        notes: Value(notes),
+        attachments: Value(attachments));
+    into(transactions).insert(transactionComp);
+    return getTransaction(id);
+  }
 
   Selectable<Group> _selectGroupBy(
     String column,
