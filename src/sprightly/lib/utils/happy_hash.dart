@@ -20,8 +20,8 @@ enum HashLibrary {
 }
 
 String hashedAll(List<String> items,
-    {int hashLength = 16, HashLibrary library = HashLibrary.sha1}) {
-  var randomStr =
+    {int hashLength = 16, HashLibrary library = HashLibrary.sha1, String key}) {
+  var randomStr = key ??
       (Random().nextInt(10000000) + DateTime.now().millisecondsSinceEpoch)
           .toString();
   var randomKey = utf8.encode(randomStr);
