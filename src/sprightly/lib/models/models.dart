@@ -134,8 +134,8 @@ class GroupActivity extends BaseData {
       String nickName,
       MemberIdType idType = MemberIdType.GroupMember,
       String secondaryIdValue,
-      bool isGroupExpense = false}) {
-    var result = _dao.addGroupMember(groupId, idValue,
+      bool isGroupExpense = false}) async {
+    var result = await _dao.addGroupMember(groupId, idValue,
         id: id,
         name: name,
         nickName: nickName,
@@ -146,10 +146,38 @@ class GroupActivity extends BaseData {
     return result;
   }
 
-  Future<Member> addGroupAccount({String idValue}) {
-    var result = addMember('$groupAccountPrefix:${idValue ?? name}',
+  Future<Member> addGroupAccount({String idValue}) async {
+    var result = await addMember('$groupAccountPrefix:${idValue ?? name}',
         idType: MemberIdType.Group, isGroupExpense: true);
     onGroupActivity(GroupActivityType.Account);
+    return result;
+  }
+
+  Future<Transaction> addGroupTransaction(
+          String groupId, String memberId, double amount,
+          {String groupMemberIds,
+          int fromAccountId,
+          int toAccountId,
+          int categoryId,
+          String settlementId,
+          String notes,
+          String attachments}) async =>
+      await _dao.addGroupTransaction(groupId, memberId, amount,
+          groupMemberIds: groupMemberIds,
+          fromAccountId: fromAccountId,
+          toAccountId: toAccountId,
+          categoryId: categoryId,
+          settlementId: settlementId,
+          notes: notes,
+          attachments: attachments);
+
+  Future<bool> finalizeSettlement(String settlementId,
+      {double settledAmount, String notes, String attachments}) async {
+    var result = await _dao.finalizeSettlement(groupId, settlementId,
+        settledAmount: settledAmount, notes: notes, attachments: attachments);
+    if (result) {
+      onGroupActivity(GroupActivityType.Settlement);
+    }
     return result;
   }
 
@@ -269,7 +297,7 @@ class GroupActivity extends BaseData {
       }
 
       // re-generate new temporary settlements
-      _dao.addGroupSettlements(
+      await _dao.addGroupSettlements(
           groupId, finalSettlements.where((s) => s.isTemporary));
       onGroupActivity(GroupActivityType.Settlement);
     }
