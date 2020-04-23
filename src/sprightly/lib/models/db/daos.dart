@@ -15,6 +15,18 @@ abstract class SystemDao {
   Stream<List<Settlement>> watchGroupSettlements(String groupId,
       [bool isTemporary]);
   Future<int> deleteTempSettlements(String groupId);
+  Future<Settlement> newSettlementForGroup(
+    String groupId,
+    String fromMemberId,
+    String toMemberId,
+    double amount, {
+    String id,
+    double settledAmount,
+    bool isTemporary = true,
+    String transactionId,
+    DateTime createdOn,
+    DateTime updatedOn,
+  });
   Future<List<Transaction>> getGroupTransactions(String groupId);
   Stream<List<Transaction>> watchGroupTransactions(String groupId);
   Future<List<Group>> getGroups(GroupType type);

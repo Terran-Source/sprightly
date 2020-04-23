@@ -376,14 +376,15 @@ mixin _GenericDaoMixin<T extends GeneratedDatabase> on DatabaseAccessor<T> {
 
   Future getReady() => _queries._init();
 
-  Future<String> _uniqueId(String tableName, List<String> items) async {
+  Future<String> _uniqueId(String tableName, List<String> items,
+      {HashLibrary hashLibrary}) async {
     var result = '';
     var foundUnique = false;
     var attempts = 0;
     do {
-      var hashFunc = HashLibrary.values.random;
+      if (null == hashLibrary) hashLibrary = HashLibrary.values.random;
       result =
-          hashedAll(items, hashLength: hashedIdMinLength, library: hashFunc);
+          hashedAll(items, hashLength: hashedIdMinLength, library: hashLibrary);
       foundUnique = !await recordWithIdExists(tableName, result);
       attempts++;
     } while (attempts < uniqueRetry && !foundUnique);
@@ -504,6 +505,36 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
             ..where(
                 (s) => s.groupId.equals(groupId) & s.isTemporary.equals(true)))
           .go());
+
+  Future<Settlement> newSettlementForGroup(
+    String groupId,
+    String fromMemberId,
+    String toMemberId,
+    double amount, {
+    String id,
+    double settledAmount,
+    bool isTemporary = true,
+    String transactionId,
+    DateTime createdOn,
+    DateTime updatedOn,
+  }) async {
+    if (null == id) {
+      id = await _uniqueId(settlements.actualTableName,
+          [groupId, fromMemberId, toMemberId, amount.toString()],
+          hashLibrary: HashLibrary.hmac_sha256);
+    }
+    return Settlement(
+        id: id,
+        groupId: groupId,
+        fromMemberId: fromMemberId,
+        toMemberId: toMemberId,
+        amount: amount,
+        settledAmount: settledAmount,
+        isTemporary: isTemporary,
+        transactionId: transactionId,
+        createdOn: createdOn,
+        updatedOn: updatedOn);
+  }
 
   Selectable<Transaction> _selectGroupTransactions(String groupId) =>
       customSelectQuery(
