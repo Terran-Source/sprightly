@@ -28,7 +28,7 @@ class Members extends Table {
   TextColumn get name => text().named('name').nullable().withLength(max: 50)();
   TextColumn get nickName =>
       text().named('nickName').nullable().withLength(max: 10)();
-  BlobColumn get avatar => blob().named('avatar').nullable()();
+  TextColumn get avatar => text().named('avatar').nullable()();
   TextColumn get idType => text().named('idType').customConstraint(
       "CHECK (idType IN ('Phone','Email','NickName','Group','GroupMember')) NOT NULL")();
   TextColumn get idValue => text().named('idValue').withLength(max: 50)();
@@ -503,7 +503,7 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
       {String id,
       String name,
       String nickName,
-      Uint8List avatar,
+      String avatar,
       MemberIdType idType,
       String secondaryIdValue,
       bool isGroupExpense = false,
@@ -527,7 +527,7 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
       {String id,
       String name,
       String nickName,
-      Uint8List avatar,
+      String avatar,
       MemberIdType idType = MemberIdType.GroupMember,
       String secondaryIdValue,
       bool isGroupExpense = false,
@@ -566,7 +566,7 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
   Future<Member> updateMember(String memberId,
       {String name,
       String nickName,
-      Uint8List avatar,
+      String avatar,
       MemberIdType idType,
       String idValue,
       String secondaryIdValue,
@@ -597,7 +597,7 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
   }
 
   Selectable<Settlement> _selectGroupSettlements(String groupId,
-          [bool isTemporary]) =>
+          {bool isTemporary}) =>
       customSelectQuery(
         _queries.selectGroupSettlements,
         variables: [
@@ -608,12 +608,12 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
       ).map((row) => Settlement.fromJson(row.data));
 
   Future<List<Settlement>> getGroupSettlements(String groupId,
-          [bool isTemporary]) =>
-      _selectGroupSettlements(groupId, isTemporary).get();
+          {bool isTemporary}) =>
+      _selectGroupSettlements(groupId, isTemporary: isTemporary).get();
 
   Stream<List<Settlement>> watchGroupSettlements(String groupId,
-          [bool isTemporary]) =>
-      _selectGroupSettlements(groupId, isTemporary).watch();
+          {bool isTemporary}) =>
+      _selectGroupSettlements(groupId, isTemporary: isTemporary).watch();
 
   Future<Settlement> getSettlement(String settlementId) async =>
       Settlement.fromJson(

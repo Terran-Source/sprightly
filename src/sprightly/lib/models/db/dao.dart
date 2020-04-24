@@ -1,7 +1,5 @@
 library sprightly.dao;
 
-import 'dart:typed_data';
-
 import 'package:sprightly/models/constants/enums.dart';
 import 'package:sprightly/models/db/database.dart';
 
@@ -23,7 +21,7 @@ abstract class SystemDao {
       {String id,
       String name,
       String nickName,
-      Uint8List avatar,
+      String avatar,
       MemberIdType idType,
       String secondaryIdValue,
       bool isGroupExpense = false,
@@ -32,7 +30,7 @@ abstract class SystemDao {
       {String id,
       String name,
       String nickName,
-      Uint8List avatar,
+      String avatar,
       MemberIdType idType = MemberIdType.GroupMember,
       String secondaryIdValue,
       bool isGroupExpense = false,
@@ -40,7 +38,7 @@ abstract class SystemDao {
   Future<Member> updateMember(String memberId,
       {String name,
       String nickName,
-      Uint8List avatar,
+      String avatar,
       MemberIdType idType,
       String idValue,
       String secondaryIdValue,
@@ -49,9 +47,9 @@ abstract class SystemDao {
   Future<int> deleteMemberFromGroup(String memberId, String groupId);
 
   Future<List<Settlement>> getGroupSettlements(String groupId,
-      [bool isTemporary]);
+      {bool isTemporary});
   Stream<List<Settlement>> watchGroupSettlements(String groupId,
-      [bool isTemporary]);
+      {bool isTemporary});
   Future<Settlement> getSettlement(String settlementId);
   Future<Settlement> newSettlementForGroup(
     String groupId,

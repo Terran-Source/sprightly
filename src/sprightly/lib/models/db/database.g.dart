@@ -11,7 +11,7 @@ class Member extends DataClass implements Insertable<Member> {
   final String id;
   final String name;
   final String nickName;
-  final Uint8List avatar;
+  final String avatar;
   final String idType;
   final String idValue;
   final String secondaryIdValue;
@@ -35,7 +35,6 @@ class Member extends DataClass implements Insertable<Member> {
       {String prefix}) {
     final effectivePrefix = prefix ?? '';
     final stringType = db.typeSystem.forDartType<String>();
-    final uint8ListType = db.typeSystem.forDartType<Uint8List>();
     final boolType = db.typeSystem.forDartType<bool>();
     final dateTimeType = db.typeSystem.forDartType<DateTime>();
     return Member(
@@ -43,8 +42,8 @@ class Member extends DataClass implements Insertable<Member> {
       name: stringType.mapFromDatabaseResponse(data['${effectivePrefix}name']),
       nickName: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}nickName']),
-      avatar: uint8ListType
-          .mapFromDatabaseResponse(data['${effectivePrefix}avatar']),
+      avatar:
+          stringType.mapFromDatabaseResponse(data['${effectivePrefix}avatar']),
       idType:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}idType']),
       idValue:
@@ -68,7 +67,7 @@ class Member extends DataClass implements Insertable<Member> {
       id: serializer.fromJson<String>(json['id']),
       name: serializer.fromJson<String>(json['name']),
       nickName: serializer.fromJson<String>(json['nickName']),
-      avatar: serializer.fromJson<Uint8List>(json['avatar']),
+      avatar: serializer.fromJson<String>(json['avatar']),
       idType: serializer.fromJson<String>(json['idType']),
       idValue: serializer.fromJson<String>(json['idValue']),
       secondaryIdValue: serializer.fromJson<String>(json['secondaryIdValue']),
@@ -85,7 +84,7 @@ class Member extends DataClass implements Insertable<Member> {
       'id': serializer.toJson<String>(id),
       'name': serializer.toJson<String>(name),
       'nickName': serializer.toJson<String>(nickName),
-      'avatar': serializer.toJson<Uint8List>(avatar),
+      'avatar': serializer.toJson<String>(avatar),
       'idType': serializer.toJson<String>(idType),
       'idValue': serializer.toJson<String>(idValue),
       'secondaryIdValue': serializer.toJson<String>(secondaryIdValue),
@@ -133,7 +132,7 @@ class Member extends DataClass implements Insertable<Member> {
           {String id,
           String name,
           String nickName,
-          Uint8List avatar,
+          String avatar,
           String idType,
           String idValue,
           String secondaryIdValue,
@@ -214,7 +213,7 @@ class MembersCompanion extends UpdateCompanion<Member> {
   final Value<String> id;
   final Value<String> name;
   final Value<String> nickName;
-  final Value<Uint8List> avatar;
+  final Value<String> avatar;
   final Value<String> idType;
   final Value<String> idValue;
   final Value<String> secondaryIdValue;
@@ -254,7 +253,7 @@ class MembersCompanion extends UpdateCompanion<Member> {
       {Value<String> id,
       Value<String> name,
       Value<String> nickName,
-      Value<Uint8List> avatar,
+      Value<String> avatar,
       Value<String> idType,
       Value<String> idValue,
       Value<String> secondaryIdValue,
@@ -307,11 +306,11 @@ class $MembersTable extends Members with TableInfo<$MembersTable, Member> {
   }
 
   final VerificationMeta _avatarMeta = const VerificationMeta('avatar');
-  GeneratedBlobColumn _avatar;
+  GeneratedTextColumn _avatar;
   @override
-  GeneratedBlobColumn get avatar => _avatar ??= _constructAvatar();
-  GeneratedBlobColumn _constructAvatar() {
-    return GeneratedBlobColumn(
+  GeneratedTextColumn get avatar => _avatar ??= _constructAvatar();
+  GeneratedTextColumn _constructAvatar() {
+    return GeneratedTextColumn(
       'avatar',
       $tableName,
       true,
@@ -495,7 +494,7 @@ class $MembersTable extends Members with TableInfo<$MembersTable, Member> {
       map['nickName'] = Variable<String, StringType>(d.nickName.value);
     }
     if (d.avatar.present) {
-      map['avatar'] = Variable<Uint8List, BlobType>(d.avatar.value);
+      map['avatar'] = Variable<String, StringType>(d.avatar.value);
     }
     if (d.idType.present) {
       map['idType'] = Variable<String, StringType>(d.idType.value);

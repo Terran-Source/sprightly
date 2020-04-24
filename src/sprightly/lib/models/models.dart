@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:sprightly/models/constants/enums.dart';
 import 'package:sprightly/models/db/dao.dart';
 import 'package:sprightly/models/db/database.dart';
@@ -34,13 +32,13 @@ class GroupSettlement extends BaseData {
   Stream<List<Settlement>> get watchedSettlements =>
       _dao.watchGroupSettlements(groupId);
   Future<List<Settlement>> get doneSettlements =>
-      _dao.getGroupSettlements(groupId, false);
+      _dao.getGroupSettlements(groupId, isTemporary: false);
   Stream<List<Settlement>> get watchedDoneSettlements =>
-      _dao.watchGroupSettlements(groupId, false);
+      _dao.watchGroupSettlements(groupId, isTemporary: false);
   Future<List<Settlement>> get tempSettlements =>
-      _dao.getGroupSettlements(groupId, true);
+      _dao.getGroupSettlements(groupId, isTemporary: true);
   Stream<List<Settlement>> get watchedTempSettlements =>
-      _dao.watchGroupSettlements(groupId, true);
+      _dao.watchGroupSettlements(groupId, isTemporary: true);
 
   GroupSettlement(SystemDao _dao, this.groupId) : super(_dao);
 }
@@ -136,7 +134,7 @@ class GroupActivity extends BaseData {
       {String id,
       String name,
       String nickName,
-      Uint8List avatar,
+      String avatar,
       MemberIdType idType = MemberIdType.GroupMember,
       String secondaryIdValue,
       bool isGroupExpense = false}) async {
