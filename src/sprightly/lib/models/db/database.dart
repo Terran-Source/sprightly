@@ -1,3 +1,5 @@
+library sprightly.moor_database;
+
 import 'dart:async';
 
 import 'package:moor/moor.dart';
