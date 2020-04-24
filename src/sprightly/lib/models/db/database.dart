@@ -552,12 +552,18 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
         await recordWithIdExists(settlements.actualTableName, id);
     if (recordExists) {
       var settleMent = await getSettlement(id);
-      await addGroupTransaction(
+      var transaction = await addGroupTransaction(
           groupId, settleMent.fromMemberId, settledAmount ?? settleMent.amount,
           groupMemberIds: settleMent.toMemberId,
           settlementId: settleMent.id,
           notes: notes,
           attachments: attachments);
+      settleMent.copyWith(
+          settledAmount: settledAmount,
+          isTemporary: false,
+          transactionId: transaction.id,
+          updatedOn: DateTime.now().toUtc());
+      await update(settlements).replace(settleMent);
       return true;
     }
     return false;
