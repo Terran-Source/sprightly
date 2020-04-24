@@ -88,12 +88,13 @@ class Contribution {
 
 class GroupActivity extends BaseData {
   final String groupId;
+  final String memberId;
   final GroupAccountMember groupAccountMember;
   final GroupOnlyMember groupMember;
   final GroupSettlement groupSettlement;
   final GroupTransaction groupTransaction;
 
-  GroupActivity(SystemDao _dao, this.groupId)
+  GroupActivity(SystemDao _dao, this.groupId, this.memberId)
       : this.groupAccountMember = GroupAccountMember(_dao, groupId),
         this.groupMember = GroupOnlyMember(_dao, groupId),
         this.groupSettlement = GroupSettlement(_dao, groupId),
@@ -174,10 +175,23 @@ class GroupActivity extends BaseData {
 
   Future<bool> finalizeSettlement(String settlementId,
       {double settledAmount, String notes, String attachments}) async {
-    var result = await _dao.finalizeSettlement(groupId, settlementId,
-        settledAmount: settledAmount, notes: notes, attachments: attachments);
-    if (result) {
-      onGroupActivity(GroupActivityType.Settlement);
+    var result = false;
+    var settlement = await _dao.getSettlement(settlementId);
+    // only existing calculated settlement & the receiving member can settle
+    if (null != settlement && settlement.toMemberId != memberId) {
+      // todo: sign the settlement
+      String signature;
+      result = await _dao.finalizeSettlement(
+        groupId,
+        settlementId,
+        signature,
+        settledAmount: settledAmount,
+        notes: notes,
+        attachments: attachments,
+      );
+      if (result) {
+        onGroupActivity(GroupActivityType.Settlement);
+      }
     }
     return result;
   }

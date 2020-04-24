@@ -36,6 +36,7 @@ class Members extends Table {
       text().named('secondaryIdValue').nullable().withLength(max: 50)();
   BoolColumn get isGroupExpense =>
       boolean().named('isGroupExpense').withDefault(const Constant(false))();
+  TextColumn get signature => text().named('signature').nullable()();
   DateTimeColumn get createdOn => dateTime()
       .named('createdOn')
       .clientDefault(() => DateTime.now().toUtc())();
@@ -175,6 +176,7 @@ class Settlements extends Table {
       .nullable()
       .withLength(min: 16)
       .customConstraint('REFERENCES Transactions(id) NULLABLE')();
+  TextColumn get signature => text().named('signature').nullable()();
   DateTimeColumn get createdOn => dateTime()
       .named('createdOn')
       .clientDefault(() => DateTime.now().toUtc())();
@@ -419,6 +421,15 @@ mixin _GenericDaoMixin<T extends GeneratedDatabase> on DatabaseAccessor<T> {
       (await getRecordsWithColumnValue(tableName, 'id', id, table: table)
               .getSingle())
           .data;
+
+  Future<bool> updateRecord<Tbl extends Table, R extends DataClass>(
+          TableInfo<Tbl, R> table, Insertable<R> record,
+          {bool dontExecute = false}) =>
+      update(table).replace(record, dontExecute: dontExecute);
+
+  Future<int> deleteRecord<Tbl extends Table, R extends DataClass>(
+          TableInfo<Tbl, R> table, Insertable<R> record) =>
+      delete(table).delete(record);
 }
 //#endregion Custom query & classes
 
@@ -521,6 +532,7 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
     double settledAmount,
     bool isTemporary = true,
     String transactionId,
+    String signature,
     DateTime createdOn,
     DateTime updatedOn,
   }) async {
@@ -538,6 +550,7 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
         settledAmount: settledAmount,
         isTemporary: isTemporary,
         transactionId: transactionId,
+        signature: signature,
         createdOn: createdOn,
         updatedOn: updatedOn);
   }
@@ -546,7 +559,7 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
           String groupId, List<Settlement> settlementList) =>
       batch((b) => b.insertAll(settlements, settlementList));
 
-  Future<bool> finalizeSettlement(String groupId, String id,
+  Future<bool> finalizeSettlement(String groupId, String id, String signature,
       {double settledAmount, String notes, String attachments}) async {
     var recordExists =
         await recordWithIdExists(settlements.actualTableName, id);
@@ -562,9 +575,9 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
           settledAmount: settledAmount,
           isTemporary: false,
           transactionId: transaction.id,
+          signature: signature,
           updatedOn: DateTime.now().toUtc());
-      await update(settlements).replace(settleMent);
-      return true;
+      return updateRecord(settlements, settleMent);
     }
     return false;
   }
@@ -677,7 +690,8 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
       String nickName,
       MemberIdType idType,
       String secondaryIdValue,
-      bool isGroupExpense = false}) async {
+      bool isGroupExpense = false,
+      String signature}) async {
     if (null != id) id = await _uniqueId(members.actualTableName, [idValue]);
     var membersComp = MembersCompanion.insert(
         id: id,
@@ -686,7 +700,8 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
         idType: idType.toEnumString(),
         idValue: idValue,
         secondaryIdValue: Value(secondaryIdValue),
-        isGroupExpense: Value(isGroupExpense));
+        isGroupExpense: Value(isGroupExpense),
+        signature: Value(signature));
     await into(members).insert(membersComp);
     return getMember(id);
   }
@@ -697,7 +712,8 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
       String nickName,
       MemberIdType idType = MemberIdType.GroupMember,
       String secondaryIdValue,
-      bool isGroupExpense = false}) async {
+      bool isGroupExpense = false,
+      String signature}) async {
     Member member;
     var existingMember = false;
     if (null != id) {
@@ -716,7 +732,8 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
           nickName: nickName,
           idType: idType,
           secondaryIdValue: secondaryIdValue,
-          isGroupExpense: isGroupExpense);
+          isGroupExpense: isGroupExpense,
+          signature: signature);
 
       if (idType == MemberIdType.Group)
         await addAccount(idValue, memberId: member.id, type: AccountType.Group);

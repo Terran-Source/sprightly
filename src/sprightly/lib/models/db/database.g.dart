@@ -16,6 +16,7 @@ class Member extends DataClass implements Insertable<Member> {
   final String idValue;
   final String secondaryIdValue;
   final bool isGroupExpense;
+  final String signature;
   final DateTime createdOn;
   final DateTime updatedOn;
   Member(
@@ -27,6 +28,7 @@ class Member extends DataClass implements Insertable<Member> {
       @required this.idValue,
       this.secondaryIdValue,
       @required this.isGroupExpense,
+      this.signature,
       @required this.createdOn,
       this.updatedOn});
   factory Member.fromData(Map<String, dynamic> data, GeneratedDatabase db,
@@ -51,6 +53,8 @@ class Member extends DataClass implements Insertable<Member> {
           .mapFromDatabaseResponse(data['${effectivePrefix}secondaryIdValue']),
       isGroupExpense: boolType
           .mapFromDatabaseResponse(data['${effectivePrefix}isGroupExpense']),
+      signature: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}signature']),
       createdOn: dateTimeType
           .mapFromDatabaseResponse(data['${effectivePrefix}createdOn']),
       updatedOn: dateTimeType
@@ -69,6 +73,7 @@ class Member extends DataClass implements Insertable<Member> {
       idValue: serializer.fromJson<String>(json['idValue']),
       secondaryIdValue: serializer.fromJson<String>(json['secondaryIdValue']),
       isGroupExpense: serializer.fromJson<bool>(json['isGroupExpense']),
+      signature: serializer.fromJson<String>(json['signature']),
       createdOn: serializer.fromJson<DateTime>(json['createdOn']),
       updatedOn: serializer.fromJson<DateTime>(json['updatedOn']),
     );
@@ -85,6 +90,7 @@ class Member extends DataClass implements Insertable<Member> {
       'idValue': serializer.toJson<String>(idValue),
       'secondaryIdValue': serializer.toJson<String>(secondaryIdValue),
       'isGroupExpense': serializer.toJson<bool>(isGroupExpense),
+      'signature': serializer.toJson<String>(signature),
       'createdOn': serializer.toJson<DateTime>(createdOn),
       'updatedOn': serializer.toJson<DateTime>(updatedOn),
     };
@@ -111,6 +117,9 @@ class Member extends DataClass implements Insertable<Member> {
       isGroupExpense: isGroupExpense == null && nullToAbsent
           ? const Value.absent()
           : Value(isGroupExpense),
+      signature: signature == null && nullToAbsent
+          ? const Value.absent()
+          : Value(signature),
       createdOn: createdOn == null && nullToAbsent
           ? const Value.absent()
           : Value(createdOn),
@@ -129,6 +138,7 @@ class Member extends DataClass implements Insertable<Member> {
           String idValue,
           String secondaryIdValue,
           bool isGroupExpense,
+          String signature,
           DateTime createdOn,
           DateTime updatedOn}) =>
       Member(
@@ -140,6 +150,7 @@ class Member extends DataClass implements Insertable<Member> {
         idValue: idValue ?? this.idValue,
         secondaryIdValue: secondaryIdValue ?? this.secondaryIdValue,
         isGroupExpense: isGroupExpense ?? this.isGroupExpense,
+        signature: signature ?? this.signature,
         createdOn: createdOn ?? this.createdOn,
         updatedOn: updatedOn ?? this.updatedOn,
       );
@@ -154,6 +165,7 @@ class Member extends DataClass implements Insertable<Member> {
           ..write('idValue: $idValue, ')
           ..write('secondaryIdValue: $secondaryIdValue, ')
           ..write('isGroupExpense: $isGroupExpense, ')
+          ..write('signature: $signature, ')
           ..write('createdOn: $createdOn, ')
           ..write('updatedOn: $updatedOn')
           ..write(')'))
@@ -177,8 +189,10 @@ class Member extends DataClass implements Insertable<Member> {
                               secondaryIdValue.hashCode,
                               $mrjc(
                                   isGroupExpense.hashCode,
-                                  $mrjc(createdOn.hashCode,
-                                      updatedOn.hashCode))))))))));
+                                  $mrjc(
+                                      signature.hashCode,
+                                      $mrjc(createdOn.hashCode,
+                                          updatedOn.hashCode)))))))))));
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
@@ -191,6 +205,7 @@ class Member extends DataClass implements Insertable<Member> {
           other.idValue == this.idValue &&
           other.secondaryIdValue == this.secondaryIdValue &&
           other.isGroupExpense == this.isGroupExpense &&
+          other.signature == this.signature &&
           other.createdOn == this.createdOn &&
           other.updatedOn == this.updatedOn);
 }
@@ -204,6 +219,7 @@ class MembersCompanion extends UpdateCompanion<Member> {
   final Value<String> idValue;
   final Value<String> secondaryIdValue;
   final Value<bool> isGroupExpense;
+  final Value<String> signature;
   final Value<DateTime> createdOn;
   final Value<DateTime> updatedOn;
   const MembersCompanion({
@@ -215,6 +231,7 @@ class MembersCompanion extends UpdateCompanion<Member> {
     this.idValue = const Value.absent(),
     this.secondaryIdValue = const Value.absent(),
     this.isGroupExpense = const Value.absent(),
+    this.signature = const Value.absent(),
     this.createdOn = const Value.absent(),
     this.updatedOn = const Value.absent(),
   });
@@ -227,6 +244,7 @@ class MembersCompanion extends UpdateCompanion<Member> {
     @required String idValue,
     this.secondaryIdValue = const Value.absent(),
     this.isGroupExpense = const Value.absent(),
+    this.signature = const Value.absent(),
     this.createdOn = const Value.absent(),
     this.updatedOn = const Value.absent(),
   })  : id = Value(id),
@@ -241,6 +259,7 @@ class MembersCompanion extends UpdateCompanion<Member> {
       Value<String> idValue,
       Value<String> secondaryIdValue,
       Value<bool> isGroupExpense,
+      Value<String> signature,
       Value<DateTime> createdOn,
       Value<DateTime> updatedOn}) {
     return MembersCompanion(
@@ -252,6 +271,7 @@ class MembersCompanion extends UpdateCompanion<Member> {
       idValue: idValue ?? this.idValue,
       secondaryIdValue: secondaryIdValue ?? this.secondaryIdValue,
       isGroupExpense: isGroupExpense ?? this.isGroupExpense,
+      signature: signature ?? this.signature,
       createdOn: createdOn ?? this.createdOn,
       updatedOn: updatedOn ?? this.updatedOn,
     );
@@ -338,6 +358,18 @@ class $MembersTable extends Members with TableInfo<$MembersTable, Member> {
         defaultValue: const Constant(false));
   }
 
+  final VerificationMeta _signatureMeta = const VerificationMeta('signature');
+  GeneratedTextColumn _signature;
+  @override
+  GeneratedTextColumn get signature => _signature ??= _constructSignature();
+  GeneratedTextColumn _constructSignature() {
+    return GeneratedTextColumn(
+      'signature',
+      $tableName,
+      true,
+    );
+  }
+
   final VerificationMeta _createdOnMeta = const VerificationMeta('createdOn');
   GeneratedDateTimeColumn _createdOn;
   @override
@@ -372,6 +404,7 @@ class $MembersTable extends Members with TableInfo<$MembersTable, Member> {
         idValue,
         secondaryIdValue,
         isGroupExpense,
+        signature,
         createdOn,
         updatedOn
       ];
@@ -426,6 +459,10 @@ class $MembersTable extends Members with TableInfo<$MembersTable, Member> {
           isGroupExpense.isAcceptableValue(
               d.isGroupExpense.value, _isGroupExpenseMeta));
     }
+    if (d.signature.present) {
+      context.handle(_signatureMeta,
+          signature.isAcceptableValue(d.signature.value, _signatureMeta));
+    }
     if (d.createdOn.present) {
       context.handle(_createdOnMeta,
           createdOn.isAcceptableValue(d.createdOn.value, _createdOnMeta));
@@ -472,6 +509,9 @@ class $MembersTable extends Members with TableInfo<$MembersTable, Member> {
     }
     if (d.isGroupExpense.present) {
       map['isGroupExpense'] = Variable<bool, BoolType>(d.isGroupExpense.value);
+    }
+    if (d.signature.present) {
+      map['signature'] = Variable<String, StringType>(d.signature.value);
     }
     if (d.createdOn.present) {
       map['createdOn'] = Variable<DateTime, DateTimeType>(d.createdOn.value);
@@ -1709,6 +1749,7 @@ class Settlement extends DataClass implements Insertable<Settlement> {
   final double settledAmount;
   final bool isTemporary;
   final String transactionId;
+  final String signature;
   final DateTime createdOn;
   final DateTime updatedOn;
   Settlement(
@@ -1720,6 +1761,7 @@ class Settlement extends DataClass implements Insertable<Settlement> {
       this.settledAmount,
       @required this.isTemporary,
       this.transactionId,
+      this.signature,
       @required this.createdOn,
       this.updatedOn});
   factory Settlement.fromData(Map<String, dynamic> data, GeneratedDatabase db,
@@ -1745,6 +1787,8 @@ class Settlement extends DataClass implements Insertable<Settlement> {
           .mapFromDatabaseResponse(data['${effectivePrefix}isTemporary']),
       transactionId: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}transactionId']),
+      signature: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}signature']),
       createdOn: dateTimeType
           .mapFromDatabaseResponse(data['${effectivePrefix}createdOn']),
       updatedOn: dateTimeType
@@ -1763,6 +1807,7 @@ class Settlement extends DataClass implements Insertable<Settlement> {
       settledAmount: serializer.fromJson<double>(json['settledAmount']),
       isTemporary: serializer.fromJson<bool>(json['isTemporary']),
       transactionId: serializer.fromJson<String>(json['transactionId']),
+      signature: serializer.fromJson<String>(json['signature']),
       createdOn: serializer.fromJson<DateTime>(json['createdOn']),
       updatedOn: serializer.fromJson<DateTime>(json['updatedOn']),
     );
@@ -1779,6 +1824,7 @@ class Settlement extends DataClass implements Insertable<Settlement> {
       'settledAmount': serializer.toJson<double>(settledAmount),
       'isTemporary': serializer.toJson<bool>(isTemporary),
       'transactionId': serializer.toJson<String>(transactionId),
+      'signature': serializer.toJson<String>(signature),
       'createdOn': serializer.toJson<DateTime>(createdOn),
       'updatedOn': serializer.toJson<DateTime>(updatedOn),
     };
@@ -1808,6 +1854,9 @@ class Settlement extends DataClass implements Insertable<Settlement> {
       transactionId: transactionId == null && nullToAbsent
           ? const Value.absent()
           : Value(transactionId),
+      signature: signature == null && nullToAbsent
+          ? const Value.absent()
+          : Value(signature),
       createdOn: createdOn == null && nullToAbsent
           ? const Value.absent()
           : Value(createdOn),
@@ -1826,6 +1875,7 @@ class Settlement extends DataClass implements Insertable<Settlement> {
           double settledAmount,
           bool isTemporary,
           String transactionId,
+          String signature,
           DateTime createdOn,
           DateTime updatedOn}) =>
       Settlement(
@@ -1837,6 +1887,7 @@ class Settlement extends DataClass implements Insertable<Settlement> {
         settledAmount: settledAmount ?? this.settledAmount,
         isTemporary: isTemporary ?? this.isTemporary,
         transactionId: transactionId ?? this.transactionId,
+        signature: signature ?? this.signature,
         createdOn: createdOn ?? this.createdOn,
         updatedOn: updatedOn ?? this.updatedOn,
       );
@@ -1851,6 +1902,7 @@ class Settlement extends DataClass implements Insertable<Settlement> {
           ..write('settledAmount: $settledAmount, ')
           ..write('isTemporary: $isTemporary, ')
           ..write('transactionId: $transactionId, ')
+          ..write('signature: $signature, ')
           ..write('createdOn: $createdOn, ')
           ..write('updatedOn: $updatedOn')
           ..write(')'))
@@ -1874,8 +1926,10 @@ class Settlement extends DataClass implements Insertable<Settlement> {
                               isTemporary.hashCode,
                               $mrjc(
                                   transactionId.hashCode,
-                                  $mrjc(createdOn.hashCode,
-                                      updatedOn.hashCode))))))))));
+                                  $mrjc(
+                                      signature.hashCode,
+                                      $mrjc(createdOn.hashCode,
+                                          updatedOn.hashCode)))))))))));
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
@@ -1888,6 +1942,7 @@ class Settlement extends DataClass implements Insertable<Settlement> {
           other.settledAmount == this.settledAmount &&
           other.isTemporary == this.isTemporary &&
           other.transactionId == this.transactionId &&
+          other.signature == this.signature &&
           other.createdOn == this.createdOn &&
           other.updatedOn == this.updatedOn);
 }
@@ -1901,6 +1956,7 @@ class SettlementsCompanion extends UpdateCompanion<Settlement> {
   final Value<double> settledAmount;
   final Value<bool> isTemporary;
   final Value<String> transactionId;
+  final Value<String> signature;
   final Value<DateTime> createdOn;
   final Value<DateTime> updatedOn;
   const SettlementsCompanion({
@@ -1912,6 +1968,7 @@ class SettlementsCompanion extends UpdateCompanion<Settlement> {
     this.settledAmount = const Value.absent(),
     this.isTemporary = const Value.absent(),
     this.transactionId = const Value.absent(),
+    this.signature = const Value.absent(),
     this.createdOn = const Value.absent(),
     this.updatedOn = const Value.absent(),
   });
@@ -1924,6 +1981,7 @@ class SettlementsCompanion extends UpdateCompanion<Settlement> {
     this.settledAmount = const Value.absent(),
     this.isTemporary = const Value.absent(),
     this.transactionId = const Value.absent(),
+    this.signature = const Value.absent(),
     this.createdOn = const Value.absent(),
     this.updatedOn = const Value.absent(),
   })  : id = Value(id),
@@ -1940,6 +1998,7 @@ class SettlementsCompanion extends UpdateCompanion<Settlement> {
       Value<double> settledAmount,
       Value<bool> isTemporary,
       Value<String> transactionId,
+      Value<String> signature,
       Value<DateTime> createdOn,
       Value<DateTime> updatedOn}) {
     return SettlementsCompanion(
@@ -1951,6 +2010,7 @@ class SettlementsCompanion extends UpdateCompanion<Settlement> {
       settledAmount: settledAmount ?? this.settledAmount,
       isTemporary: isTemporary ?? this.isTemporary,
       transactionId: transactionId ?? this.transactionId,
+      signature: signature ?? this.signature,
       createdOn: createdOn ?? this.createdOn,
       updatedOn: updatedOn ?? this.updatedOn,
     );
@@ -2051,6 +2111,18 @@ class $SettlementsTable extends Settlements
         $customConstraints: 'REFERENCES Transactions(id) NULLABLE');
   }
 
+  final VerificationMeta _signatureMeta = const VerificationMeta('signature');
+  GeneratedTextColumn _signature;
+  @override
+  GeneratedTextColumn get signature => _signature ??= _constructSignature();
+  GeneratedTextColumn _constructSignature() {
+    return GeneratedTextColumn(
+      'signature',
+      $tableName,
+      true,
+    );
+  }
+
   final VerificationMeta _createdOnMeta = const VerificationMeta('createdOn');
   GeneratedDateTimeColumn _createdOn;
   @override
@@ -2085,6 +2157,7 @@ class $SettlementsTable extends Settlements
         settledAmount,
         isTemporary,
         transactionId,
+        signature,
         createdOn,
         updatedOn
       ];
@@ -2145,6 +2218,10 @@ class $SettlementsTable extends Settlements
           transactionId.isAcceptableValue(
               d.transactionId.value, _transactionIdMeta));
     }
+    if (d.signature.present) {
+      context.handle(_signatureMeta,
+          signature.isAcceptableValue(d.signature.value, _signatureMeta));
+    }
     if (d.createdOn.present) {
       context.handle(_createdOnMeta,
           createdOn.isAcceptableValue(d.createdOn.value, _createdOnMeta));
@@ -2191,6 +2268,9 @@ class $SettlementsTable extends Settlements
     if (d.transactionId.present) {
       map['transactionId'] =
           Variable<String, StringType>(d.transactionId.value);
+    }
+    if (d.signature.present) {
+      map['signature'] = Variable<String, StringType>(d.signature.value);
     }
     if (d.createdOn.present) {
       map['createdOn'] = Variable<DateTime, DateTimeType>(d.createdOn.value);

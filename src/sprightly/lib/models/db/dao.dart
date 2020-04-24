@@ -33,7 +33,7 @@ abstract class SystemDao {
   });
   Future<void> addGroupSettlements(
       String groupId, List<Settlement> settlementList);
-  Future<bool> finalizeSettlement(String groupId, String id,
+  Future<bool> finalizeSettlement(String groupId, String id, String signature,
       {double settledAmount, String notes, String attachments});
   Future<List<Transaction>> getGroupTransactions(String groupId);
   Stream<List<Transaction>> watchGroupTransactions(String groupId);
