@@ -1,5 +1,7 @@
 library sprightly.dao;
 
+import 'dart:typed_data';
+
 import 'package:sprightly/models/constants/enums.dart';
 import 'package:sprightly/models/db/database.dart';
 
@@ -21,16 +23,30 @@ abstract class SystemDao {
       {String id,
       String name,
       String nickName,
+      Uint8List avatar,
       MemberIdType idType,
       String secondaryIdValue,
-      bool isGroupExpense = false});
+      bool isGroupExpense = false,
+      String signature});
   Future<Member> addGroupMember(String groupId, String idValue,
       {String id,
       String name,
       String nickName,
+      Uint8List avatar,
       MemberIdType idType = MemberIdType.GroupMember,
       String secondaryIdValue,
-      bool isGroupExpense = false});
+      bool isGroupExpense = false,
+      String signature});
+  Future<Member> updateMember(String memberId,
+      {String name,
+      String nickName,
+      Uint8List avatar,
+      MemberIdType idType,
+      String idValue,
+      String secondaryIdValue,
+      String signature});
+  Future<int> deleteMember(String memberId);
+  Future<int> deleteMemberFromGroup(String memberId, String groupId);
 
   Future<List<Settlement>> getGroupSettlements(String groupId,
       [bool isTemporary]);
@@ -46,8 +62,7 @@ abstract class SystemDao {
     double settledAmount,
     bool isTemporary = true,
     String transactionId,
-    DateTime createdOn,
-    DateTime updatedOn,
+    String signature,
   });
   Future<void> addGroupSettlements(
       String groupId, List<Settlement> settlementList);
@@ -68,16 +83,37 @@ abstract class SystemDao {
       String settlementId,
       String notes,
       String attachments});
+  Future<Transaction> updateTransaction(String transactionId,
+      {String memberId,
+      double amount,
+      String groupMemberIds,
+      int fromAccountId,
+      int toAccountId,
+      int categoryId,
+      String notes,
+      String attachments});
+  Future<int> deleteTransaction(String transactionId);
 
   Future<Account> getAccount(int accountId);
   Future<Account> addAccount(String name,
       {int parentId, AccountType type, String memberId});
+  Future<Account> updateAccount(int accountId,
+      {String name, int parentId, AccountType type, String memberId});
+  Future<int> deleteAccount(int accountId);
 
   Future<List<Group>> getGroups(GroupType type);
   Stream<List<Group>> watchGroups(GroupType type);
   Future<bool> groupWithNameExists(String groupName);
   Future<Group> getGroup(String groupId);
-  Future<Group> createGroup(String name, [GroupType type = GroupType.Shared]);
+  Future<Group> createGroup(String name,
+      {GroupType type = GroupType.Shared, bool isHidden = false});
+  Future<Group> updateGroup(String groupId,
+      {String name, GroupType type, bool isHidden});
+
+  /// Use with caution. No turn-back
+  ///
+  /// use [updateGroup](groupId, isHidden: true) instead
+  Future<int> deleteGroup(String groupId);
 }
 
 abstract class SettingsDao {

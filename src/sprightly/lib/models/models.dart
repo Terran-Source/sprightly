@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:sprightly/models/constants/enums.dart';
 import 'package:sprightly/models/db/dao.dart';
 import 'package:sprightly/models/db/database.dart';
@@ -134,6 +136,7 @@ class GroupActivity extends BaseData {
       {String id,
       String name,
       String nickName,
+      Uint8List avatar,
       MemberIdType idType = MemberIdType.GroupMember,
       String secondaryIdValue,
       bool isGroupExpense = false}) async {
@@ -141,6 +144,7 @@ class GroupActivity extends BaseData {
         id: id,
         name: name,
         nickName: nickName,
+        avatar: avatar,
         idType: idType,
         secondaryIdValue: secondaryIdValue,
         isGroupExpense: isGroupExpense);
@@ -322,9 +326,10 @@ class GroupActivity extends BaseData {
   static Future<bool> isUniqueGroupName(SystemDao _dao, String name) async =>
       !(await _dao.groupWithNameExists(name));
 
-  static Future<GroupActivity> createNew(SystemDao _dao, String name) async {
-    var newGroup = await _dao.createGroup(name, GroupType.Shared);
+  static Future<GroupActivity> createNew(
+      SystemDao _dao, String name, String memberId) async {
+    var newGroup = await _dao.createGroup(name, type: GroupType.Shared);
     onGroupActivity(GroupActivityType.GroupActivity);
-    return GroupActivity(_dao, newGroup.id);
+    return GroupActivity(_dao, newGroup.id, memberId);
   }
 }

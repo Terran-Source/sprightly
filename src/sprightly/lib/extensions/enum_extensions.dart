@@ -2,8 +2,11 @@ import 'dart:math';
 
 extension Enums<T> on List<T> {
   static String toEnumString<T>(T value, [bool withQuote = false]) {
-    final val = value.toString().split(".").last;
-    return withQuote ? "'$val'" : val;
+    if (null != value) {
+      final val = value.toString().split(".").last;
+      return withQuote ? "'$val'" : val;
+    }
+    return null;
   }
 
   T find(String val) =>

@@ -532,23 +532,28 @@ class Group extends DataClass implements Insertable<Group> {
   final String id;
   final String name;
   final String type;
+  final bool isHidden;
   final DateTime createdOn;
   final DateTime updatedOn;
   Group(
       {@required this.id,
       @required this.name,
       this.type,
+      @required this.isHidden,
       @required this.createdOn,
       this.updatedOn});
   factory Group.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String prefix}) {
     final effectivePrefix = prefix ?? '';
     final stringType = db.typeSystem.forDartType<String>();
+    final boolType = db.typeSystem.forDartType<bool>();
     final dateTimeType = db.typeSystem.forDartType<DateTime>();
     return Group(
       id: stringType.mapFromDatabaseResponse(data['${effectivePrefix}id']),
       name: stringType.mapFromDatabaseResponse(data['${effectivePrefix}name']),
       type: stringType.mapFromDatabaseResponse(data['${effectivePrefix}type']),
+      isHidden:
+          boolType.mapFromDatabaseResponse(data['${effectivePrefix}isHidden']),
       createdOn: dateTimeType
           .mapFromDatabaseResponse(data['${effectivePrefix}createdOn']),
       updatedOn: dateTimeType
@@ -562,6 +567,7 @@ class Group extends DataClass implements Insertable<Group> {
       id: serializer.fromJson<String>(json['id']),
       name: serializer.fromJson<String>(json['name']),
       type: serializer.fromJson<String>(json['type']),
+      isHidden: serializer.fromJson<bool>(json['isHidden']),
       createdOn: serializer.fromJson<DateTime>(json['createdOn']),
       updatedOn: serializer.fromJson<DateTime>(json['updatedOn']),
     );
@@ -573,6 +579,7 @@ class Group extends DataClass implements Insertable<Group> {
       'id': serializer.toJson<String>(id),
       'name': serializer.toJson<String>(name),
       'type': serializer.toJson<String>(type),
+      'isHidden': serializer.toJson<bool>(isHidden),
       'createdOn': serializer.toJson<DateTime>(createdOn),
       'updatedOn': serializer.toJson<DateTime>(updatedOn),
     };
@@ -584,6 +591,9 @@ class Group extends DataClass implements Insertable<Group> {
       id: id == null && nullToAbsent ? const Value.absent() : Value(id),
       name: name == null && nullToAbsent ? const Value.absent() : Value(name),
       type: type == null && nullToAbsent ? const Value.absent() : Value(type),
+      isHidden: isHidden == null && nullToAbsent
+          ? const Value.absent()
+          : Value(isHidden),
       createdOn: createdOn == null && nullToAbsent
           ? const Value.absent()
           : Value(createdOn),
@@ -597,12 +607,14 @@ class Group extends DataClass implements Insertable<Group> {
           {String id,
           String name,
           String type,
+          bool isHidden,
           DateTime createdOn,
           DateTime updatedOn}) =>
       Group(
         id: id ?? this.id,
         name: name ?? this.name,
         type: type ?? this.type,
+        isHidden: isHidden ?? this.isHidden,
         createdOn: createdOn ?? this.createdOn,
         updatedOn: updatedOn ?? this.updatedOn,
       );
@@ -612,6 +624,7 @@ class Group extends DataClass implements Insertable<Group> {
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('type: $type, ')
+          ..write('isHidden: $isHidden, ')
           ..write('createdOn: $createdOn, ')
           ..write('updatedOn: $updatedOn')
           ..write(')'))
@@ -624,7 +637,9 @@ class Group extends DataClass implements Insertable<Group> {
       $mrjc(
           name.hashCode,
           $mrjc(
-              type.hashCode, $mrjc(createdOn.hashCode, updatedOn.hashCode)))));
+              type.hashCode,
+              $mrjc(isHidden.hashCode,
+                  $mrjc(createdOn.hashCode, updatedOn.hashCode))))));
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
@@ -632,6 +647,7 @@ class Group extends DataClass implements Insertable<Group> {
           other.id == this.id &&
           other.name == this.name &&
           other.type == this.type &&
+          other.isHidden == this.isHidden &&
           other.createdOn == this.createdOn &&
           other.updatedOn == this.updatedOn);
 }
@@ -640,12 +656,14 @@ class GroupsCompanion extends UpdateCompanion<Group> {
   final Value<String> id;
   final Value<String> name;
   final Value<String> type;
+  final Value<bool> isHidden;
   final Value<DateTime> createdOn;
   final Value<DateTime> updatedOn;
   const GroupsCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.type = const Value.absent(),
+    this.isHidden = const Value.absent(),
     this.createdOn = const Value.absent(),
     this.updatedOn = const Value.absent(),
   });
@@ -653,6 +671,7 @@ class GroupsCompanion extends UpdateCompanion<Group> {
     @required String id,
     @required String name,
     this.type = const Value.absent(),
+    this.isHidden = const Value.absent(),
     this.createdOn = const Value.absent(),
     this.updatedOn = const Value.absent(),
   })  : id = Value(id),
@@ -661,12 +680,14 @@ class GroupsCompanion extends UpdateCompanion<Group> {
       {Value<String> id,
       Value<String> name,
       Value<String> type,
+      Value<bool> isHidden,
       Value<DateTime> createdOn,
       Value<DateTime> updatedOn}) {
     return GroupsCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
       type: type ?? this.type,
+      isHidden: isHidden ?? this.isHidden,
       createdOn: createdOn ?? this.createdOn,
       updatedOn: updatedOn ?? this.updatedOn,
     );
@@ -703,6 +724,15 @@ class $GroupsTable extends Groups with TableInfo<$GroupsTable, Group> {
             'CHECK (type IN (\'Personal\',\'Budget\',\'Shared\')) NOT NULL DEFAULT \'Shared\'');
   }
 
+  final VerificationMeta _isHiddenMeta = const VerificationMeta('isHidden');
+  GeneratedBoolColumn _isHidden;
+  @override
+  GeneratedBoolColumn get isHidden => _isHidden ??= _constructIsHidden();
+  GeneratedBoolColumn _constructIsHidden() {
+    return GeneratedBoolColumn('isHidden', $tableName, false,
+        defaultValue: const Constant(false));
+  }
+
   final VerificationMeta _createdOnMeta = const VerificationMeta('createdOn');
   GeneratedDateTimeColumn _createdOn;
   @override
@@ -728,7 +758,8 @@ class $GroupsTable extends Groups with TableInfo<$GroupsTable, Group> {
   }
 
   @override
-  List<GeneratedColumn> get $columns => [id, name, type, createdOn, updatedOn];
+  List<GeneratedColumn> get $columns =>
+      [id, name, type, isHidden, createdOn, updatedOn];
   @override
   $GroupsTable get asDslTable => this;
   @override
@@ -753,6 +784,10 @@ class $GroupsTable extends Groups with TableInfo<$GroupsTable, Group> {
     if (d.type.present) {
       context.handle(
           _typeMeta, type.isAcceptableValue(d.type.value, _typeMeta));
+    }
+    if (d.isHidden.present) {
+      context.handle(_isHiddenMeta,
+          isHidden.isAcceptableValue(d.isHidden.value, _isHiddenMeta));
     }
     if (d.createdOn.present) {
       context.handle(_createdOnMeta,
@@ -784,6 +819,9 @@ class $GroupsTable extends Groups with TableInfo<$GroupsTable, Group> {
     }
     if (d.type.present) {
       map['type'] = Variable<String, StringType>(d.type.value);
+    }
+    if (d.isHidden.present) {
+      map['isHidden'] = Variable<bool, BoolType>(d.isHidden.value);
     }
     if (d.createdOn.present) {
       map['createdOn'] = Variable<DateTime, DateTimeType>(d.createdOn.value);
@@ -1297,7 +1335,8 @@ class $AccountsTable extends Accounts with TableInfo<$AccountsTable, Account> {
   GeneratedIntColumn get parentId => _parentId ??= _constructParentId();
   GeneratedIntColumn _constructParentId() {
     return GeneratedIntColumn('parentId', $tableName, true,
-        $customConstraints: 'REFERENCES Accounts(id) NULLABLE');
+        $customConstraints:
+            'REFERENCES Accounts(id) NULLABLE ON UPDATE CASCADE');
   }
 
   final VerificationMeta _typeMeta = const VerificationMeta('type');
@@ -1624,7 +1663,8 @@ class $CategoriesTable extends Categories
   GeneratedIntColumn get parentId => _parentId ??= _constructParentId();
   GeneratedIntColumn _constructParentId() {
     return GeneratedIntColumn('parentId', $tableName, true,
-        $customConstraints: 'REFERENCES Categories(id) NULLABLE');
+        $customConstraints:
+            'REFERENCES Categories(id) NULLABLE ON UPDATE CASCADE');
   }
 
   final VerificationMeta _typeMeta = const VerificationMeta('type');
@@ -2037,7 +2077,7 @@ class $SettlementsTable extends Settlements
   GeneratedTextColumn _constructGroupId() {
     return GeneratedTextColumn('groupId', $tableName, false,
         minTextLength: 16,
-        $customConstraints: 'REFERENCES Groups(id) NOT NULL');
+        $customConstraints: 'REFERENCES Groups(id) NOT NULL ON UPDATE CASCADE');
   }
 
   final VerificationMeta _fromMemberIdMeta =
@@ -2049,7 +2089,8 @@ class $SettlementsTable extends Settlements
   GeneratedTextColumn _constructFromMemberId() {
     return GeneratedTextColumn('fromMemberId', $tableName, false,
         minTextLength: 16,
-        $customConstraints: 'REFERENCES Members(id) NOT NULL');
+        $customConstraints:
+            'REFERENCES Members(id) NOT NULL ON UPDATE CASCADE');
   }
 
   final VerificationMeta _toMemberIdMeta = const VerificationMeta('toMemberId');
@@ -2059,7 +2100,8 @@ class $SettlementsTable extends Settlements
   GeneratedTextColumn _constructToMemberId() {
     return GeneratedTextColumn('toMemberId', $tableName, false,
         minTextLength: 16,
-        $customConstraints: 'REFERENCES Members(id) NOT NULL');
+        $customConstraints:
+            'REFERENCES Members(id) NOT NULL ON UPDATE CASCADE');
   }
 
   final VerificationMeta _amountMeta = const VerificationMeta('amount');
@@ -2108,7 +2150,8 @@ class $SettlementsTable extends Settlements
   GeneratedTextColumn _constructTransactionId() {
     return GeneratedTextColumn('transactionId', $tableName, true,
         minTextLength: 16,
-        $customConstraints: 'REFERENCES Transactions(id) NULLABLE');
+        $customConstraints:
+            'REFERENCES Transactions(id) NULLABLE ON UPDATE CASCADE');
   }
 
   final VerificationMeta _signatureMeta = const VerificationMeta('signature');
@@ -2624,7 +2667,8 @@ class $TransactionsTable extends Transactions
   GeneratedTextColumn _constructMemberId() {
     return GeneratedTextColumn('memberId', $tableName, false,
         minTextLength: 16,
-        $customConstraints: 'REFERENCES Members(id) NOT NULL');
+        $customConstraints:
+            'REFERENCES Members(id) NOT NULL ON UPDATE CASCADE');
   }
 
   final VerificationMeta _amountMeta = const VerificationMeta('amount');
@@ -2646,7 +2690,7 @@ class $TransactionsTable extends Transactions
   GeneratedTextColumn _constructGroupId() {
     return GeneratedTextColumn('groupId', $tableName, false,
         minTextLength: 16,
-        $customConstraints: 'REFERENCES Groups(id) NOT NULL');
+        $customConstraints: 'REFERENCES Groups(id) NOT NULL ON UPDATE CASCADE');
   }
 
   final VerificationMeta _groupMemberIdsMeta =
@@ -2671,7 +2715,8 @@ class $TransactionsTable extends Transactions
       _fromAccountId ??= _constructFromAccountId();
   GeneratedIntColumn _constructFromAccountId() {
     return GeneratedIntColumn('fromAccountId', $tableName, true,
-        $customConstraints: 'REFERENCES Accounts(id) NULLABLE');
+        $customConstraints:
+            'REFERENCES Accounts(id) NULLABLE ON UPDATE CASCADE');
   }
 
   final VerificationMeta _toAccountIdMeta =
@@ -2682,7 +2727,8 @@ class $TransactionsTable extends Transactions
       _toAccountId ??= _constructToAccountId();
   GeneratedIntColumn _constructToAccountId() {
     return GeneratedIntColumn('toAccountId', $tableName, true,
-        $customConstraints: 'REFERENCES Accounts(id) NULLABLE');
+        $customConstraints:
+            'REFERENCES Accounts(id) NULLABLE ON UPDATE CASCADE');
   }
 
   final VerificationMeta _categoryIdMeta = const VerificationMeta('categoryId');
@@ -2691,7 +2737,8 @@ class $TransactionsTable extends Transactions
   GeneratedIntColumn get categoryId => _categoryId ??= _constructCategoryId();
   GeneratedIntColumn _constructCategoryId() {
     return GeneratedIntColumn('categoryId', $tableName, true,
-        $customConstraints: 'REFERENCES Categories(id) NULLABLE');
+        $customConstraints:
+            'REFERENCES Categories(id) NULLABLE ON UPDATE CASCADE');
   }
 
   final VerificationMeta _settlementIdMeta =
@@ -2702,7 +2749,8 @@ class $TransactionsTable extends Transactions
       _settlementId ??= _constructSettlementId();
   GeneratedTextColumn _constructSettlementId() {
     return GeneratedTextColumn('settlementId', $tableName, true,
-        $customConstraints: 'REFERENCES Settlements(id) NULLABLE');
+        $customConstraints:
+            'REFERENCES Settlements(id) NULLABLE ON UPDATE CASCADE');
   }
 
   final VerificationMeta _notesMeta = const VerificationMeta('notes');
@@ -3712,7 +3760,8 @@ class $FontCombosTable extends FontCombos
   GeneratedIntColumn get headerFont => _headerFont ??= _constructHeaderFont();
   GeneratedIntColumn _constructHeaderFont() {
     return GeneratedIntColumn('headerFont', $tableName, false,
-        $customConstraints: 'REFERENCES AppFonts(id) NOT NULL');
+        $customConstraints:
+            'REFERENCES AppFonts(id) NOT NULL ON UPDATE CASCADE');
   }
 
   final VerificationMeta _bodyFontMeta = const VerificationMeta('bodyFont');
@@ -3721,7 +3770,8 @@ class $FontCombosTable extends FontCombos
   GeneratedIntColumn get bodyFont => _bodyFont ??= _constructBodyFont();
   GeneratedIntColumn _constructBodyFont() {
     return GeneratedIntColumn('bodyFont', $tableName, false,
-        $customConstraints: 'REFERENCES AppFonts(id) NOT NULL');
+        $customConstraints:
+            'REFERENCES AppFonts(id) NOT NULL ON UPDATE CASCADE');
   }
 
   final VerificationMeta _bodyFontBigMeta =
@@ -3732,7 +3782,8 @@ class $FontCombosTable extends FontCombos
       _bodyFontBig ??= _constructBodyFontBig();
   GeneratedIntColumn _constructBodyFontBig() {
     return GeneratedIntColumn('bodyFontBig', $tableName, true,
-        $customConstraints: 'REFERENCES AppFonts(id)');
+        $customConstraints:
+            'REFERENCES AppFonts(id) NULLABLE ON UPDATE CASCADE');
   }
 
   final VerificationMeta _bodyFontMediumMeta =
@@ -3743,7 +3794,8 @@ class $FontCombosTable extends FontCombos
       _bodyFontMedium ??= _constructBodyFontMedium();
   GeneratedIntColumn _constructBodyFontMedium() {
     return GeneratedIntColumn('bodyFontMedium', $tableName, true,
-        $customConstraints: 'REFERENCES AppFonts(id)');
+        $customConstraints:
+            'REFERENCES AppFonts(id) NULLABLE ON UPDATE CASCADE');
   }
 
   final VerificationMeta _bodyFontSmallMeta =
@@ -3754,7 +3806,8 @@ class $FontCombosTable extends FontCombos
       _bodyFontSmall ??= _constructBodyFontSmall();
   GeneratedIntColumn _constructBodyFontSmall() {
     return GeneratedIntColumn('bodyFontSmall', $tableName, true,
-        $customConstraints: 'REFERENCES AppFonts(id)');
+        $customConstraints:
+            'REFERENCES AppFonts(id) NULLABLE ON UPDATE CASCADE');
   }
 
   final VerificationMeta _bodyFontTinyMeta =
@@ -3765,7 +3818,8 @@ class $FontCombosTable extends FontCombos
       _bodyFontTiny ??= _constructBodyFontTiny();
   GeneratedIntColumn _constructBodyFontTiny() {
     return GeneratedIntColumn('bodyFontTiny', $tableName, true,
-        $customConstraints: 'REFERENCES AppFonts(id)');
+        $customConstraints:
+            'REFERENCES AppFonts(id) NULLABLE ON UPDATE CASCADE');
   }
 
   final VerificationMeta _valueFontMeta = const VerificationMeta('valueFont');
@@ -3774,7 +3828,8 @@ class $FontCombosTable extends FontCombos
   GeneratedIntColumn get valueFont => _valueFont ??= _constructValueFont();
   GeneratedIntColumn _constructValueFont() {
     return GeneratedIntColumn('valueFont', $tableName, false,
-        $customConstraints: 'REFERENCES AppFonts(id) NOT NULL');
+        $customConstraints:
+            'REFERENCES AppFonts(id) NOT NULL ON UPDATE CASCADE');
   }
 
   final VerificationMeta _valueFontBigMeta =
@@ -3785,7 +3840,8 @@ class $FontCombosTable extends FontCombos
       _valueFontBig ??= _constructValueFontBig();
   GeneratedIntColumn _constructValueFontBig() {
     return GeneratedIntColumn('valueFontBig', $tableName, true,
-        $customConstraints: 'REFERENCES AppFonts(id)');
+        $customConstraints:
+            'REFERENCES AppFonts(id) NULLABLE ON UPDATE CASCADE');
   }
 
   final VerificationMeta _valueFontMediumMeta =
@@ -3796,7 +3852,8 @@ class $FontCombosTable extends FontCombos
       _valueFontMedium ??= _constructValueFontMedium();
   GeneratedIntColumn _constructValueFontMedium() {
     return GeneratedIntColumn('valueFontMedium', $tableName, true,
-        $customConstraints: 'REFERENCES AppFonts(id)');
+        $customConstraints:
+            'REFERENCES AppFonts(id) NULLABLE ON UPDATE CASCADE');
   }
 
   final VerificationMeta _valueFontSmallMeta =
@@ -3807,7 +3864,8 @@ class $FontCombosTable extends FontCombos
       _valueFontSmall ??= _constructValueFontSmall();
   GeneratedIntColumn _constructValueFontSmall() {
     return GeneratedIntColumn('valueFontSmall', $tableName, true,
-        $customConstraints: 'REFERENCES AppFonts(id)');
+        $customConstraints:
+            'REFERENCES AppFonts(id) NULLABLE ON UPDATE CASCADE');
   }
 
   final VerificationMeta _valueFontTinyMeta =
@@ -3818,7 +3876,8 @@ class $FontCombosTable extends FontCombos
       _valueFontTiny ??= _constructValueFontTiny();
   GeneratedIntColumn _constructValueFontTiny() {
     return GeneratedIntColumn('valueFontTiny', $tableName, true,
-        $customConstraints: 'REFERENCES AppFonts(id)');
+        $customConstraints:
+            'REFERENCES AppFonts(id) NULLABLE ON UPDATE CASCADE');
   }
 
   final VerificationMeta _createdOnMeta = const VerificationMeta('createdOn');

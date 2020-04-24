@@ -61,6 +61,8 @@ class Groups extends Table {
       .nullable()
       .customConstraint("CHECK (type IN ('Personal','Budget','Shared'))"
           " NOT NULL DEFAULT 'Shared'")();
+  BoolColumn get isHidden =>
+      boolean().named('isHidden').withDefault(const Constant(false))();
   DateTimeColumn get createdOn => dateTime()
       .named('createdOn')
       .clientDefault(() => DateTime.now().toUtc())();
@@ -109,7 +111,7 @@ class Accounts extends Table {
   IntColumn get parentId => integer()
       .named('parentId')
       .nullable()
-      .customConstraint('REFERENCES Accounts(id) NULLABLE')();
+      .customConstraint('REFERENCES Accounts(id) NULLABLE ON UPDATE CASCADE')();
   TextColumn get type => text().named('type').nullable().customConstraint(
       "CHECK (type IN ('Group','Cash','Credit','Bank','Investment')) NULLABLE")();
   TextColumn get memberId => text()
@@ -133,10 +135,9 @@ class Categories extends Table {
 
   IntColumn get id => integer().named('id').autoIncrement()();
   TextColumn get name => text().named('name').withLength(max: 15)();
-  IntColumn get parentId => integer()
-      .named('parentId')
-      .nullable()
-      .customConstraint('REFERENCES Categories(id) NULLABLE')();
+  IntColumn get parentId =>
+      integer().named('parentId').nullable().customConstraint(
+          'REFERENCES Categories(id) NULLABLE ON UPDATE CASCADE')();
   TextColumn get type => text().named('type').nullable().customConstraint(
       "CHECK (type IN ('Expense','Liability','Income','Investment','Misc'))"
       " NOT NULL DEFAULT 'Misc'")();
@@ -158,15 +159,15 @@ class Settlements extends Table {
   TextColumn get groupId => text()
       .named('groupId')
       .withLength(min: 16)
-      .customConstraint('REFERENCES Groups(id) NOT NULL')();
+      .customConstraint('REFERENCES Groups(id) NOT NULL ON UPDATE CASCADE')();
   TextColumn get fromMemberId => text()
       .named('fromMemberId')
       .withLength(min: 16)
-      .customConstraint('REFERENCES Members(id) NOT NULL')();
+      .customConstraint('REFERENCES Members(id) NOT NULL ON UPDATE CASCADE')();
   TextColumn get toMemberId => text()
       .named('toMemberId')
       .withLength(min: 16)
-      .customConstraint('REFERENCES Members(id) NOT NULL')();
+      .customConstraint('REFERENCES Members(id) NOT NULL ON UPDATE CASCADE')();
   RealColumn get amount => real().named('amount')();
   RealColumn get settledAmount => real().named('settledAmount').nullable()();
   BoolColumn get isTemporary =>
@@ -175,7 +176,8 @@ class Settlements extends Table {
       .named('transactionId')
       .nullable()
       .withLength(min: 16)
-      .customConstraint('REFERENCES Transactions(id) NULLABLE')();
+      .customConstraint(
+          'REFERENCES Transactions(id) NULLABLE ON UPDATE CASCADE')();
   TextColumn get signature => text().named('signature').nullable()();
   DateTimeColumn get createdOn => dateTime()
       .named('createdOn')
@@ -198,29 +200,27 @@ class Transactions extends Table {
   TextColumn get memberId => text()
       .named('memberId')
       .withLength(min: 16)
-      .customConstraint('REFERENCES Members(id) NOT NULL')();
+      .customConstraint('REFERENCES Members(id) NOT NULL ON UPDATE CASCADE')();
   RealColumn get amount => real().named('amount')();
   TextColumn get groupId => text()
       .named('groupId')
       .withLength(min: 16)
-      .customConstraint('REFERENCES Groups(id) NOT NULL')();
+      .customConstraint('REFERENCES Groups(id) NOT NULL ON UPDATE CASCADE')();
   TextColumn get groupMemberIds => text().named('groupMemberIds').nullable()();
   IntColumn get fromAccountId => integer()
       .named('fromAccountId')
       .nullable()
-      .customConstraint('REFERENCES Accounts(id) NULLABLE')();
+      .customConstraint('REFERENCES Accounts(id) NULLABLE ON UPDATE CASCADE')();
   IntColumn get toAccountId => integer()
       .named('toAccountId')
       .nullable()
-      .customConstraint('REFERENCES Accounts(id) NULLABLE')();
-  IntColumn get categoryId => integer()
-      .named('categoryId')
-      .nullable()
-      .customConstraint('REFERENCES Categories(id) NULLABLE')();
-  TextColumn get settlementId => text()
-      .named('settlementId')
-      .nullable()
-      .customConstraint('REFERENCES Settlements(id) NULLABLE')();
+      .customConstraint('REFERENCES Accounts(id) NULLABLE ON UPDATE CASCADE')();
+  IntColumn get categoryId =>
+      integer().named('categoryId').nullable().customConstraint(
+          'REFERENCES Categories(id) NULLABLE ON UPDATE CASCADE')();
+  TextColumn get settlementId =>
+      text().named('settlementId').nullable().customConstraint(
+          'REFERENCES Settlements(id) NULLABLE ON UPDATE CASCADE')();
   TextColumn get notes => text().named('notes').nullable()();
   TextColumn get attachments => text().named('attachments').nullable()();
   DateTimeColumn get createdOn => dateTime()
@@ -270,45 +270,45 @@ class FontCombos extends Table {
   TextColumn get name => text().named('name').withLength(max: 50)();
   IntColumn get headerFont => integer()
       .named('headerFont')
-      .customConstraint('REFERENCES AppFonts(id) NOT NULL')();
+      .customConstraint('REFERENCES AppFonts(id) NOT NULL ON UPDATE CASCADE')();
   IntColumn get bodyFont => integer()
       .named('bodyFont')
-      .customConstraint('REFERENCES AppFonts(id) NOT NULL')();
+      .customConstraint('REFERENCES AppFonts(id) NOT NULL ON UPDATE CASCADE')();
   IntColumn get bodyFontBig => integer()
       .named('bodyFontBig')
       .nullable()
-      .customConstraint('REFERENCES AppFonts(id)')();
+      .customConstraint('REFERENCES AppFonts(id) NULLABLE ON UPDATE CASCADE')();
   IntColumn get bodyFontMedium => integer()
       .named('bodyFontMedium')
       .nullable()
-      .customConstraint('REFERENCES AppFonts(id)')();
+      .customConstraint('REFERENCES AppFonts(id) NULLABLE ON UPDATE CASCADE')();
   IntColumn get bodyFontSmall => integer()
       .named('bodyFontSmall')
       .nullable()
-      .customConstraint('REFERENCES AppFonts(id)')();
+      .customConstraint('REFERENCES AppFonts(id) NULLABLE ON UPDATE CASCADE')();
   IntColumn get bodyFontTiny => integer()
       .named('bodyFontTiny')
       .nullable()
-      .customConstraint('REFERENCES AppFonts(id)')();
+      .customConstraint('REFERENCES AppFonts(id) NULLABLE ON UPDATE CASCADE')();
   IntColumn get valueFont => integer()
       .named('valueFont')
-      .customConstraint('REFERENCES AppFonts(id) NOT NULL')();
+      .customConstraint('REFERENCES AppFonts(id) NOT NULL ON UPDATE CASCADE')();
   IntColumn get valueFontBig => integer()
       .named('valueFontBig')
       .nullable()
-      .customConstraint('REFERENCES AppFonts(id)')();
+      .customConstraint('REFERENCES AppFonts(id) NULLABLE ON UPDATE CASCADE')();
   IntColumn get valueFontMedium => integer()
       .named('valueFontMedium')
       .nullable()
-      .customConstraint('REFERENCES AppFonts(id)')();
+      .customConstraint('REFERENCES AppFonts(id) NULLABLE ON UPDATE CASCADE')();
   IntColumn get valueFontSmall => integer()
       .named('valueFontSmall')
       .nullable()
-      .customConstraint('REFERENCES AppFonts(id)')();
+      .customConstraint('REFERENCES AppFonts(id) NULLABLE ON UPDATE CASCADE')();
   IntColumn get valueFontTiny => integer()
       .named('valueFontTiny')
       .nullable()
-      .customConstraint('REFERENCES AppFonts(id)')();
+      .customConstraint('REFERENCES AppFonts(id) NULLABLE ON UPDATE CASCADE')();
   DateTimeColumn get createdOn => dateTime()
       .named('createdOn')
       .clientDefault(() => DateTime.now().toUtc())();
@@ -503,6 +503,7 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
       {String id,
       String name,
       String nickName,
+      Uint8List avatar,
       MemberIdType idType,
       String secondaryIdValue,
       bool isGroupExpense = false,
@@ -512,6 +513,7 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
         id: id,
         name: Value(name),
         nickName: Value(nickName),
+        avatar: Value(avatar),
         idType: idType.toEnumString(),
         idValue: idValue,
         secondaryIdValue: Value(secondaryIdValue),
@@ -525,6 +527,7 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
       {String id,
       String name,
       String nickName,
+      Uint8List avatar,
       MemberIdType idType = MemberIdType.GroupMember,
       String secondaryIdValue,
       bool isGroupExpense = false,
@@ -545,6 +548,7 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
           id: id,
           name: name,
           nickName: nickName,
+          avatar: avatar,
           idType: idType,
           secondaryIdValue: secondaryIdValue,
           isGroupExpense: isGroupExpense,
@@ -557,6 +561,39 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
         GroupMembersCompanion.insert(groupId: groupId, memberId: member.id);
     await into(groupMembers).insert(groupMembersComp);
     return member;
+  }
+
+  Future<Member> updateMember(String memberId,
+      {String name,
+      String nickName,
+      Uint8List avatar,
+      MemberIdType idType,
+      String idValue,
+      String secondaryIdValue,
+      String signature}) async {
+    var member = await getMember(memberId);
+    member.copyWith(
+        name: name,
+        nickName: nickName,
+        avatar: avatar,
+        idType: idType.toEnumString(),
+        idValue: idValue,
+        secondaryIdValue: secondaryIdValue,
+        signature: signature,
+        updatedOn: DateTime.now().toUtc());
+    await updateRecord(members, member);
+    return getMember(memberId);
+  }
+
+  Future<int> deleteMember(String memberId) =>
+      deleteRecord(members, MembersCompanion(id: Value(memberId)));
+
+  Future<int> deleteMemberFromGroup(String memberId, String groupId) async {
+    var groupMember = await (select(groupMembers)
+          ..where((gm) =>
+              gm.groupId.equals(groupId) & gm.memberId.equals(memberId)))
+        .getSingle();
+    return deleteRecord(groupMembers, groupMember);
   }
 
   Selectable<Settlement> _selectGroupSettlements(String groupId,
@@ -592,8 +629,6 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
     bool isTemporary = true,
     String transactionId,
     String signature,
-    DateTime createdOn,
-    DateTime updatedOn,
   }) async {
     if (null == id) {
       id = await _uniqueId(settlements.actualTableName,
@@ -610,8 +645,8 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
         isTemporary: isTemporary,
         transactionId: transactionId,
         signature: signature,
-        createdOn: createdOn,
-        updatedOn: updatedOn);
+        createdOn: DateTime.now().toUtc(),
+        updatedOn: DateTime.now().toUtc());
   }
 
   Future<void> addGroupSettlements(
@@ -694,6 +729,42 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
     return getTransaction(id);
   }
 
+  Future<Transaction> updateTransaction(String transactionId,
+      {String memberId,
+      double amount,
+      String groupMemberIds,
+      int fromAccountId,
+      int toAccountId,
+      int categoryId,
+      String notes,
+      String attachments}) async {
+    var transaction = await getTransaction(transactionId);
+    if (null == transaction.settlementId) {
+      transaction.copyWith(
+        memberId: memberId,
+        amount: amount,
+        groupMemberIds: groupMemberIds,
+        fromAccountId: fromAccountId,
+        toAccountId: toAccountId,
+        categoryId: categoryId,
+        notes: notes,
+        attachments: attachments,
+        updatedOn: DateTime.now().toUtc(),
+      );
+      await updateRecord(transactions, transaction);
+      return getTransaction(transactionId);
+    }
+    return transaction;
+  }
+
+  Future<int> deleteTransaction(String transactionId) async {
+    var transaction = await getTransaction(transactionId);
+    if (null == transaction.settlementId)
+      return deleteRecord(
+          transactions, TransactionsCompanion(id: Value(transactionId)));
+    return 0;
+  }
+
   Future<Account> getAccount(int accountId) async => Account.fromJson(
       await getRecord(accounts.actualTableName, accountId.toString()));
 
@@ -707,6 +778,23 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
     var accountId = await into(accounts).insert(accountsComp);
     return getAccount(accountId);
   }
+
+  Future<Account> updateAccount(int accountId,
+      {String name, int parentId, AccountType type, String memberId}) async {
+    var account = await getAccount(accountId);
+    account.copyWith(
+      name: name,
+      parentId: parentId,
+      type: type.toEnumString(),
+      memberId: memberId,
+      updatedOn: DateTime.now().toUtc(),
+    );
+    await updateRecord(accounts, account);
+    return getAccount(accountId);
+  }
+
+  Future<int> deleteAccount(int accountId) =>
+      deleteRecord(accounts, AccountsCompanion(id: Value(accountId)));
 
   Selectable<Group> _selectGroupBy(
     String column,
@@ -732,16 +820,36 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
       Group.fromJson(await getRecord(groups.actualTableName, groupId));
 
   Future<Group> createGroup(String name,
-      [GroupType type = GroupType.Shared]) async {
+      {GroupType type = GroupType.Shared, bool isHidden = false}) async {
     var groupId =
         await _uniqueId(groups.actualTableName, [name, type.toEnumString()]);
     var newGroupComp = GroupsCompanion.insert(
-        id: groupId, name: name, type: Value(type.toEnumString()));
+      id: groupId,
+      name: name,
+      type: Value(type.toEnumString()),
+      isHidden: Value(isHidden),
+    );
     await into(groups).insert(newGroupComp);
     var newGroup = await getGroup(groupId);
     sharedGroupList.add(newGroup);
     return newGroup;
   }
+
+  Future<Group> updateGroup(String groupId,
+      {String name, GroupType type, bool isHidden}) async {
+    var group = await getGroup(groupId);
+    group.copyWith(
+      name: name,
+      type: type.toEnumString(),
+      isHidden: isHidden,
+      updatedOn: DateTime.now().toUtc(),
+    );
+    await updateRecord(groups, group);
+    return getGroup(groupId);
+  }
+
+  Future<int> deleteGroup(String groupId) =>
+      deleteRecord(groups, GroupsCompanion(id: Value(groupId)));
 }
 
 @UseDao(
