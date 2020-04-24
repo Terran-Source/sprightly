@@ -19,12 +19,15 @@ enum HashLibrary {
   hmac_sha512
 }
 
-String hashedAll(List<String> items,
-    {int hashLength = 16, HashLibrary library = HashLibrary.sha1, String key}) {
-  var randomStr = key ??
-      (Random().nextInt(10000000) + DateTime.now().millisecondsSinceEpoch)
-          .toString();
-  var randomKey = utf8.encode(randomStr);
+String hashedAll(
+  List<String> items, {
+  int hashLength = 16,
+  HashLibrary library = HashLibrary.sha1,
+  String key,
+}) {
+  key ??= (Random().nextInt(1000000000) + DateTime.now().millisecondsSinceEpoch)
+      .toString();
+  var utf8Key = utf8.encode(key);
   var sink = AccumulatorSink<Digest>();
   var byteChunks = items.map((str) => utf8.encode(str));
   ByteConversionSink chunks;
@@ -45,27 +48,27 @@ String hashedAll(List<String> items,
       chunks = sha512.startChunkedConversion(sink);
       break;
     case HashLibrary.hmac_md5:
-      var hmac = Hmac(md5, randomKey);
+      var hmac = Hmac(md5, utf8Key);
       chunks = hmac.startChunkedConversion(sink);
       break;
     case HashLibrary.hmac_sha1:
-      var hmac = Hmac(sha1, randomKey);
+      var hmac = Hmac(sha1, utf8Key);
       chunks = hmac.startChunkedConversion(sink);
       break;
     case HashLibrary.hmac_sha224:
-      var hmac = Hmac(sha224, randomKey);
+      var hmac = Hmac(sha224, utf8Key);
       chunks = hmac.startChunkedConversion(sink);
       break;
     case HashLibrary.hmac_sha256:
-      var hmac = Hmac(sha256, randomKey);
+      var hmac = Hmac(sha256, utf8Key);
       chunks = hmac.startChunkedConversion(sink);
       break;
     case HashLibrary.hmac_sha384:
-      var hmac = Hmac(sha384, randomKey);
+      var hmac = Hmac(sha384, utf8Key);
       chunks = hmac.startChunkedConversion(sink);
       break;
     case HashLibrary.hmac_sha512:
-      var hmac = Hmac(sha512, randomKey);
+      var hmac = Hmac(sha512, utf8Key);
       chunks = hmac.startChunkedConversion(sink);
       break;
     case HashLibrary.sha1:
@@ -78,12 +81,21 @@ String hashedAll(List<String> items,
   var result = "${library.toEnumString().replaceAll("_", "")}"
       ":${sink.events.single}";
   if (result.length < hashLength) {
-    result += hashed(randomStr,
-        hashLength: hashLength - result.length, library: library);
+    result +=
+        hashed(key, hashLength: hashLength - result.length, library: library);
   }
   return result.substring(0, hashLength);
 }
 
-String hashed(String item,
-        {int hashLength = 16, HashLibrary library = HashLibrary.sha1}) =>
-    hashedAll([item], hashLength: hashLength, library: library);
+String hashed(
+  String item, {
+  int hashLength = 16,
+  HashLibrary library = HashLibrary.sha1,
+  String key,
+}) =>
+    hashedAll(
+      [item],
+      hashLength: hashLength,
+      library: library,
+      key: key,
+    );
