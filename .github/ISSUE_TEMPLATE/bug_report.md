@@ -3,9 +3,7 @@ name: Bug report
 about: Something Went wrong
 title: '✍️'
 labels: ''
-assignees:
-  - ''
-
+assignees: ''
 ---
 
 **Describe the bug**
