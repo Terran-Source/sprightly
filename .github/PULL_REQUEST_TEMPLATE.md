@@ -4,7 +4,9 @@ about: Something Done
 title: '✍️'
 labels: ''
 assignees: ''
----| Bug/Feature  | Bug/Feature Title       | Branch From            | Branch To |
+---
+
+| Bug/Feature  | Bug/Feature Title       | Branch From            | Branch To |
 | ------------ | ----------------------- | ---------------------- | --------- |
 | #BUG/Feature | Feature: Something Cool | feature/something-cool | master    |
 

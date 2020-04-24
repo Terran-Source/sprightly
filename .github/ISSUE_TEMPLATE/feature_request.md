@@ -3,8 +3,8 @@ name: Feature request
 about: Something Cool or Hot
 title: '✍️'
 labels: ''
-assignees: ''
-
+assignees:
+  - ''
 ---
 
 | Bug  | Problem                               | Solution          | Alternetives          |
