@@ -56,7 +56,7 @@ class AppSettings extends BaseData {
   T _getSettings<T>(String name) => (_settings[name] as Setting<T>).value;
 
   // AppInfo details
-  // todo: set it during migration initiaization
+  // todo: set it during MigrationStrategy initiation
   String get appName => _getSettings('appName');
   String get packageName => _getSettings('packageName');
   String get version => _getSettings('version');
