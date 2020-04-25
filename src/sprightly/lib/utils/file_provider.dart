@@ -6,11 +6,14 @@ import 'package:path/path.dart' as p;
 
 String get sqlAssetDirectory => 'assets/queries_min';
 
-Future<File> getFile(String filePath, [bool isSupportFile = false]) async {
+Future<File> getFile(String filePath,
+    {bool isSupportFile = false, bool recreateFile = false}) async {
   final targetDirectory = isSupportFile
       ? await getApplicationSupportDirectory()
       : await getApplicationDocumentsDirectory();
-  return File(p.join(targetDirectory.path, filePath));
+  var file = File(p.join(targetDirectory.path, filePath));
+  if (recreateFile && file.existsSync()) await file.delete();
+  return file;
 }
 
 Future<File> appendText(String filePath, String text,

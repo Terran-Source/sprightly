@@ -16,6 +16,7 @@ const String appDataDbFile = 'sprightly_db.lite';
 const String setupDataDbFile = 'sprightly_setup.lite';
 const int hashedIdMinLength = 16;
 const int uniqueRetry = 5;
+const String defaultStartupStatement = 'PRAGMA foreign_keys = ON;';
 
 //#region Database
 //#region Database: sprightly_db
@@ -236,8 +237,8 @@ class Transactions extends Table {
   @override
   Set<Column> get primaryKey => {id};
 }
-
 //#endregion Database: sprightly_db
+
 //#region Database: sprightly_setup
 @DataClassName("AppFont")
 class AppFonts extends Table {
@@ -960,9 +961,18 @@ class SprightlySetupDao extends DatabaseAccessor<SprightlySetupDatabase>
   Stream<List<ColorCombo>> watchColorCombos() => select(colorCombos).watch();
 }
 
-LazyDatabase _openConnection(String dbFile,
-        {bool isSupportFile = false, bool logStatements = false}) =>
-    LazyDatabase(() async => VmDatabase(await getFile(dbFile, isSupportFile),
+LazyDatabase _openConnection(
+  String dbFile, {
+  bool isSupportFile = false,
+  bool logStatements = false,
+  bool recreateDatabase = false,
+}) =>
+    LazyDatabase(() async => VmDatabase(
+        await getFile(
+          dbFile,
+          isSupportFile: isSupportFile,
+          recreateFile: recreateDatabase,
+        ),
         logStatements: logStatements));
 
 @UseMoor(
@@ -978,11 +988,30 @@ LazyDatabase _openConnection(String dbFile,
   daos: [SprightlyDao],
 )
 class SprightlyDatabase extends _$SprightlyDatabase {
-  SprightlyDatabase({bool enableDebug = false})
-      : super(_openConnection(appDataDbFile, logStatements: enableDebug));
+  bool enableDebug;
+  bool recreateDatabase;
+  SprightlyDatabase({this.enableDebug = false, this.recreateDatabase = false})
+      : super(_openConnection(
+          appDataDbFile,
+          logStatements: enableDebug,
+          recreateDatabase: recreateDatabase,
+        ));
 
   @override
   int get schemaVersion => 1;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+        onCreate: (Migrator m) async {
+          await m.createAll();
+        },
+        onUpgrade: (Migrator m, int from, int to) async {},
+        beforeOpen: (OpeningDetails details) async {
+          if (details.wasCreated) {}
+          await sprightlyDao.getReady();
+          await customStatement(defaultStartupStatement);
+        },
+      );
 }
 
 @UseMoor(
@@ -995,9 +1024,29 @@ class SprightlyDatabase extends _$SprightlyDatabase {
   daos: [SprightlySetupDao],
 )
 class SprightlySetupDatabase extends _$SprightlySetupDatabase {
-  SprightlySetupDatabase({bool enableDebug = false})
-      : super(_openConnection(setupDataDbFile, logStatements: enableDebug));
+  bool enableDebug;
+  bool recreateDatabase;
+  SprightlySetupDatabase(
+      {this.enableDebug = false, this.recreateDatabase = false})
+      : super(_openConnection(
+          setupDataDbFile,
+          logStatements: enableDebug,
+          recreateDatabase: recreateDatabase,
+        ));
 
   @override
   int get schemaVersion => 1;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+        onCreate: (Migrator m) async {
+          await m.createAll();
+        },
+        onUpgrade: (Migrator m, int from, int to) async {},
+        beforeOpen: (OpeningDetails details) async {
+          if (details.wasCreated) {}
+          await sprightlySetupDao.getReady();
+          await customStatement(defaultStartupStatement);
+        },
+      );
 }
