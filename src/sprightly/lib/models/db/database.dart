@@ -351,7 +351,7 @@ class AppSettings extends Table {
   TextColumn get name => text().named('name').withLength(max: 50)();
   TextColumn get value => text().named('value')();
   TextColumn get type => text().named('type').nullable().customConstraint(
-      "CHECK (type IN ('String','Number','Bool','List')) NOT NULL  DEFAULT 'String'")();
+      "CHECK (type IN ('String','Number','Bool','List','AppInfo')) NOT NULL  DEFAULT 'String'")();
   DateTimeColumn get createdOn => dateTime()
       .named('createdOn')
       .clientDefault(() => DateTime.now().toUtc())();
@@ -898,11 +898,12 @@ class SprightlySetupDao extends DatabaseAccessor<SprightlySetupDatabase>
   bool _initialized = false;
   bool _working = false;
   @override
-  bool get ready => super.ready && _initialized;
+  bool get ready => super.ready && appInformation.ready && _initialized;
   @override
   Future getReady() async {
     if (!_initialized && !_working) {
       _working = true;
+      await appInformation.getReady();
       _allAppSettings = await getAppSettings();
       _allAppFonts = await getAppFonts();
       _allFontCombos = await getFontCombos();
@@ -913,6 +914,7 @@ class SprightlySetupDao extends DatabaseAccessor<SprightlySetupDatabase>
     }
   }
 
+  AppInformation appInformation = AppInformation();
   List<AppSetting> _allAppSettings;
   List<AppSetting> get allAppSettings => _allAppSettings;
   List<AppFont> _allAppFonts;

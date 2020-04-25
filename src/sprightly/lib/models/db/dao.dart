@@ -1,5 +1,6 @@
 library sprightly.dao;
 
+import 'package:package_info/package_info.dart';
 import 'package:sprightly/models/constants/enums.dart';
 import 'package:sprightly/models/db/database.dart';
 
@@ -8,6 +9,36 @@ String get groupAccountPrefix => 'GroupAccount';
 abstract class AppDao {
   bool get ready;
   Future getReady();
+}
+
+class AppInformation extends AppDao {
+  bool _initialized = false;
+  bool _working = false;
+  @override
+  bool get ready => _initialized;
+  @override
+  Future getReady() async {
+    if (!_initialized && !_working) {
+      _working = true;
+      var packageInfo = await PackageInfo.fromPlatform();
+      _appName = packageInfo.appName;
+      _packageName = packageInfo.packageName;
+      _version = packageInfo.version;
+      _buildNumber = packageInfo.buildNumber;
+      _initialized = true;
+      _working = false;
+    }
+  }
+
+  String _appName;
+  String _packageName;
+  String _version;
+  String _buildNumber;
+
+  String get appName => _appName;
+  String get packageName => _packageName;
+  String get version => _version;
+  String get buildNumber => _buildNumber;
 }
 
 abstract class SystemDao extends AppDao {

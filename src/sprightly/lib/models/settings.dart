@@ -19,6 +19,7 @@ class Setting<T> {
 
   factory Setting.from(AppSetting appSetting, AppSettingType type) {
     switch (type) {
+      case AppSettingType.AppInfo:
       case AppSettingType.String:
         return Setting._ofType(appSetting.name, appSetting.value);
       case AppSettingType.Number:
@@ -54,8 +55,13 @@ class AppSettings extends BaseData {
 
   T _getSettings<T>(String name) => (_settings[name] as Setting<T>).value;
 
+  // AppInfo details
+  // todo: set it during migration initiaization
   String get appName => _getSettings('appName');
-  String get appVersion => _getSettings('appVersion');
+  String get packageName => _getSettings('packageName');
+  String get version => _getSettings('version');
+  String get buildNumber => _getSettings('buildNumber');
   String get dbVersion => _getSettings('dbVersion');
+  // Other settings
   bool get primarySetupComplete => _getSettings('primarySetupComplete');
 }
