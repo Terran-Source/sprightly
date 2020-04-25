@@ -16,7 +16,6 @@ const String appDataDbFile = 'sprightly_db.lite';
 const String setupDataDbFile = 'sprightly_setup.lite';
 const int hashedIdMinLength = 16;
 const int uniqueRetry = 5;
-const String defaultStartupStatement = 'PRAGMA foreign_keys = ON;';
 
 //#region Database
 //#region Database: sprightly_db
@@ -372,6 +371,8 @@ class SprightlyQueries {
   static SprightlyQueries _cache = SprightlyQueries();
   bool initialized = false;
   bool _working = false;
+  String _defaultStartupStatement = 'defaultStartupStatement';
+  String get defaultStartupStatement => _defaultStartupStatement;
   String _selectGroupAccountMembers = "selectGroupAccountMembers";
   String get selectGroupAccountMembers => _selectGroupAccountMembers;
   String _selectGroupOnlyMembers = "selectGroupOnlyMembers";
@@ -386,6 +387,7 @@ class SprightlyQueries {
   Future _init() async {
     if (!initialized && !_working) {
       _working = true;
+      _defaultStartupStatement = await getSqlQuery(_defaultStartupStatement);
       _selectGroupAccountMembers =
           await getSqlQuery(_selectGroupAccountMembers);
       _selectGroupOnlyMembers = await getSqlQuery(_selectGroupOnlyMembers);
@@ -1009,7 +1011,7 @@ class SprightlyDatabase extends _$SprightlyDatabase {
         beforeOpen: (OpeningDetails details) async {
           if (details.wasCreated) {}
           await sprightlyDao.getReady();
-          await customStatement(defaultStartupStatement);
+          await customStatement(sprightlyDao._queries.defaultStartupStatement);
         },
       );
 }
@@ -1046,7 +1048,8 @@ class SprightlySetupDatabase extends _$SprightlySetupDatabase {
         beforeOpen: (OpeningDetails details) async {
           if (details.wasCreated) {}
           await sprightlySetupDao.getReady();
-          await customStatement(defaultStartupStatement);
+          await customStatement(
+              sprightlySetupDao._queries.defaultStartupStatement);
         },
       );
 }
