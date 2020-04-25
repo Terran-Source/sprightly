@@ -904,6 +904,9 @@ class SprightlySetupDao extends DatabaseAccessor<SprightlySetupDatabase>
     if (!_initialized && !_working) {
       _working = true;
       _allAppSettings = await getAppSettings();
+      _allAppFonts = await getAppFonts();
+      _allFontCombos = await getFontCombos();
+      _allColorCombos = await getColorCombos();
       await super.getReady();
       _initialized = true;
       _working = false;
@@ -912,6 +915,12 @@ class SprightlySetupDao extends DatabaseAccessor<SprightlySetupDatabase>
 
   List<AppSetting> _allAppSettings;
   List<AppSetting> get allAppSettings => _allAppSettings;
+  List<AppFont> _allAppFonts;
+  List<AppFont> get allAppFonts => _allAppFonts;
+  List<FontCombo> _allFontCombos;
+  List<FontCombo> get allFontCombos => _allFontCombos;
+  List<ColorCombo> _allColorCombos;
+  List<ColorCombo> get allColorCombos => _allColorCombos;
 
   Future<List<AppSetting>> getAppSettings() => select(appSettings).get();
 
@@ -921,7 +930,7 @@ class SprightlySetupDao extends DatabaseAccessor<SprightlySetupDatabase>
       await getRecordWithColumnValue(appSettings.actualTableName, 'name', name),
       db);
 
-  Future<bool> _updateSetting(String name, String value,
+  Future<bool> updateAppSetting(String name, String value,
       {AppSettingType type}) async {
     var appSetting = await getAppSetting(name);
     appSetting.copyWith(
@@ -935,9 +944,18 @@ class SprightlySetupDao extends DatabaseAccessor<SprightlySetupDatabase>
   Future<bool> updateAppSettings(Map<String, String> settings) async {
     var result = true;
     settings.forEach((name, value) async =>
-        result = result && await _updateSetting(name, value));
+        result = result && await updateAppSetting(name, value));
     return result;
   }
+
+  Future<List<AppFont>> getAppFonts() => select(appFonts).get();
+  Stream<List<AppFont>> watchAppFonts() => select(appFonts).watch();
+
+  Future<List<FontCombo>> getFontCombos() => select(fontCombos).get();
+  Stream<List<FontCombo>> watchFontCombos() => select(fontCombos).watch();
+
+  Future<List<ColorCombo>> getColorCombos() => select(colorCombos).get();
+  Stream<List<ColorCombo>> watchColorCombos() => select(colorCombos).watch();
 }
 
 LazyDatabase _openConnection(String dbFile,

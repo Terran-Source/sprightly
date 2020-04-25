@@ -118,8 +118,23 @@ abstract class SystemDao extends AppDao {
 
 abstract class SettingsDao extends AppDao {
   List<AppSetting> get allAppSettings;
+  List<AppFont> get allAppFonts;
+  List<FontCombo> get allFontCombos;
+  List<ColorCombo> get allColorCombos;
 
   Future<List<AppSetting>> getAppSettings();
   Stream<List<AppSetting>> watchAppSettings();
+  Future<AppSetting> getAppSetting(String name);
+  Future<bool> updateAppSetting(String name, String value,
+      {AppSettingType type});
   Future<bool> updateAppSettings(Map<String, String> settings);
+
+  Future<List<AppFont>> getAppFonts();
+  Stream<List<AppFont>> watchAppFonts();
+
+  Future<List<FontCombo>> getFontCombos();
+  Stream<List<FontCombo>> watchFontCombos();
+
+  Future<List<ColorCombo>> getColorCombos();
+  Stream<List<ColorCombo>> watchColorCombos();
 }

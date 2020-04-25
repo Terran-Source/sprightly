@@ -34,10 +34,10 @@ class Setting<T> {
   }
 }
 
-class Settings extends BaseData {
+class AppSettings extends BaseData {
   final Map<String, Setting> _settings;
 
-  Settings(SettingsDao _dao)
+  AppSettings(SettingsDao _dao)
       : _settings = {},
         super(_dao) {
     _dao.allAppSettings.forEach((appSetting) {
@@ -48,9 +48,14 @@ class Settings extends BaseData {
     });
   }
 
+  List<AppFont> get _appFonts => _dao.allAppFonts;
+  List<FontCombo> get _fontCombos => _dao.allFontCombos;
+  List<ColorCombo> get _colorCombos => _dao.allColorCombos;
+
   T _getSettings<T>(String name) => (_settings[name] as Setting<T>).value;
 
   String get appName => _getSettings('appName');
+  String get appVersion => _getSettings('appVersion');
   String get dbVersion => _getSettings('dbVersion');
   bool get primarySetupComplete => _getSettings('primarySetupComplete');
 }
