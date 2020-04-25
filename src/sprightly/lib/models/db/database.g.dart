@@ -4419,6 +4419,287 @@ class $ColorCombosTable extends ColorCombos
   }
 }
 
+class AppSetting extends DataClass implements Insertable<AppSetting> {
+  final String name;
+  final String value;
+  final String type;
+  final DateTime createdOn;
+  final DateTime updatedOn;
+  AppSetting(
+      {@required this.name,
+      @required this.value,
+      this.type,
+      @required this.createdOn,
+      this.updatedOn});
+  factory AppSetting.fromData(Map<String, dynamic> data, GeneratedDatabase db,
+      {String prefix}) {
+    final effectivePrefix = prefix ?? '';
+    final stringType = db.typeSystem.forDartType<String>();
+    final dateTimeType = db.typeSystem.forDartType<DateTime>();
+    return AppSetting(
+      name: stringType.mapFromDatabaseResponse(data['${effectivePrefix}name']),
+      value:
+          stringType.mapFromDatabaseResponse(data['${effectivePrefix}value']),
+      type: stringType.mapFromDatabaseResponse(data['${effectivePrefix}type']),
+      createdOn: dateTimeType
+          .mapFromDatabaseResponse(data['${effectivePrefix}createdOn']),
+      updatedOn: dateTimeType
+          .mapFromDatabaseResponse(data['${effectivePrefix}updatedOn']),
+    );
+  }
+  factory AppSetting.fromJson(Map<String, dynamic> json,
+      {ValueSerializer serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return AppSetting(
+      name: serializer.fromJson<String>(json['name']),
+      value: serializer.fromJson<String>(json['value']),
+      type: serializer.fromJson<String>(json['type']),
+      createdOn: serializer.fromJson<DateTime>(json['createdOn']),
+      updatedOn: serializer.fromJson<DateTime>(json['updatedOn']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'name': serializer.toJson<String>(name),
+      'value': serializer.toJson<String>(value),
+      'type': serializer.toJson<String>(type),
+      'createdOn': serializer.toJson<DateTime>(createdOn),
+      'updatedOn': serializer.toJson<DateTime>(updatedOn),
+    };
+  }
+
+  @override
+  AppSettingsCompanion createCompanion(bool nullToAbsent) {
+    return AppSettingsCompanion(
+      name: name == null && nullToAbsent ? const Value.absent() : Value(name),
+      value:
+          value == null && nullToAbsent ? const Value.absent() : Value(value),
+      type: type == null && nullToAbsent ? const Value.absent() : Value(type),
+      createdOn: createdOn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdOn),
+      updatedOn: updatedOn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedOn),
+    );
+  }
+
+  AppSetting copyWith(
+          {String name,
+          String value,
+          String type,
+          DateTime createdOn,
+          DateTime updatedOn}) =>
+      AppSetting(
+        name: name ?? this.name,
+        value: value ?? this.value,
+        type: type ?? this.type,
+        createdOn: createdOn ?? this.createdOn,
+        updatedOn: updatedOn ?? this.updatedOn,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('AppSetting(')
+          ..write('name: $name, ')
+          ..write('value: $value, ')
+          ..write('type: $type, ')
+          ..write('createdOn: $createdOn, ')
+          ..write('updatedOn: $updatedOn')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => $mrjf($mrjc(
+      name.hashCode,
+      $mrjc(
+          value.hashCode,
+          $mrjc(
+              type.hashCode, $mrjc(createdOn.hashCode, updatedOn.hashCode)))));
+  @override
+  bool operator ==(dynamic other) =>
+      identical(this, other) ||
+      (other is AppSetting &&
+          other.name == this.name &&
+          other.value == this.value &&
+          other.type == this.type &&
+          other.createdOn == this.createdOn &&
+          other.updatedOn == this.updatedOn);
+}
+
+class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
+  final Value<String> name;
+  final Value<String> value;
+  final Value<String> type;
+  final Value<DateTime> createdOn;
+  final Value<DateTime> updatedOn;
+  const AppSettingsCompanion({
+    this.name = const Value.absent(),
+    this.value = const Value.absent(),
+    this.type = const Value.absent(),
+    this.createdOn = const Value.absent(),
+    this.updatedOn = const Value.absent(),
+  });
+  AppSettingsCompanion.insert({
+    @required String name,
+    @required String value,
+    this.type = const Value.absent(),
+    this.createdOn = const Value.absent(),
+    this.updatedOn = const Value.absent(),
+  })  : name = Value(name),
+        value = Value(value);
+  AppSettingsCompanion copyWith(
+      {Value<String> name,
+      Value<String> value,
+      Value<String> type,
+      Value<DateTime> createdOn,
+      Value<DateTime> updatedOn}) {
+    return AppSettingsCompanion(
+      name: name ?? this.name,
+      value: value ?? this.value,
+      type: type ?? this.type,
+      createdOn: createdOn ?? this.createdOn,
+      updatedOn: updatedOn ?? this.updatedOn,
+    );
+  }
+}
+
+class $AppSettingsTable extends AppSettings
+    with TableInfo<$AppSettingsTable, AppSetting> {
+  final GeneratedDatabase _db;
+  final String _alias;
+  $AppSettingsTable(this._db, [this._alias]);
+  final VerificationMeta _nameMeta = const VerificationMeta('name');
+  GeneratedTextColumn _name;
+  @override
+  GeneratedTextColumn get name => _name ??= _constructName();
+  GeneratedTextColumn _constructName() {
+    return GeneratedTextColumn('name', $tableName, false, maxTextLength: 50);
+  }
+
+  final VerificationMeta _valueMeta = const VerificationMeta('value');
+  GeneratedTextColumn _value;
+  @override
+  GeneratedTextColumn get value => _value ??= _constructValue();
+  GeneratedTextColumn _constructValue() {
+    return GeneratedTextColumn(
+      'value',
+      $tableName,
+      false,
+    );
+  }
+
+  final VerificationMeta _typeMeta = const VerificationMeta('type');
+  GeneratedTextColumn _type;
+  @override
+  GeneratedTextColumn get type => _type ??= _constructType();
+  GeneratedTextColumn _constructType() {
+    return GeneratedTextColumn('type', $tableName, true,
+        $customConstraints:
+            'CHECK (type IN (\'String\',\'Number\',\'Bool\',\'List\')) NOT NULL  DEFAULT \'String\'');
+  }
+
+  final VerificationMeta _createdOnMeta = const VerificationMeta('createdOn');
+  GeneratedDateTimeColumn _createdOn;
+  @override
+  GeneratedDateTimeColumn get createdOn => _createdOn ??= _constructCreatedOn();
+  GeneratedDateTimeColumn _constructCreatedOn() {
+    return GeneratedDateTimeColumn(
+      'createdOn',
+      $tableName,
+      false,
+    )..clientDefault = () => DateTime.now().toUtc();
+  }
+
+  final VerificationMeta _updatedOnMeta = const VerificationMeta('updatedOn');
+  GeneratedDateTimeColumn _updatedOn;
+  @override
+  GeneratedDateTimeColumn get updatedOn => _updatedOn ??= _constructUpdatedOn();
+  GeneratedDateTimeColumn _constructUpdatedOn() {
+    return GeneratedDateTimeColumn(
+      'updatedOn',
+      $tableName,
+      true,
+    )..clientDefault = () => DateTime.now().toUtc();
+  }
+
+  @override
+  List<GeneratedColumn> get $columns =>
+      [name, value, type, createdOn, updatedOn];
+  @override
+  $AppSettingsTable get asDslTable => this;
+  @override
+  String get $tableName => _alias ?? 'AppSettings';
+  @override
+  final String actualTableName = 'AppSettings';
+  @override
+  VerificationContext validateIntegrity(AppSettingsCompanion d,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    if (d.name.present) {
+      context.handle(
+          _nameMeta, name.isAcceptableValue(d.name.value, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (d.value.present) {
+      context.handle(
+          _valueMeta, value.isAcceptableValue(d.value.value, _valueMeta));
+    } else if (isInserting) {
+      context.missing(_valueMeta);
+    }
+    if (d.type.present) {
+      context.handle(
+          _typeMeta, type.isAcceptableValue(d.type.value, _typeMeta));
+    }
+    if (d.createdOn.present) {
+      context.handle(_createdOnMeta,
+          createdOn.isAcceptableValue(d.createdOn.value, _createdOnMeta));
+    }
+    if (d.updatedOn.present) {
+      context.handle(_updatedOnMeta,
+          updatedOn.isAcceptableValue(d.updatedOn.value, _updatedOnMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {name};
+  @override
+  AppSetting map(Map<String, dynamic> data, {String tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
+    return AppSetting.fromData(data, _db, prefix: effectivePrefix);
+  }
+
+  @override
+  Map<String, Variable> entityToSql(AppSettingsCompanion d) {
+    final map = <String, Variable>{};
+    if (d.name.present) {
+      map['name'] = Variable<String, StringType>(d.name.value);
+    }
+    if (d.value.present) {
+      map['value'] = Variable<String, StringType>(d.value.value);
+    }
+    if (d.type.present) {
+      map['type'] = Variable<String, StringType>(d.type.value);
+    }
+    if (d.createdOn.present) {
+      map['createdOn'] = Variable<DateTime, DateTimeType>(d.createdOn.value);
+    }
+    if (d.updatedOn.present) {
+      map['updatedOn'] = Variable<DateTime, DateTimeType>(d.updatedOn.value);
+    }
+    return map;
+  }
+
+  @override
+  $AppSettingsTable createAlias(String alias) {
+    return $AppSettingsTable(_db, alias);
+  }
+}
+
 abstract class _$SprightlySetupDatabase extends GeneratedDatabase {
   _$SprightlySetupDatabase(QueryExecutor e)
       : super(SqlTypeSystem.defaultInstance, e);
@@ -4428,6 +4709,8 @@ abstract class _$SprightlySetupDatabase extends GeneratedDatabase {
   $FontCombosTable get fontCombos => _fontCombos ??= $FontCombosTable(this);
   $ColorCombosTable _colorCombos;
   $ColorCombosTable get colorCombos => _colorCombos ??= $ColorCombosTable(this);
+  $AppSettingsTable _appSettings;
+  $AppSettingsTable get appSettings => _appSettings ??= $AppSettingsTable(this);
   SprightlySetupDao _sprightlySetupDao;
   SprightlySetupDao get sprightlySetupDao =>
       _sprightlySetupDao ??= SprightlySetupDao(this as SprightlySetupDatabase);
@@ -4435,7 +4718,7 @@ abstract class _$SprightlySetupDatabase extends GeneratedDatabase {
   Iterable<TableInfo> get allTables => allSchemaEntities.whereType<TableInfo>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [appFonts, fontCombos, colorCombos];
+      [appFonts, fontCombos, colorCombos, appSettings];
 }
 
 // **************************************************************************
@@ -4455,4 +4738,5 @@ mixin _$SprightlySetupDaoMixin on DatabaseAccessor<SprightlySetupDatabase> {
   $AppFontsTable get appFonts => db.appFonts;
   $FontCombosTable get fontCombos => db.fontCombos;
   $ColorCombosTable get colorCombos => db.colorCombos;
+  $AppSettingsTable get appSettings => db.appSettings;
 }

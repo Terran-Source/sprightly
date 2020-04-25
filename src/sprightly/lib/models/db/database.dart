@@ -342,6 +342,27 @@ class ColorCombos extends Table {
       .nullable()
       .clientDefault(() => DateTime.now().toUtc())();
 }
+
+@DataClassName("AppSetting")
+class AppSettings extends Table {
+  @override
+  String get tableName => "AppSettings";
+
+  TextColumn get name => text().named('name').withLength(max: 50)();
+  TextColumn get value => text().named('value')();
+  TextColumn get type => text().named('type').nullable().customConstraint(
+      "CHECK (type IN ('String','Number','Bool','List')) NOT NULL  DEFAULT 'String'")();
+  DateTimeColumn get createdOn => dateTime()
+      .named('createdOn')
+      .clientDefault(() => DateTime.now().toUtc())();
+  DateTimeColumn get updatedOn => dateTime()
+      .named('updatedOn')
+      .nullable()
+      .clientDefault(() => DateTime.now().toUtc())();
+
+  @override
+  Set<Column> get primaryKey => {name};
+}
 //#endregion Database: sprightly_setup
 //#endregion Database
 
@@ -859,6 +880,7 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
     AppFonts,
     FontCombos,
     ColorCombos,
+    AppSettings,
   ],
 )
 class SprightlySetupDao extends DatabaseAccessor<SprightlySetupDatabase>
@@ -897,6 +919,7 @@ class SprightlyDatabase extends _$SprightlyDatabase {
     AppFonts,
     FontCombos,
     ColorCombos,
+    AppSettings,
   ],
   daos: [SprightlySetupDao],
 )

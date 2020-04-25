@@ -41,3 +41,4 @@ enum GroupActivityType {
 enum FontType { Regular, Mono }
 enum FontStyle { Regular, Italic, Bold, BoldItalic }
 enum ThemeMode { Bright, Dark }
+enum AppSettingType { String, Number, Bool, List }
