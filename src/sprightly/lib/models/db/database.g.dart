@@ -1334,8 +1334,7 @@ class $AccountsTable extends Accounts with TableInfo<$AccountsTable, Account> {
   GeneratedIntColumn get parentId => _parentId ??= _constructParentId();
   GeneratedIntColumn _constructParentId() {
     return GeneratedIntColumn('parentId', $tableName, true,
-        $customConstraints:
-            'REFERENCES Accounts(id) NULLABLE ON UPDATE CASCADE');
+        $customConstraints: 'REFERENCES Accounts(id) NULL ON UPDATE CASCADE');
   }
 
   final VerificationMeta _typeMeta = const VerificationMeta('type');
@@ -1345,7 +1344,7 @@ class $AccountsTable extends Accounts with TableInfo<$AccountsTable, Account> {
   GeneratedTextColumn _constructType() {
     return GeneratedTextColumn('type', $tableName, true,
         $customConstraints:
-            'CHECK (type IN (\'Group\',\'Cash\',\'Credit\',\'Bank\',\'Investment\')) NULLABLE');
+            'CHECK (type IN (\'Group\',\'Cash\',\'Credit\',\'Bank\',\'Investment\')) NULL');
   }
 
   final VerificationMeta _memberIdMeta = const VerificationMeta('memberId');
@@ -1355,8 +1354,7 @@ class $AccountsTable extends Accounts with TableInfo<$AccountsTable, Account> {
   GeneratedTextColumn _constructMemberId() {
     return GeneratedTextColumn('memberId', $tableName, true,
         minTextLength: 16,
-        $customConstraints:
-            'REFERENCES Members(id) NULLABLE ON UPDATE CASCADE');
+        $customConstraints: 'REFERENCES Members(id) NULL ON UPDATE CASCADE');
   }
 
   final VerificationMeta _createdOnMeta = const VerificationMeta('createdOn');
@@ -1662,8 +1660,7 @@ class $CategoriesTable extends Categories
   GeneratedIntColumn get parentId => _parentId ??= _constructParentId();
   GeneratedIntColumn _constructParentId() {
     return GeneratedIntColumn('parentId', $tableName, true,
-        $customConstraints:
-            'REFERENCES Categories(id) NULLABLE ON UPDATE CASCADE');
+        $customConstraints: 'REFERENCES Categories(id) NULL ON UPDATE CASCADE');
   }
 
   final VerificationMeta _typeMeta = const VerificationMeta('type');
@@ -2150,7 +2147,7 @@ class $SettlementsTable extends Settlements
     return GeneratedTextColumn('transactionId', $tableName, true,
         minTextLength: 16,
         $customConstraints:
-            'REFERENCES Transactions(id) NULLABLE ON UPDATE CASCADE');
+            'REFERENCES Transactions(id) NULL ON UPDATE CASCADE');
   }
 
   final VerificationMeta _signatureMeta = const VerificationMeta('signature');
@@ -2714,8 +2711,7 @@ class $TransactionsTable extends Transactions
       _fromAccountId ??= _constructFromAccountId();
   GeneratedIntColumn _constructFromAccountId() {
     return GeneratedIntColumn('fromAccountId', $tableName, true,
-        $customConstraints:
-            'REFERENCES Accounts(id) NULLABLE ON UPDATE CASCADE');
+        $customConstraints: 'REFERENCES Accounts(id) NULL ON UPDATE CASCADE');
   }
 
   final VerificationMeta _toAccountIdMeta =
@@ -2726,8 +2722,7 @@ class $TransactionsTable extends Transactions
       _toAccountId ??= _constructToAccountId();
   GeneratedIntColumn _constructToAccountId() {
     return GeneratedIntColumn('toAccountId', $tableName, true,
-        $customConstraints:
-            'REFERENCES Accounts(id) NULLABLE ON UPDATE CASCADE');
+        $customConstraints: 'REFERENCES Accounts(id) NULL ON UPDATE CASCADE');
   }
 
   final VerificationMeta _categoryIdMeta = const VerificationMeta('categoryId');
@@ -2736,8 +2731,7 @@ class $TransactionsTable extends Transactions
   GeneratedIntColumn get categoryId => _categoryId ??= _constructCategoryId();
   GeneratedIntColumn _constructCategoryId() {
     return GeneratedIntColumn('categoryId', $tableName, true,
-        $customConstraints:
-            'REFERENCES Categories(id) NULLABLE ON UPDATE CASCADE');
+        $customConstraints: 'REFERENCES Categories(id) NULL ON UPDATE CASCADE');
   }
 
   final VerificationMeta _settlementIdMeta =
@@ -2749,7 +2743,7 @@ class $TransactionsTable extends Transactions
   GeneratedTextColumn _constructSettlementId() {
     return GeneratedTextColumn('settlementId', $tableName, true,
         $customConstraints:
-            'REFERENCES Settlements(id) NULLABLE ON UPDATE CASCADE');
+            'REFERENCES Settlements(id) NULL ON UPDATE CASCADE');
   }
 
   final VerificationMeta _notesMeta = const VerificationMeta('notes');
@@ -3781,8 +3775,7 @@ class $FontCombosTable extends FontCombos
       _bodyFontBig ??= _constructBodyFontBig();
   GeneratedIntColumn _constructBodyFontBig() {
     return GeneratedIntColumn('bodyFontBig', $tableName, true,
-        $customConstraints:
-            'REFERENCES AppFonts(id) NULLABLE ON UPDATE CASCADE');
+        $customConstraints: 'REFERENCES AppFonts(id) NULL ON UPDATE CASCADE');
   }
 
   final VerificationMeta _bodyFontMediumMeta =
@@ -3793,8 +3786,7 @@ class $FontCombosTable extends FontCombos
       _bodyFontMedium ??= _constructBodyFontMedium();
   GeneratedIntColumn _constructBodyFontMedium() {
     return GeneratedIntColumn('bodyFontMedium', $tableName, true,
-        $customConstraints:
-            'REFERENCES AppFonts(id) NULLABLE ON UPDATE CASCADE');
+        $customConstraints: 'REFERENCES AppFonts(id) NULL ON UPDATE CASCADE');
   }
 
   final VerificationMeta _bodyFontSmallMeta =
@@ -3805,8 +3797,7 @@ class $FontCombosTable extends FontCombos
       _bodyFontSmall ??= _constructBodyFontSmall();
   GeneratedIntColumn _constructBodyFontSmall() {
     return GeneratedIntColumn('bodyFontSmall', $tableName, true,
-        $customConstraints:
-            'REFERENCES AppFonts(id) NULLABLE ON UPDATE CASCADE');
+        $customConstraints: 'REFERENCES AppFonts(id) NULL ON UPDATE CASCADE');
   }
 
   final VerificationMeta _bodyFontTinyMeta =
@@ -3817,8 +3808,7 @@ class $FontCombosTable extends FontCombos
       _bodyFontTiny ??= _constructBodyFontTiny();
   GeneratedIntColumn _constructBodyFontTiny() {
     return GeneratedIntColumn('bodyFontTiny', $tableName, true,
-        $customConstraints:
-            'REFERENCES AppFonts(id) NULLABLE ON UPDATE CASCADE');
+        $customConstraints: 'REFERENCES AppFonts(id) NULL ON UPDATE CASCADE');
   }
 
   final VerificationMeta _valueFontMeta = const VerificationMeta('valueFont');
@@ -3839,8 +3829,7 @@ class $FontCombosTable extends FontCombos
       _valueFontBig ??= _constructValueFontBig();
   GeneratedIntColumn _constructValueFontBig() {
     return GeneratedIntColumn('valueFontBig', $tableName, true,
-        $customConstraints:
-            'REFERENCES AppFonts(id) NULLABLE ON UPDATE CASCADE');
+        $customConstraints: 'REFERENCES AppFonts(id) NULL ON UPDATE CASCADE');
   }
 
   final VerificationMeta _valueFontMediumMeta =
@@ -3851,8 +3840,7 @@ class $FontCombosTable extends FontCombos
       _valueFontMedium ??= _constructValueFontMedium();
   GeneratedIntColumn _constructValueFontMedium() {
     return GeneratedIntColumn('valueFontMedium', $tableName, true,
-        $customConstraints:
-            'REFERENCES AppFonts(id) NULLABLE ON UPDATE CASCADE');
+        $customConstraints: 'REFERENCES AppFonts(id) NULL ON UPDATE CASCADE');
   }
 
   final VerificationMeta _valueFontSmallMeta =
@@ -3863,8 +3851,7 @@ class $FontCombosTable extends FontCombos
       _valueFontSmall ??= _constructValueFontSmall();
   GeneratedIntColumn _constructValueFontSmall() {
     return GeneratedIntColumn('valueFontSmall', $tableName, true,
-        $customConstraints:
-            'REFERENCES AppFonts(id) NULLABLE ON UPDATE CASCADE');
+        $customConstraints: 'REFERENCES AppFonts(id) NULL ON UPDATE CASCADE');
   }
 
   final VerificationMeta _valueFontTinyMeta =
@@ -3875,8 +3862,7 @@ class $FontCombosTable extends FontCombos
       _valueFontTiny ??= _constructValueFontTiny();
   GeneratedIntColumn _constructValueFontTiny() {
     return GeneratedIntColumn('valueFontTiny', $tableName, true,
-        $customConstraints:
-            'REFERENCES AppFonts(id) NULLABLE ON UPDATE CASCADE');
+        $customConstraints: 'REFERENCES AppFonts(id) NULL ON UPDATE CASCADE');
   }
 
   final VerificationMeta _createdOnMeta = const VerificationMeta('createdOn');

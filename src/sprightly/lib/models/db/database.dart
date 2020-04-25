@@ -111,14 +111,14 @@ class Accounts extends Table {
   IntColumn get parentId => integer()
       .named('parentId')
       .nullable()
-      .customConstraint('REFERENCES Accounts(id) NULLABLE ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES Accounts(id) NULL ON UPDATE CASCADE')();
   TextColumn get type => text().named('type').nullable().customConstraint(
-      "CHECK (type IN ('Group','Cash','Credit','Bank','Investment')) NULLABLE")();
+      "CHECK (type IN ('Group','Cash','Credit','Bank','Investment')) NULL")();
   TextColumn get memberId => text()
       .named('memberId')
       .nullable()
       .withLength(min: 16)
-      .customConstraint('REFERENCES Members(id) NULLABLE ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES Members(id) NULL ON UPDATE CASCADE')();
   DateTimeColumn get createdOn => dateTime()
       .named('createdOn')
       .clientDefault(() => DateTime.now().toUtc())();
@@ -135,9 +135,10 @@ class Categories extends Table {
 
   IntColumn get id => integer().named('id').autoIncrement()();
   TextColumn get name => text().named('name').withLength(max: 15)();
-  IntColumn get parentId =>
-      integer().named('parentId').nullable().customConstraint(
-          'REFERENCES Categories(id) NULLABLE ON UPDATE CASCADE')();
+  IntColumn get parentId => integer()
+      .named('parentId')
+      .nullable()
+      .customConstraint('REFERENCES Categories(id) NULL ON UPDATE CASCADE')();
   TextColumn get type => text().named('type').nullable().customConstraint(
       "CHECK (type IN ('Expense','Liability','Income','Investment','Misc'))"
       " NOT NULL DEFAULT 'Misc'")();
@@ -176,8 +177,7 @@ class Settlements extends Table {
       .named('transactionId')
       .nullable()
       .withLength(min: 16)
-      .customConstraint(
-          'REFERENCES Transactions(id) NULLABLE ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES Transactions(id) NULL ON UPDATE CASCADE')();
   TextColumn get signature => text().named('signature').nullable()();
   DateTimeColumn get createdOn => dateTime()
       .named('createdOn')
@@ -210,17 +210,19 @@ class Transactions extends Table {
   IntColumn get fromAccountId => integer()
       .named('fromAccountId')
       .nullable()
-      .customConstraint('REFERENCES Accounts(id) NULLABLE ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES Accounts(id) NULL ON UPDATE CASCADE')();
   IntColumn get toAccountId => integer()
       .named('toAccountId')
       .nullable()
-      .customConstraint('REFERENCES Accounts(id) NULLABLE ON UPDATE CASCADE')();
-  IntColumn get categoryId =>
-      integer().named('categoryId').nullable().customConstraint(
-          'REFERENCES Categories(id) NULLABLE ON UPDATE CASCADE')();
-  TextColumn get settlementId =>
-      text().named('settlementId').nullable().customConstraint(
-          'REFERENCES Settlements(id) NULLABLE ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES Accounts(id) NULL ON UPDATE CASCADE')();
+  IntColumn get categoryId => integer()
+      .named('categoryId')
+      .nullable()
+      .customConstraint('REFERENCES Categories(id) NULL ON UPDATE CASCADE')();
+  TextColumn get settlementId => text()
+      .named('settlementId')
+      .nullable()
+      .customConstraint('REFERENCES Settlements(id) NULL ON UPDATE CASCADE')();
   TextColumn get notes => text().named('notes').nullable()();
   TextColumn get attachments => text().named('attachments').nullable()();
   DateTimeColumn get createdOn => dateTime()
@@ -277,38 +279,38 @@ class FontCombos extends Table {
   IntColumn get bodyFontBig => integer()
       .named('bodyFontBig')
       .nullable()
-      .customConstraint('REFERENCES AppFonts(id) NULLABLE ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES AppFonts(id) NULL ON UPDATE CASCADE')();
   IntColumn get bodyFontMedium => integer()
       .named('bodyFontMedium')
       .nullable()
-      .customConstraint('REFERENCES AppFonts(id) NULLABLE ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES AppFonts(id) NULL ON UPDATE CASCADE')();
   IntColumn get bodyFontSmall => integer()
       .named('bodyFontSmall')
       .nullable()
-      .customConstraint('REFERENCES AppFonts(id) NULLABLE ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES AppFonts(id) NULL ON UPDATE CASCADE')();
   IntColumn get bodyFontTiny => integer()
       .named('bodyFontTiny')
       .nullable()
-      .customConstraint('REFERENCES AppFonts(id) NULLABLE ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES AppFonts(id) NULL ON UPDATE CASCADE')();
   IntColumn get valueFont => integer()
       .named('valueFont')
       .customConstraint('REFERENCES AppFonts(id) NOT NULL ON UPDATE CASCADE')();
   IntColumn get valueFontBig => integer()
       .named('valueFontBig')
       .nullable()
-      .customConstraint('REFERENCES AppFonts(id) NULLABLE ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES AppFonts(id) NULL ON UPDATE CASCADE')();
   IntColumn get valueFontMedium => integer()
       .named('valueFontMedium')
       .nullable()
-      .customConstraint('REFERENCES AppFonts(id) NULLABLE ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES AppFonts(id) NULL ON UPDATE CASCADE')();
   IntColumn get valueFontSmall => integer()
       .named('valueFontSmall')
       .nullable()
-      .customConstraint('REFERENCES AppFonts(id) NULLABLE ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES AppFonts(id) NULL ON UPDATE CASCADE')();
   IntColumn get valueFontTiny => integer()
       .named('valueFontTiny')
       .nullable()
-      .customConstraint('REFERENCES AppFonts(id) NULLABLE ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES AppFonts(id) NULL ON UPDATE CASCADE')();
   DateTimeColumn get createdOn => dateTime()
       .named('createdOn')
       .clientDefault(() => DateTime.now().toUtc())();
