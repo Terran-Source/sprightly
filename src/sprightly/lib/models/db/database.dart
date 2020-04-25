@@ -445,6 +445,7 @@ mixin _GenericDaoMixin<T extends GeneratedDatabase> on DatabaseAccessor<T> {
         readsFrom: null == table ? null : {table},
       );
 
+  /// **_caution_**: use this function only if the query returns only 1 record or none
   Future<Map<String, dynamic>> getRecordWithColumnValue(
           String tableName, String column, String value,
           {TableInfo table}) async =>
