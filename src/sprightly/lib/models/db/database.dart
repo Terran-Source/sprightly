@@ -868,7 +868,7 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
     );
     await into(groups).insert(newGroupComp);
     var newGroup = await getGroup(groupId);
-    sharedGroupList.add(newGroup);
+    if (type == GroupType.Shared) _sharedGroupList.add(newGroup);
     return newGroup;
   }
 
@@ -882,11 +882,17 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
       updatedOn: DateTime.now().toUtc(),
     );
     await updateRecord(groups, group);
+    if (type == GroupType.Shared)
+      _sharedGroupList = await getGroups(GroupType.Shared);
     return getGroup(groupId);
   }
 
-  Future<int> deleteGroup(String groupId) =>
-      deleteRecord(groups, GroupsCompanion(id: Value(groupId)));
+  Future<int> deleteGroup(String groupId) async {
+    var result =
+        await deleteRecord(groups, GroupsCompanion(id: Value(groupId)));
+    _sharedGroupList = await getGroups(GroupType.Shared);
+    return result;
+  }
 }
 
 @UseDao(
@@ -940,20 +946,23 @@ class SprightlySetupDao extends DatabaseAccessor<SprightlySetupDatabase>
       db);
 
   Future<bool> updateAppSetting(String name, String value,
-      {AppSettingType type}) async {
+      {AppSettingType type, bool batchOperation = false}) async {
     var appSetting = await getAppSetting(name);
     appSetting.copyWith(
       value: value,
       type: type.toEnumString(),
       updatedOn: DateTime.now().toUtc(),
     );
-    return updateRecord(appSettings, appSetting);
+    var result = updateRecord(appSettings, appSetting);
+    if (!batchOperation) _allAppSettings = await getAppSettings();
+    return result;
   }
 
   Future<bool> updateAppSettings(Map<String, String> settings) async {
     var result = true;
-    settings.forEach((name, value) async =>
-        result = result && await updateAppSetting(name, value));
+    settings.forEach((name, value) async => result =
+        result && await updateAppSetting(name, value, batchOperation: true));
+    _allAppSettings = await getAppSettings();
     return result;
   }
 
