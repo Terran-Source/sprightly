@@ -5,10 +5,12 @@ import 'package:sprightly/models/db/database.dart';
 
 String get groupAccountPrefix => 'GroupAccount';
 
-abstract class SystemDao {
+abstract class AppDao {
   bool get ready;
   Future getReady();
+}
 
+abstract class SystemDao extends AppDao {
   List<Group> get sharedGroupList;
 
   Future<List<Member>> getGroupAccountMembers(String groupId);
@@ -114,7 +116,10 @@ abstract class SystemDao {
   Future<int> deleteGroup(String groupId);
 }
 
-abstract class SettingsDao {
-  bool get ready;
-  Future getReady();
+abstract class SettingsDao extends AppDao {
+  List<AppSetting> get allAppSettings;
+
+  Future<List<AppSetting>> getAppSettings();
+  Stream<List<AppSetting>> watchAppSettings();
+  Future<bool> updateAppSettings(Map<String, String> settings);
 }

@@ -439,6 +439,13 @@ mixin _GenericDaoMixin<T extends GeneratedDatabase> on DatabaseAccessor<T> {
         readsFrom: null == table ? null : {table},
       );
 
+  Future<Map<String, dynamic>> getRecordWithColumnValue(
+          String tableName, String column, String value,
+          {TableInfo table}) async =>
+      (await getRecordsWithColumnValue(tableName, column, value, table: table)
+              .getSingle())
+          .data;
+
   Future<Map<String, dynamic>> getRecord(String tableName, String id,
           {TableInfo table}) async =>
       (await getRecordsWithColumnValue(tableName, 'id', id, table: table)
@@ -887,6 +894,50 @@ class SprightlySetupDao extends DatabaseAccessor<SprightlySetupDatabase>
     with _$SprightlySetupDaoMixin, _GenericDaoMixin
     implements SettingsDao {
   SprightlySetupDao(SprightlySetupDatabase _db) : super(_db);
+
+  bool _initialized = false;
+  bool _working = false;
+  @override
+  bool get ready => super.ready && _initialized;
+  @override
+  Future getReady() async {
+    if (!_initialized && !_working) {
+      _working = true;
+      _allAppSettings = await getAppSettings();
+      await super.getReady();
+      _initialized = true;
+      _working = false;
+    }
+  }
+
+  List<AppSetting> _allAppSettings;
+  List<AppSetting> get allAppSettings => _allAppSettings;
+
+  Future<List<AppSetting>> getAppSettings() => select(appSettings).get();
+
+  Stream<List<AppSetting>> watchAppSettings() => select(appSettings).watch();
+
+  Future<AppSetting> getAppSetting(String name) async => AppSetting.fromData(
+      await getRecordWithColumnValue(appSettings.actualTableName, 'name', name),
+      db);
+
+  Future<bool> _updateSetting(String name, String value,
+      {AppSettingType type}) async {
+    var appSetting = await getAppSetting(name);
+    appSetting.copyWith(
+      value: value,
+      type: type.toEnumString(),
+      updatedOn: DateTime.now().toUtc(),
+    );
+    return updateRecord(appSettings, appSetting);
+  }
+
+  Future<bool> updateAppSettings(Map<String, String> settings) async {
+    var result = true;
+    settings.forEach((name, value) async =>
+        result = result && await _updateSetting(name, value));
+    return result;
+  }
 }
 
 LazyDatabase _openConnection(String dbFile,
