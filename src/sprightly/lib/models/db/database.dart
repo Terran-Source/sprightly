@@ -472,7 +472,7 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
         _queries.selectGroupAccountMembers,
         variables: [Variable.withString(groupId)],
         readsFrom: {members, groupMembers},
-      ).map((row) => Member.fromJson(row.data));
+      ).map((row) => Member.fromData(row.data, db));
 
   Future<List<Member>> getGroupAccountMembers(String groupId) =>
       _selectGroupAccountMembers(groupId).get();
@@ -485,7 +485,7 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
         _queries.selectGroupOnlyMembers,
         variables: [Variable.withString(groupId)],
         readsFrom: {members, groupMembers},
-      ).map((row) => Member.fromJson(row.data));
+      ).map((row) => Member.fromData(row.data, db));
 
   Future<List<Member>> getGroupOnlyMembers(String groupId) =>
       _selectGroupOnlyMembers(groupId).get();
@@ -605,7 +605,7 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
           Variable.withBool(isTemporary)
         ],
         readsFrom: {settlements, groups},
-      ).map((row) => Settlement.fromJson(row.data));
+      ).map((row) => Settlement.fromData(row.data, db));
 
   Future<List<Settlement>> getGroupSettlements(String groupId,
           {bool isTemporary}) =>
@@ -687,7 +687,7 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
         _queries.selectGroupTransactions,
         variables: [Variable.withString(groupId)],
         readsFrom: {transactions, groups},
-      ).map((row) => Transaction.fromJson(row.data));
+      ).map((row) => Transaction.fromData(row.data, db));
 
   Future<List<Transaction>> getGroupTransactions(String groupId) =>
       _selectGroupTransactions(groupId).get();
@@ -805,7 +805,7 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
         column,
         value,
         table: groups,
-      ).map((row) => Group.fromJson(row.data));
+      ).map((row) => Group.fromData(row.data, db));
 
   Future<List<Group>> getGroups(GroupType type) async =>
       await _selectGroupBy('type', type.toEnumString()).get();
