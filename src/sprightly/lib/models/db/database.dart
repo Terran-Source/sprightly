@@ -404,7 +404,10 @@ mixin _GenericDaoMixin<T extends GeneratedDatabase> on DatabaseAccessor<T> {
 
   bool get ready => _queries.initialized;
 
-  Future getReady() => _queries._init();
+  Future getReady() async {
+    await _queries._init();
+    await customStatement(_queries.defaultStartupStatement);
+  }
 
   Future<String> _uniqueId(String tableName, List<String> items,
       {HashLibrary hashLibrary}) async {
@@ -490,8 +493,8 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
   Future getReady() async {
     if (!_initialized && !_working) {
       _working = true;
-      _sharedGroupList = await getGroups(GroupType.Shared);
       await super.getReady();
+      _sharedGroupList = await getGroups(GroupType.Shared);
       _initialized = true;
       _working = false;
     }
@@ -906,12 +909,12 @@ class SprightlySetupDao extends DatabaseAccessor<SprightlySetupDatabase>
   Future getReady() async {
     if (!_initialized && !_working) {
       _working = true;
+      await super.getReady();
       await appInformation.getReady();
       _allAppSettings = await getAppSettings();
       _allAppFonts = await getAppFonts();
       _allFontCombos = await getFontCombos();
       _allColorCombos = await getColorCombos();
-      await super.getReady();
       _initialized = true;
       _working = false;
     }
@@ -1009,9 +1012,8 @@ class SprightlyDatabase extends _$SprightlyDatabase {
         },
         onUpgrade: (Migrator m, int from, int to) async {},
         beforeOpen: (OpeningDetails details) async {
-          if (details.wasCreated) {}
           await sprightlyDao.getReady();
-          await customStatement(sprightlyDao._queries.defaultStartupStatement);
+          if (details.wasCreated) {}
         },
       );
 }
@@ -1046,10 +1048,8 @@ class SprightlySetupDatabase extends _$SprightlySetupDatabase {
         },
         onUpgrade: (Migrator m, int from, int to) async {},
         beforeOpen: (OpeningDetails details) async {
-          if (details.wasCreated) {}
           await sprightlySetupDao.getReady();
-          await customStatement(
-              sprightlySetupDao._queries.defaultStartupStatement);
+          if (details.wasCreated) {}
         },
       );
 }
