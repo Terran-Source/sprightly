@@ -382,6 +382,12 @@ class SprightlyQueries {
   String _selectGroupTransactions = "selectGroupTransactions";
   String get selectGroupTransactions => _selectGroupTransactions;
 
+  // beforeOpen Queries
+  String _dataInitiation = "dataInitiation";
+  String get dataInitiation => _dataInitiation;
+  String _setupInitiation = "setupInitiation";
+  String get setupInitiation => _setupInitiation;
+
   /// Migration Queries
   ///
   /// declare here & assign them inside [_init]
@@ -401,6 +407,10 @@ class SprightlyQueries {
       _selectGroupOnlyMembers = await getSqlQuery(_selectGroupOnlyMembers);
       _selectGroupSettlements = await getSqlQuery(_selectGroupSettlements);
       _selectGroupTransactions = await getSqlQuery(_selectGroupTransactions);
+
+      // beforeOpen Queries
+      _dataInitiation = await getSqlQuery(_dataInitiation);
+      _setupInitiation = await getSqlQuery(_setupInitiation);
 
       // // Migration Queries initiation
       // // dataMigrations
@@ -430,8 +440,12 @@ mixin _GenericDaoMixin<T extends GeneratedDatabase> on DatabaseAccessor<T> {
     await customStatement(_queries.defaultStartupStatement);
   }
 
-  Future<void> beforeOpen(OpeningDetails details, Migrator m);
+  Future<void> onCreate(Migrator m) async {
+    await m.createAll();
+  }
+
   Future<void> onUpgrade(Migrator m, int from, int to);
+  Future<void> beforeOpen(OpeningDetails details, Migrator m);
 
   Future<String> _uniqueId(String tableName, List<String> items,
       {HashLibrary hashLibrary}) async {
@@ -526,18 +540,23 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
   }
 
   @override
-  Future<void> beforeOpen(OpeningDetails details, Migrator m) async {
-    if (details.wasCreated) {
-      // todo: delete all irrelevant data & indexes
-      // todo: populate initial data
-    }
-    await getReady();
+  Future<void> onCreate(Migrator m) async {
+    await super.onCreate(m);
+    await m.issueCustomQuery(_queries.dataInitiation);
   }
 
   @override
   Future<void> onUpgrade(Migrator m, int from, int to) async {
     for (var i = from; i < to; i++)
       await m.issueCustomQuery(_queries.dataMigrations[i]);
+  }
+
+  @override
+  Future<void> beforeOpen(OpeningDetails details, Migrator m) async {
+    if (details.wasCreated) {
+      // todo: do first time activity
+    }
+    await getReady();
   }
 
   List<Group> _sharedGroupList;
@@ -950,13 +969,13 @@ class SprightlySetupDao extends DatabaseAccessor<SprightlySetupDatabase>
   bool _initialized = false;
   bool _working = false;
   @override
-  bool get ready => super.ready && appInformation.ready && _initialized;
+  bool get ready => super.ready && _appInformation.ready && _initialized;
   @override
   Future getReady() async {
     if (!_initialized && !_working) {
       _working = true;
       await super.getReady();
-      await appInformation.getReady();
+      await _appInformation.getReady();
       _allAppSettings = await getAppSettings();
       _allAppFonts = await getAppFonts();
       _allFontCombos = await getFontCombos();
@@ -967,12 +986,9 @@ class SprightlySetupDao extends DatabaseAccessor<SprightlySetupDatabase>
   }
 
   @override
-  Future<void> beforeOpen(OpeningDetails details, Migrator m) async {
-    if (details.wasCreated) {
-      // todo: delete all irrelevant data & indexes
-      // todo: populate initial data
-    }
-    await getReady();
+  Future<void> onCreate(Migrator m) async {
+    await super.onCreate(m);
+    await m.issueCustomQuery(_queries.setupInitiation);
   }
 
   @override
@@ -981,7 +997,17 @@ class SprightlySetupDao extends DatabaseAccessor<SprightlySetupDatabase>
       await m.issueCustomQuery(_queries.setupMigrations[i]);
   }
 
-  AppInformation appInformation = AppInformation();
+  @override
+  Future<void> beforeOpen(OpeningDetails details, Migrator m) async {
+    if (details.wasCreated) {
+      // todo: do first time activity
+      await updateAppSetting('dbVersion', db.schemaVersion.toString());
+    }
+    await getReady();
+  }
+
+  AppInformation _appInformation = AppInformation();
+  AppInformation get appInformation => _appInformation;
   List<AppSetting> _allAppSettings;
   List<AppSetting> get allAppSettings => _allAppSettings;
   List<AppFont> _allAppFonts;

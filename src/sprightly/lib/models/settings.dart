@@ -57,11 +57,11 @@ class AppSettings extends BaseData {
 
   // AppInfo details
   // todo: set it during MigrationStrategy initiation
-  String get appName => _getSettings('appName');
-  String get packageName => _getSettings('packageName');
-  String get version => _getSettings('version');
-  String get buildNumber => _getSettings('buildNumber');
-  String get dbVersion => _getSettings('dbVersion');
+  String get appName => _dao.appInformation.appName;
+  String get packageName => _dao.appInformation.packageName;
+  String get version => _dao.appInformation.version;
+  String get buildNumber => _dao.appInformation.buildNumber;
+  int get dbVersion => _getSettings<double>('dbVersion').round();
   // Other settings
   bool get primarySetupComplete => _getSettings('primarySetupComplete');
 }

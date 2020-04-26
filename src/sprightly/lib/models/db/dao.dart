@@ -148,6 +148,7 @@ abstract class SystemDao extends AppDao {
 }
 
 abstract class SettingsDao extends AppDao {
+  AppInformation get appInformation;
   List<AppSetting> get allAppSettings;
   List<AppFont> get allAppFonts;
   List<FontCombo> get allFontCombos;
