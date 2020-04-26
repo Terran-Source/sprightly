@@ -367,62 +367,59 @@ class AppSettings extends Table {
 //#endregion Database
 
 //#region Custom query & classes
+class CustomQuery {
+  final String source;
+  String _query;
+
+  CustomQuery(this.source);
+
+  Future<String> load() async => _query ??= await getSqlQuery(source);
+
+  String get query => _query;
+}
+
 class SprightlyQueries {
   static SprightlyQueries _cache = SprightlyQueries();
   bool initialized = false;
   bool _working = false;
-  String _defaultStartupStatement = 'defaultStartupStatement';
-  String get defaultStartupStatement => _defaultStartupStatement;
-  String _selectGroupAccountMembers = "selectGroupAccountMembers";
-  String get selectGroupAccountMembers => _selectGroupAccountMembers;
-  String _selectGroupOnlyMembers = "selectGroupOnlyMembers";
-  String get selectGroupOnlyMembers => _selectGroupOnlyMembers;
-  String _selectGroupSettlements = "selectGroupSettlements";
-  String get selectGroupSettlements => _selectGroupSettlements;
-  String _selectGroupTransactions = "selectGroupTransactions";
-  String get selectGroupTransactions => _selectGroupTransactions;
 
-  // beforeOpen Queries
-  String _dataInitiation = "dataInitiation";
-  String get dataInitiation => _dataInitiation;
-  String _setupInitiation = "setupInitiation";
-  String get setupInitiation => _setupInitiation;
+  // startup queries
+  CustomQuery get defaultStartupStatement =>
+      CustomQuery("defaultStartupStatement");
 
-  /// Migration Queries
-  ///
-  /// declare here & assign them inside [_init]
-  Map<int, String> dataMigrations = {};
-  Map<int, String> setupMigrations = {};
-  // String _dataMigrationFrom1 = "dataMigrationFrom1";
-  // String _setupMigrationFrom1 = "setupMigrationFrom1";
+  // custom queries
+  CustomQuery get selectGroupAccountMembers =>
+      CustomQuery("selectGroupAccountMembers");
+  CustomQuery get selectGroupOnlyMembers =>
+      CustomQuery("selectGroupOnlyMembers");
+  CustomQuery get selectGroupSettlements =>
+      CustomQuery("selectGroupSettlements");
+  CustomQuery get selectGroupTransactions =>
+      CustomQuery("selectGroupTransactions");
+
+  // beforeOpen queries
+  CustomQuery get dataInitiation => CustomQuery("dataInitiation");
+  CustomQuery get setupInitiation => CustomQuery("setupInitiation");
+
+  // Migration queries
+  Map<int, CustomQuery> dataMigrations = {
+    // 0: CustomQuery("dataMigrationFrom1"),
+  };
+  Map<int, CustomQuery> setupMigrations = {
+    // 0: CustomQuery("setupMigrationFrom1"),
+  };
 
   factory SprightlyQueries() => _cache;
 
   Future _init() async {
     if (!initialized && !_working) {
       _working = true;
-      _defaultStartupStatement = await getSqlQuery(_defaultStartupStatement);
-      _selectGroupAccountMembers =
-          await getSqlQuery(_selectGroupAccountMembers);
-      _selectGroupOnlyMembers = await getSqlQuery(_selectGroupOnlyMembers);
-      _selectGroupSettlements = await getSqlQuery(_selectGroupSettlements);
-      _selectGroupTransactions = await getSqlQuery(_selectGroupTransactions);
 
-      // beforeOpen Queries
-      _dataInitiation = await getSqlQuery(_dataInitiation);
-      _setupInitiation = await getSqlQuery(_setupInitiation);
-
-      // // Migration Queries initiation
-      // // dataMigrations
-      // _dataMigrationFrom1 = await getSqlQuery(_dataMigrationFrom1);
-      // dataMigrations = {
-      //   1: _dataMigrationFrom1,
-      // };
-      // // setupMigrations
-      // _setupMigrationFrom1 = await getSqlQuery(_setupMigrationFrom1);
-      // setupMigrations = {
-      //   1: _setupMigrationFrom1,
-      // };
+      // custom queries
+      await selectGroupAccountMembers.load();
+      await selectGroupOnlyMembers.load();
+      await selectGroupSettlements.load();
+      await selectGroupTransactions.load();
 
       initialized = true;
       _working = false;
@@ -437,7 +434,7 @@ mixin _GenericDaoMixin<T extends GeneratedDatabase> on DatabaseAccessor<T> {
 
   Future getReady() async {
     await _queries._init();
-    await customStatement(_queries.defaultStartupStatement);
+    await customStatement(await _queries.defaultStartupStatement.load());
   }
 
   Future<void> onCreate(Migrator m) async {
@@ -542,13 +539,13 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
   @override
   Future<void> onCreate(Migrator m) async {
     await super.onCreate(m);
-    await m.issueCustomQuery(_queries.dataInitiation);
+    await m.issueCustomQuery(await _queries.dataInitiation.load());
   }
 
   @override
   Future<void> onUpgrade(Migrator m, int from, int to) async {
     for (var i = from; i < to; i++)
-      await m.issueCustomQuery(_queries.dataMigrations[i]);
+      await m.issueCustomQuery(await _queries.dataMigrations[i].load());
   }
 
   @override
@@ -564,7 +561,7 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
 
   Selectable<Member> _selectGroupAccountMembers(String groupId) =>
       customSelectQuery(
-        _queries.selectGroupAccountMembers,
+        _queries.selectGroupAccountMembers.query,
         variables: [Variable.withString(groupId)],
         readsFrom: {members, groupMembers},
       ).map((row) => Member.fromData(row.data, db));
@@ -577,7 +574,7 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
 
   Selectable<Member> _selectGroupOnlyMembers(String groupId) =>
       customSelectQuery(
-        _queries.selectGroupOnlyMembers,
+        _queries.selectGroupOnlyMembers.query,
         variables: [Variable.withString(groupId)],
         readsFrom: {members, groupMembers},
       ).map((row) => Member.fromData(row.data, db));
@@ -694,7 +691,7 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
   Selectable<Settlement> _selectGroupSettlements(String groupId,
           {bool isTemporary}) =>
       customSelectQuery(
-        _queries.selectGroupSettlements,
+        _queries.selectGroupSettlements.query,
         variables: [
           Variable.withString(groupId),
           Variable.withBool(isTemporary)
@@ -779,7 +776,7 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
 
   Selectable<Transaction> _selectGroupTransactions(String groupId) =>
       customSelectQuery(
-        _queries.selectGroupTransactions,
+        _queries.selectGroupTransactions.query,
         variables: [Variable.withString(groupId)],
         readsFrom: {transactions, groups},
       ).map((row) => Transaction.fromData(row.data, db));
@@ -988,13 +985,13 @@ class SprightlySetupDao extends DatabaseAccessor<SprightlySetupDatabase>
   @override
   Future<void> onCreate(Migrator m) async {
     await super.onCreate(m);
-    await m.issueCustomQuery(_queries.setupInitiation);
+    await m.issueCustomQuery(await _queries.setupInitiation.load());
   }
 
   @override
   Future<void> onUpgrade(Migrator m, int from, int to) async {
     for (var i = from; i < to; i++)
-      await m.issueCustomQuery(_queries.setupMigrations[i]);
+      await m.issueCustomQuery(await _queries.setupMigrations[i].load());
   }
 
   @override
