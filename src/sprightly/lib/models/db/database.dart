@@ -380,6 +380,8 @@ class CustomQuery {
 
 class SprightlyQueries {
   static SprightlyQueries _cache = SprightlyQueries();
+  factory SprightlyQueries() => _cache;
+
   bool initialized = false;
   bool _working = false;
 
@@ -408,8 +410,6 @@ class SprightlyQueries {
   Map<int, CustomQuery> setupMigrations = {
     // 0: CustomQuery("setupMigrationFrom1"),
   };
-
-  factory SprightlyQueries() => _cache;
 
   Future _init() async {
     if (!initialized && !_working) {
