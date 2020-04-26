@@ -36,9 +36,11 @@ class Setting<T> {
 }
 
 class AppSettings extends BaseData {
+  static AppSettings _cache;
   final Map<String, Setting> _settings;
+  final SettingNames _setting = SettingNames();
 
-  AppSettings(SettingsDao _dao)
+  AppSettings._(SettingsDao _dao)
       : _settings = {},
         super(_dao) {
     _dao.allAppSettings.forEach((appSetting) {
@@ -49,11 +51,18 @@ class AppSettings extends BaseData {
     });
   }
 
+  factory AppSettings(SettingsDao dao) => _cache ??= AppSettings._(dao);
+
   List<AppFont> get _appFonts => _dao.allAppFonts;
   List<FontCombo> get _fontCombos => _dao.allFontCombos;
   List<ColorCombo> get _colorCombos => _dao.allColorCombos;
 
   T _getSettings<T>(String name) => (_settings[name] as Setting<T>).value;
+  void _setSettings<T>(String name, T value) {
+    updateAppSetting(name, T.toString()).then((success) {
+      if (success) _settings[name] = Setting._ofType(name, T.toString());
+    });
+  }
 
   // AppInfo details
   // todo: set it during MigrationStrategy initiation
@@ -61,7 +70,22 @@ class AppSettings extends BaseData {
   String get packageName => _dao.appInformation.packageName;
   String get version => _dao.appInformation.version;
   String get buildNumber => _dao.appInformation.buildNumber;
-  int get dbVersion => _getSettings<double>('dbVersion').round();
+  int get dbVersion => _getSettings<double>(_setting.dbVersion).round();
+
   // Other settings
-  bool get primarySetupComplete => _getSettings('primarySetupComplete');
+  bool get primarySetupComplete => _getSettings(_setting.primarySetupComplete);
+  set primarySetupComplete(bool value) =>
+      _setSettings(_setting.primarySetupComplete, value);
+
+  // Themes
+  ThemeMode get themeMode =>
+      ThemeMode.values.find(_getSettings<String>(_setting.themeMode));
+  set themeMode(ThemeMode mode) =>
+      _setSettings(_setting.themeMode, mode.toEnumString());
+
+  Future<bool> updateAppSetting(String name, String value) =>
+      _dao.updateAppSetting(name, value);
+
+  Future<bool> updateAppSettings(Map<String, String> settings) =>
+      _dao.updateAppSettings(settings);
 }
