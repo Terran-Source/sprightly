@@ -1097,9 +1097,7 @@ class SprightlyDatabase extends _$SprightlyDatabase {
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-        onCreate: (Migrator m) async {
-          await m.createAll();
-        },
+        onCreate: sprightlyDao.onCreate,
         onUpgrade: sprightlyDao.onUpgrade,
         beforeOpen: (OpeningDetails details) async {
           Migrator m = this.createMigrator();
@@ -1133,9 +1131,7 @@ class SprightlySetupDatabase extends _$SprightlySetupDatabase {
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-        onCreate: (Migrator m) async {
-          await m.createAll();
-        },
+        onCreate: sprightlySetupDao.onCreate,
         onUpgrade: sprightlySetupDao.onUpgrade,
         beforeOpen: (OpeningDetails details) async {
           Migrator m = this.createMigrator();
