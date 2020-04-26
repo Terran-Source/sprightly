@@ -382,6 +382,14 @@ class SprightlyQueries {
   String _selectGroupTransactions = "selectGroupTransactions";
   String get selectGroupTransactions => _selectGroupTransactions;
 
+  /// Migration Queries
+  ///
+  /// declare here & assign them inside [_init]
+  Map<int, String> dataMigrations = {};
+  Map<int, String> setupMigrations = {};
+  // String _dataMigrationFrom1 = "dataMigrationFrom1";
+  // String _setupMigrationFrom1 = "setupMigrationFrom1";
+
   factory SprightlyQueries() => _cache;
 
   Future _init() async {
@@ -393,6 +401,19 @@ class SprightlyQueries {
       _selectGroupOnlyMembers = await getSqlQuery(_selectGroupOnlyMembers);
       _selectGroupSettlements = await getSqlQuery(_selectGroupSettlements);
       _selectGroupTransactions = await getSqlQuery(_selectGroupTransactions);
+
+      // // Migration Queries initiation
+      // // dataMigrations
+      // _dataMigrationFrom1 = await getSqlQuery(_dataMigrationFrom1);
+      // dataMigrations = {
+      //   1: _dataMigrationFrom1,
+      // };
+      // // setupMigrations
+      // _setupMigrationFrom1 = await getSqlQuery(_setupMigrationFrom1);
+      // setupMigrations = {
+      //   1: _setupMigrationFrom1,
+      // };
+
       initialized = true;
       _working = false;
     }
@@ -408,6 +429,9 @@ mixin _GenericDaoMixin<T extends GeneratedDatabase> on DatabaseAccessor<T> {
     await _queries._init();
     await customStatement(_queries.defaultStartupStatement);
   }
+
+  Future<void> beforeOpen(OpeningDetails details, Migrator m);
+  Future<void> onUpgrade(Migrator m, int from, int to);
 
   Future<String> _uniqueId(String tableName, List<String> items,
       {HashLibrary hashLibrary}) async {
@@ -499,6 +523,21 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
       _initialized = true;
       _working = false;
     }
+  }
+
+  @override
+  Future<void> beforeOpen(OpeningDetails details, Migrator m) async {
+    if (details.wasCreated) {
+      // todo: delete all irrelevant data & indexes
+      // todo: populate initial data
+    }
+    await getReady();
+  }
+
+  @override
+  Future<void> onUpgrade(Migrator m, int from, int to) async {
+    for (var i = from; i < to; i++)
+      await m.issueCustomQuery(_queries.dataMigrations[i]);
   }
 
   List<Group> _sharedGroupList;
@@ -927,6 +966,21 @@ class SprightlySetupDao extends DatabaseAccessor<SprightlySetupDatabase>
     }
   }
 
+  @override
+  Future<void> beforeOpen(OpeningDetails details, Migrator m) async {
+    if (details.wasCreated) {
+      // todo: delete all irrelevant data & indexes
+      // todo: populate initial data
+    }
+    await getReady();
+  }
+
+  @override
+  Future<void> onUpgrade(Migrator m, int from, int to) async {
+    for (var i = from; i < to; i++)
+      await m.issueCustomQuery(_queries.setupMigrations[i]);
+  }
+
   AppInformation appInformation = AppInformation();
   List<AppSetting> _allAppSettings;
   List<AppSetting> get allAppSettings => _allAppSettings;
@@ -1020,10 +1074,10 @@ class SprightlyDatabase extends _$SprightlyDatabase {
         onCreate: (Migrator m) async {
           await m.createAll();
         },
-        onUpgrade: (Migrator m, int from, int to) async {},
+        onUpgrade: sprightlyDao.onUpgrade,
         beforeOpen: (OpeningDetails details) async {
-          await sprightlyDao.getReady();
-          if (details.wasCreated) {}
+          Migrator m = this.createMigrator();
+          await sprightlyDao.beforeOpen(details, m);
         },
       );
 }
@@ -1056,10 +1110,10 @@ class SprightlySetupDatabase extends _$SprightlySetupDatabase {
         onCreate: (Migrator m) async {
           await m.createAll();
         },
-        onUpgrade: (Migrator m, int from, int to) async {},
+        onUpgrade: sprightlySetupDao.onUpgrade,
         beforeOpen: (OpeningDetails details) async {
-          await sprightlySetupDao.getReady();
-          if (details.wasCreated) {}
+          Migrator m = this.createMigrator();
+          await sprightlySetupDao.beforeOpen(details, m);
         },
       );
 }
