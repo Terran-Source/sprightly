@@ -1,10 +1,18 @@
+import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 
-String get sqlAssetDirectory => 'assets/queries_min';
+Future<Directory> getDirectory(String path,
+    {bool isSupportDirectory = false}) async {
+  var targetDirectory = isSupportDirectory
+      ? await getApplicationSupportDirectory()
+      : await getApplicationDocumentsDirectory();
+  return Directory(p.join(targetDirectory.path, path));
+}
 
 Future<File> getFile(String filePath,
     {bool isSupportFile = false, bool recreateFile = false}) async {
@@ -12,24 +20,88 @@ Future<File> getFile(String filePath,
       ? await getApplicationSupportDirectory()
       : await getApplicationDocumentsDirectory();
   var file = File(p.join(targetDirectory.path, filePath));
-  if (recreateFile && file.existsSync()) await file.delete();
+  if (recreateFile && await file.exists()) await file.delete();
   return file;
 }
 
-Future<File> appendText(String filePath, String text,
-    [bool isSupportFile = false]) async {
-  final targetDirectory = isSupportFile
-      ? await getApplicationSupportDirectory()
-      : await getApplicationDocumentsDirectory();
-  var file = File(p.join(targetDirectory.path, filePath));
-  if (file.existsSync()) {
-    text = (await file.readAsString()) + text;
-  }
-  return file.writeAsString(text);
+Future<File> writeText(String filePath, String text,
+    {bool isSupportFile = false}) async {
+  var file = await getFile(filePath, isSupportFile: isSupportFile);
+  return file.writeAsString(text, mode: FileMode.writeOnly, flush: true);
 }
 
-Future<String> getAssetText(String assetDirectory, String fileName) =>
-    rootBundle.loadString(p.join(assetDirectory, fileName));
+Future<File> appendText(String filePath, String text,
+    {bool isSupportFile = false}) async {
+  var file = await getFile(filePath, isSupportFile: isSupportFile);
+  return file.writeAsString(text, mode: FileMode.writeOnlyAppend, flush: true);
+}
 
-Future<String> getSqlQuery(String queryName) =>
-    getAssetText(sqlAssetDirectory, '$queryName.sql');
+Future<String> getFileText(String filePath,
+    {bool isSupportFile = false}) async {
+  var file = await getFile(filePath, isSupportFile: isSupportFile);
+  if (await file.exists()) return await file.readAsString();
+  return null;
+}
+
+// Future<File> cacheRemoteFile(String fileUri,
+//         {Map<String, String> headers,
+//         String cacheRelativePath,
+//         bool isSupportFile = false}) =>
+//     null;
+
+Future<File> cacheFile(Uint8List fileContent, String cacheRelativePath,
+    {bool isSupportFile = false}) async {
+  var file = await getFile(cacheRelativePath, isSupportFile: isSupportFile);
+  return file.writeAsBytes(fileContent.toList(),
+      mode: FileMode.writeOnly, flush: true);
+}
+
+Future<String> getAssetText(
+  String fileName, {
+  String assetDirectory,
+  String extension,
+}) =>
+    rootBundle.loadString(
+        p.join(assetDirectory ?? '', '$fileName${extension ?? ''}'));
+
+Future<String> getSqlQuery(
+  String fileName, {
+  String path,
+  String extension,
+}) =>
+    getAssetText(fileName,
+        assetDirectory: path, extension: extension ?? '.sql');
+
+class RemoteFileCache {
+  final String _cacheDirectory = '__fileCache';
+  final String _cacheFile = '__fileCache.json';
+  final Map<String, String> _fileCache = {};
+
+  static RemoteFileCache _cache = RemoteFileCache._();
+  RemoteFileCache._() {
+    _init();
+  }
+  factory RemoteFileCache() => _cache;
+
+  bool initialized = false;
+  bool _working = false;
+  Future<void> _init() async {
+    if (!initialized && !_working) {
+      _working = true;
+      var cacheDirectory = await getDirectory(_cacheDirectory);
+      if (await cacheDirectory.exists()) {
+        var oldFileCache =
+            await getFileText(p.join(_cacheDirectory, _cacheFile));
+        if (null != oldFileCache) _fileCache.addAll(json.decode(oldFileCache));
+      } else
+        await cacheDirectory.create(recursive: true);
+      initialized = true;
+      _working = false;
+    }
+  }
+
+  /// to be called before application ends,
+  /// or else, any changes after last [dump] will be lost
+  Future<void> dump() =>
+      writeText(p.join(_cacheDirectory, _cacheFile), json.encode(_fileCache));
+}

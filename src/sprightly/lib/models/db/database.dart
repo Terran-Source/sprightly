@@ -17,6 +17,9 @@ const String setupDataDbFile = 'sprightly_setup.lite';
 const int hashedIdMinLength = 16;
 const int uniqueRetry = 5;
 
+/// asset path for custom sql files
+String get sqlAssetDirectory => 'assets/queries_min';
+
 //#region Database
 //#region Database: sprightly_db
 @DataClassName("Member")
@@ -375,13 +378,25 @@ class AppSettings extends Table {
 
 //#region Custom query & classes
 class CustomQuery {
+  /// either a filename(without extension) inside [sqlAssetDirectory]
+  /// or an accessible web address of the file
+  ///
+  /// Example:
+  /// ```dart
+  /// var customQueryFromFile = CustomQuery('queryFileName');
+  /// // or
+  /// var customQueryFromWeb = CustomQuery('https://example.com/some/source/queryFileName.sql');
+  /// ```
   final String source;
   String _query;
 
   CustomQuery(this.source);
 
-  Future<String> load() async => _query ??= await getSqlQuery(source);
+  /// Asynchronously load the sql file content
+  Future<String> load() async =>
+      _query ??= await getSqlQuery(source, path: sqlAssetDirectory);
 
+  /// the actual sql statements after the [load] is called at least once
   String get query => _query;
 }
 
