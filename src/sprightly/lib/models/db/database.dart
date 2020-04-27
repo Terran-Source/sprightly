@@ -108,6 +108,10 @@ class Accounts extends Table {
 
   IntColumn get id => integer().named('id').autoIncrement()();
   TextColumn get name => text().named('name').withLength(max: 15)();
+  TextColumn get groupId => text()
+      .named('groupId')
+      .withLength(min: 16)
+      .customConstraint('REFERENCES Groups(id) NOT NULL ON UPDATE CASCADE')();
   IntColumn get parentId => integer()
       .named('parentId')
       .nullable()
@@ -119,6 +123,8 @@ class Accounts extends Table {
       .nullable()
       .withLength(min: 16)
       .customConstraint('REFERENCES Members(id) NULL ON UPDATE CASCADE')();
+  RealColumn get balance =>
+      real().named('balance').withDefault(const Constant(0))();
   DateTimeColumn get createdOn => dateTime()
       .named('createdOn')
       .clientDefault(() => DateTime.now().toUtc())();
@@ -539,6 +545,13 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
   @override
   Future<void> onCreate(Migrator m) async {
     await super.onCreate(m);
+    var defaultGroup = await createGroup('Sprightly Default',
+        type: GroupType.Personal, isHidden: true);
+    await addAccount('Cash', defaultGroup.id, type: AccountType.Cash);
+    await addAccount('Bank Accounts', defaultGroup.id, type: AccountType.Bank);
+    await addAccount('Credit Cards', defaultGroup.id, type: AccountType.Credit);
+    await addAccount('Investments', defaultGroup.id,
+        type: AccountType.Investment);
     await m.issueCustomQuery(await _queries.dataInitiation.load());
   }
 
@@ -647,7 +660,8 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
           signature: signature);
 
       if (idType == MemberIdType.Group)
-        await addAccount(idValue, memberId: member.id, type: AccountType.Group);
+        await addAccount(idValue, groupId,
+            memberId: member.id, type: AccountType.Group);
     }
     var groupMembersComp =
         GroupMembersCompanion.insert(groupId: groupId, memberId: member.id);
@@ -860,25 +874,35 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
   Future<Account> getAccount(int accountId) async => Account.fromJson(
       await getRecord(accounts.actualTableName, accountId.toString()));
 
-  Future<Account> addAccount(String name,
-      {int parentId, AccountType type, String memberId}) async {
+  Future<Account> addAccount(String name, String groupId,
+      {int parentId, AccountType type, String memberId, double balance}) async {
     var accountsComp = AccountsCompanion.insert(
-        name: name,
-        parentId: Value(parentId),
-        type: Value(type.toEnumString()),
-        memberId: Value(memberId));
+      name: name,
+      groupId: groupId,
+      parentId: Value(parentId),
+      type: Value(type.toEnumString()),
+      memberId: Value(memberId),
+      balance: Value(balance),
+    );
     var accountId = await into(accounts).insert(accountsComp);
     return getAccount(accountId);
   }
 
   Future<Account> updateAccount(int accountId,
-      {String name, int parentId, AccountType type, String memberId}) async {
+      {String name,
+      String groupId,
+      int parentId,
+      AccountType type,
+      String memberId,
+      double balance}) async {
     var account = await getAccount(accountId);
     account.copyWith(
       name: name,
+      groupId: groupId,
       parentId: parentId,
       type: type.toEnumString(),
       memberId: memberId,
+      balance: balance,
       updatedOn: DateTime.now().toUtc(),
     );
     await updateRecord(accounts, account);

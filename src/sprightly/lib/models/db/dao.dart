@@ -126,10 +126,15 @@ abstract class SystemDao extends AppDao {
   Future<int> deleteTransaction(String transactionId);
 
   Future<Account> getAccount(int accountId);
-  Future<Account> addAccount(String name,
-      {int parentId, AccountType type, String memberId});
+  Future<Account> addAccount(String name, String groupId,
+      {int parentId, AccountType type, String memberId, double balance});
   Future<Account> updateAccount(int accountId,
-      {String name, int parentId, AccountType type, String memberId});
+      {String name,
+      String groupId,
+      int parentId,
+      AccountType type,
+      String memberId,
+      double balance});
   Future<int> deleteAccount(int accountId);
 
   Future<List<Group>> getGroups(GroupType type);
