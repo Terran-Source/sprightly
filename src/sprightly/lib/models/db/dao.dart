@@ -97,32 +97,46 @@ abstract class SystemDao extends AppDao {
   });
   Future<void> addGroupSettlements(
       String groupId, List<Settlement> settlementList);
-  Future<bool> finalizeSettlement(String groupId, String id, String signature,
-      {double settledAmount, String notes, String attachments});
+  Future<bool> finalizeSettlement(
+    String groupId,
+    String id,
+    String signature, {
+    double settledAmount,
+    String notes,
+    List<String> attachments,
+    List<String> tags,
+  });
   Future<int> deleteTempSettlements(String groupId);
 
   Future<List<Transaction>> getGroupTransactions(String groupId);
   Stream<List<Transaction>> watchGroupTransactions(String groupId);
   Future<Transaction> getTransaction(String transactionId);
   Future<Transaction> addGroupTransaction(
-      String groupId, String memberId, double amount,
-      {String id,
-      String groupMemberIds,
-      int fromAccountId,
-      int toAccountId,
-      int categoryId,
-      String settlementId,
-      String notes,
-      String attachments});
-  Future<Transaction> updateTransaction(String transactionId,
-      {String memberId,
-      double amount,
-      String groupMemberIds,
-      int fromAccountId,
-      int toAccountId,
-      int categoryId,
-      String notes,
-      String attachments});
+    String groupId,
+    String memberId,
+    double amount, {
+    String id,
+    String groupMemberIds,
+    int fromAccountId,
+    int toAccountId,
+    int categoryId,
+    String settlementId,
+    String notes,
+    List<String> attachments,
+    List<String> tags,
+  });
+  Future<Transaction> updateTransaction(
+    String transactionId, {
+    String memberId,
+    double amount,
+    String groupMemberIds,
+    int fromAccountId,
+    int toAccountId,
+    int categoryId,
+    String notes,
+    List<String> attachments,
+    List<String> tags,
+  });
   Future<int> deleteTransaction(String transactionId);
 
   Future<Account> getAccount(int accountId);

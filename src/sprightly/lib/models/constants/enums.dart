@@ -18,6 +18,7 @@ enum MemberIdType { Phone, Email, NickName, Group, GroupMember }
 enum GroupType { Personal, Budget, Shared }
 enum AccountType { Group, Cash, Credit, Bank, Investment }
 enum CategoryType { Expense, Liability, Income, Investment, Misc }
+enum TransactionTag { Special, Star }
 
 // package:sprightly/models
 enum GroupActivityType {

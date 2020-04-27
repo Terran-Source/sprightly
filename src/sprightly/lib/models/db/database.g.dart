@@ -2426,6 +2426,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
   final String settlementId;
   final String notes;
   final String attachments;
+  final String tags;
   final DateTime createdOn;
   final DateTime updatedOn;
   Transaction(
@@ -2440,6 +2441,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       this.settlementId,
       this.notes,
       this.attachments,
+      this.tags,
       @required this.createdOn,
       this.updatedOn});
   factory Transaction.fromData(Map<String, dynamic> data, GeneratedDatabase db,
@@ -2471,6 +2473,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}notes']),
       attachments: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}attachments']),
+      tags: stringType.mapFromDatabaseResponse(data['${effectivePrefix}tags']),
       createdOn: dateTimeType
           .mapFromDatabaseResponse(data['${effectivePrefix}createdOn']),
       updatedOn: dateTimeType
@@ -2492,6 +2495,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       settlementId: serializer.fromJson<String>(json['settlementId']),
       notes: serializer.fromJson<String>(json['notes']),
       attachments: serializer.fromJson<String>(json['attachments']),
+      tags: serializer.fromJson<String>(json['tags']),
       createdOn: serializer.fromJson<DateTime>(json['createdOn']),
       updatedOn: serializer.fromJson<DateTime>(json['updatedOn']),
     );
@@ -2511,6 +2515,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       'settlementId': serializer.toJson<String>(settlementId),
       'notes': serializer.toJson<String>(notes),
       'attachments': serializer.toJson<String>(attachments),
+      'tags': serializer.toJson<String>(tags),
       'createdOn': serializer.toJson<DateTime>(createdOn),
       'updatedOn': serializer.toJson<DateTime>(updatedOn),
     };
@@ -2548,6 +2553,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       attachments: attachments == null && nullToAbsent
           ? const Value.absent()
           : Value(attachments),
+      tags: tags == null && nullToAbsent ? const Value.absent() : Value(tags),
       createdOn: createdOn == null && nullToAbsent
           ? const Value.absent()
           : Value(createdOn),
@@ -2569,6 +2575,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
           String settlementId,
           String notes,
           String attachments,
+          String tags,
           DateTime createdOn,
           DateTime updatedOn}) =>
       Transaction(
@@ -2583,6 +2590,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
         settlementId: settlementId ?? this.settlementId,
         notes: notes ?? this.notes,
         attachments: attachments ?? this.attachments,
+        tags: tags ?? this.tags,
         createdOn: createdOn ?? this.createdOn,
         updatedOn: updatedOn ?? this.updatedOn,
       );
@@ -2600,6 +2608,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
           ..write('settlementId: $settlementId, ')
           ..write('notes: $notes, ')
           ..write('attachments: $attachments, ')
+          ..write('tags: $tags, ')
           ..write('createdOn: $createdOn, ')
           ..write('updatedOn: $updatedOn')
           ..write(')'))
@@ -2630,9 +2639,11 @@ class Transaction extends DataClass implements Insertable<Transaction> {
                                           $mrjc(
                                               attachments.hashCode,
                                               $mrjc(
-                                                  createdOn.hashCode,
-                                                  updatedOn
-                                                      .hashCode)))))))))))));
+                                                  tags.hashCode,
+                                                  $mrjc(
+                                                      createdOn.hashCode,
+                                                      updatedOn
+                                                          .hashCode))))))))))))));
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
@@ -2648,6 +2659,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
           other.settlementId == this.settlementId &&
           other.notes == this.notes &&
           other.attachments == this.attachments &&
+          other.tags == this.tags &&
           other.createdOn == this.createdOn &&
           other.updatedOn == this.updatedOn);
 }
@@ -2664,6 +2676,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
   final Value<String> settlementId;
   final Value<String> notes;
   final Value<String> attachments;
+  final Value<String> tags;
   final Value<DateTime> createdOn;
   final Value<DateTime> updatedOn;
   const TransactionsCompanion({
@@ -2678,6 +2691,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     this.settlementId = const Value.absent(),
     this.notes = const Value.absent(),
     this.attachments = const Value.absent(),
+    this.tags = const Value.absent(),
     this.createdOn = const Value.absent(),
     this.updatedOn = const Value.absent(),
   });
@@ -2693,6 +2707,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     this.settlementId = const Value.absent(),
     this.notes = const Value.absent(),
     this.attachments = const Value.absent(),
+    this.tags = const Value.absent(),
     this.createdOn = const Value.absent(),
     this.updatedOn = const Value.absent(),
   })  : id = Value(id),
@@ -2711,6 +2726,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
       Value<String> settlementId,
       Value<String> notes,
       Value<String> attachments,
+      Value<String> tags,
       Value<DateTime> createdOn,
       Value<DateTime> updatedOn}) {
     return TransactionsCompanion(
@@ -2725,6 +2741,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
       settlementId: settlementId ?? this.settlementId,
       notes: notes ?? this.notes,
       attachments: attachments ?? this.attachments,
+      tags: tags ?? this.tags,
       createdOn: createdOn ?? this.createdOn,
       updatedOn: updatedOn ?? this.updatedOn,
     );
@@ -2860,6 +2877,18 @@ class $TransactionsTable extends Transactions
     );
   }
 
+  final VerificationMeta _tagsMeta = const VerificationMeta('tags');
+  GeneratedTextColumn _tags;
+  @override
+  GeneratedTextColumn get tags => _tags ??= _constructTags();
+  GeneratedTextColumn _constructTags() {
+    return GeneratedTextColumn(
+      'tags',
+      $tableName,
+      true,
+    );
+  }
+
   final VerificationMeta _createdOnMeta = const VerificationMeta('createdOn');
   GeneratedDateTimeColumn _createdOn;
   @override
@@ -2897,6 +2926,7 @@ class $TransactionsTable extends Transactions
         settlementId,
         notes,
         attachments,
+        tags,
         createdOn,
         updatedOn
       ];
@@ -2967,6 +2997,10 @@ class $TransactionsTable extends Transactions
       context.handle(_attachmentsMeta,
           attachments.isAcceptableValue(d.attachments.value, _attachmentsMeta));
     }
+    if (d.tags.present) {
+      context.handle(
+          _tagsMeta, tags.isAcceptableValue(d.tags.value, _tagsMeta));
+    }
     if (d.createdOn.present) {
       context.handle(_createdOnMeta,
           createdOn.isAcceptableValue(d.createdOn.value, _createdOnMeta));
@@ -3022,6 +3056,9 @@ class $TransactionsTable extends Transactions
     }
     if (d.attachments.present) {
       map['attachments'] = Variable<String, StringType>(d.attachments.value);
+    }
+    if (d.tags.present) {
+      map['tags'] = Variable<String, StringType>(d.tags.value);
     }
     if (d.createdOn.present) {
       map['createdOn'] = Variable<DateTime, DateTimeType>(d.createdOn.value);

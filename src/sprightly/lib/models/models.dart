@@ -158,39 +158,50 @@ class GroupActivity extends BaseData {
   }
 
   Future<Transaction> addGroupTransaction(
-          String groupId, String memberId, double amount,
-          {String groupMemberIds,
-          int fromAccountId,
-          int toAccountId,
-          int categoryId,
-          String settlementId,
-          String notes,
-          String attachments}) async =>
-      await _dao.addGroupTransaction(groupId, memberId, amount,
-          groupMemberIds: groupMemberIds,
-          fromAccountId: fromAccountId,
-          toAccountId: toAccountId,
-          categoryId: categoryId,
-          settlementId: settlementId,
-          notes: notes,
-          attachments: attachments);
+    String groupId,
+    String memberId,
+    double amount, {
+    String groupMemberIds,
+    int fromAccountId,
+    int toAccountId,
+    int categoryId,
+    String settlementId,
+    String notes,
+    List<String> attachments,
+    List<String> tags,
+  }) async =>
+      await _dao.addGroupTransaction(
+        groupId,
+        memberId,
+        amount,
+        groupMemberIds: groupMemberIds,
+        fromAccountId: fromAccountId,
+        toAccountId: toAccountId,
+        categoryId: categoryId,
+        settlementId: settlementId,
+        notes: notes,
+        attachments: attachments,
+        tags: tags,
+      );
 
-  Future<bool> finalizeSettlement(String settlementId,
-      {double settledAmount, String notes, String attachments}) async {
+  Future<bool> finalizeSettlement(
+    String settlementId, {
+    double settledAmount,
+    String notes,
+    List<String> attachments,
+    List<String> tags,
+  }) async {
     var result = false;
     var settlement = await _dao.getSettlement(settlementId);
     // only existing calculated settlement & the receiving member can settle
     if (null != settlement && settlement.toMemberId != memberId) {
       // todo: sign the settlement
       String signature;
-      result = await _dao.finalizeSettlement(
-        groupId,
-        settlementId,
-        signature,
-        settledAmount: settledAmount,
-        notes: notes,
-        attachments: attachments,
-      );
+      result = await _dao.finalizeSettlement(groupId, settlementId, signature,
+          settledAmount: settledAmount,
+          notes: notes,
+          attachments: attachments,
+          tags: tags);
       if (result) {
         onGroupActivity(GroupActivityType.Settlement);
       }

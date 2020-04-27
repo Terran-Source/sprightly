@@ -231,6 +231,7 @@ class Transactions extends Table {
       .customConstraint('REFERENCES Settlements(id) NULL ON UPDATE CASCADE')();
   TextColumn get notes => text().named('notes').nullable()();
   TextColumn get attachments => text().named('attachments').nullable()();
+  TextColumn get tags => text().named('tags').nullable()();
   DateTimeColumn get createdOn => dateTime()
       .named('createdOn')
       .clientDefault(() => DateTime.now().toUtc())();
@@ -759,24 +760,36 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
           String groupId, List<Settlement> settlementList) =>
       batch((b) => b.insertAll(settlements, settlementList));
 
-  Future<bool> finalizeSettlement(String groupId, String id, String signature,
-      {double settledAmount, String notes, String attachments}) async {
+  Future<bool> finalizeSettlement(
+    String groupId,
+    String id,
+    String signature, {
+    double settledAmount,
+    String notes,
+    List<String> attachments,
+    List<String> tags,
+  }) async {
     var recordExists =
         await recordWithIdExists(settlements.actualTableName, id);
     if (recordExists) {
       var settleMent = await getSettlement(id);
       var transaction = await addGroupTransaction(
-          groupId, settleMent.fromMemberId, settledAmount ?? settleMent.amount,
-          groupMemberIds: settleMent.toMemberId,
-          settlementId: settleMent.id,
-          notes: notes,
-          attachments: attachments);
+        groupId,
+        settleMent.fromMemberId,
+        settledAmount ?? settleMent.amount,
+        groupMemberIds: settleMent.toMemberId,
+        settlementId: settleMent.id,
+        notes: notes,
+        attachments: attachments,
+        tags: tags,
+      );
       settleMent.copyWith(
-          settledAmount: settledAmount,
-          isTemporary: false,
-          transactionId: transaction.id,
-          signature: signature,
-          updatedOn: DateTime.now().toUtc());
+        settledAmount: settledAmount,
+        isTemporary: false,
+        transactionId: transaction.id,
+        signature: signature,
+        updatedOn: DateTime.now().toUtc(),
+      );
       return updateRecord(settlements, settleMent);
     }
     return false;
@@ -806,44 +819,53 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
           await getRecord(transactions.actualTableName, transactionId));
 
   Future<Transaction> addGroupTransaction(
-      String groupId, String memberId, double amount,
-      {String id,
-      String groupMemberIds,
-      int fromAccountId,
-      int toAccountId,
-      int categoryId,
-      String settlementId,
-      String notes,
-      String attachments}) async {
+    String groupId,
+    String memberId,
+    double amount, {
+    String id,
+    String groupMemberIds,
+    int fromAccountId,
+    int toAccountId,
+    int categoryId,
+    String settlementId,
+    String notes,
+    List<String> attachments,
+    List<String> tags,
+  }) async {
     if (null != id)
       id = await _uniqueId(
           transactions.actualTableName, [groupId, memberId, amount.toString()],
           hashLibrary: HashLibrary.hmac_sha256);
     var transactionComp = TransactionsCompanion.insert(
-        id: id,
-        memberId: memberId,
-        amount: amount,
-        groupId: groupId,
-        groupMemberIds: Value(groupMemberIds),
-        fromAccountId: Value(fromAccountId),
-        toAccountId: Value(toAccountId),
-        categoryId: Value(categoryId),
-        settlementId: Value(settlementId),
-        notes: Value(notes),
-        attachments: Value(attachments));
+      id: id,
+      memberId: memberId,
+      amount: amount,
+      groupId: groupId,
+      groupMemberIds: Value(groupMemberIds),
+      fromAccountId: Value(fromAccountId),
+      toAccountId: Value(toAccountId),
+      categoryId: Value(categoryId),
+      settlementId: Value(settlementId),
+      notes: Value(notes),
+      attachments: Value(attachments.join(',')),
+      tags: Value(tags.join(',')),
+    );
     into(transactions).insert(transactionComp);
     return getTransaction(id);
   }
 
-  Future<Transaction> updateTransaction(String transactionId,
-      {String memberId,
-      double amount,
-      String groupMemberIds,
-      int fromAccountId,
-      int toAccountId,
-      int categoryId,
-      String notes,
-      String attachments}) async {
+  Future<Transaction> updateTransaction(
+    String transactionId, {
+    String memberId,
+    double amount,
+    String groupMemberIds,
+    int fromAccountId,
+    int toAccountId,
+    int categoryId,
+    String notes,
+    List<String> attachments,
+    List<String> tags,
+  }) async {
     var transaction = await getTransaction(transactionId);
     if (null == transaction.settlementId) {
       transaction.copyWith(
@@ -854,7 +876,8 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
         toAccountId: toAccountId,
         categoryId: categoryId,
         notes: notes,
-        attachments: attachments,
+        attachments: attachments.join(','),
+        tags: tags.join(','),
         updatedOn: DateTime.now().toUtc(),
       );
       await updateRecord(transactions, transaction);
