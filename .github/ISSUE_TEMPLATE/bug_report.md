@@ -4,7 +4,6 @@ about: Something Went wrong
 title: '✍️'
 labels: ''
 assignees: ''
-
 ---
 
 **Describe the bug**
