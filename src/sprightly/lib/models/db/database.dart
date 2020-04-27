@@ -546,13 +546,6 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
   @override
   Future<void> onCreate(Migrator m) async {
     await super.onCreate(m);
-    var defaultGroup = await createGroup('Sprightly Default',
-        type: GroupType.Personal, isHidden: true);
-    await addAccount('Cash', defaultGroup.id, type: AccountType.Cash);
-    await addAccount('Bank Accounts', defaultGroup.id, type: AccountType.Bank);
-    await addAccount('Credit Cards', defaultGroup.id, type: AccountType.Credit);
-    await addAccount('Investments', defaultGroup.id,
-        type: AccountType.Investment);
     await m.issueCustomQuery(await _queries.dataInitiation.load());
   }
 
@@ -564,10 +557,20 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
 
   @override
   Future<void> beforeOpen(OpeningDetails details, Migrator m) async {
+    await getReady();
     if (details.wasCreated) {
       // todo: do first time activity
+      // creating default Group & Accounts
+      var defaultGroup = await createGroup('Sprightly Default',
+          type: GroupType.Personal, isHidden: true);
+      await addAccount('Cash', defaultGroup.id, type: AccountType.Cash);
+      await addAccount('Bank Accounts', defaultGroup.id,
+          type: AccountType.Bank);
+      await addAccount('Credit Cards', defaultGroup.id,
+          type: AccountType.Credit);
+      await addAccount('Investments', defaultGroup.id,
+          type: AccountType.Investment);
     }
-    await getReady();
   }
 
   List<Group> _sharedGroupList;
@@ -1043,11 +1046,13 @@ class SprightlySetupDao extends DatabaseAccessor<SprightlySetupDatabase>
 
   @override
   Future<void> beforeOpen(OpeningDetails details, Migrator m) async {
+    await getReady();
     if (details.wasCreated) {
       // todo: do first time activity
       await updateAppSetting('dbVersion', db.schemaVersion.toString());
+      // already done through _queries.setupInitiation
+      // await updateAppSetting('primarySetupComplete', false.toString());
     }
-    await getReady();
   }
 
   AppInformation _appInformation = AppInformation();
