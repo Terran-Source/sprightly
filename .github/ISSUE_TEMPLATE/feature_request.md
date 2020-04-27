@@ -4,7 +4,6 @@ about: Something Cool or Hot
 title: '✍️'
 labels: ''
 assignees: ''
-
 ---
 
 | Bug  | Problem                               | Solution          | Alternetives          |
