@@ -1049,9 +1049,12 @@ class SprightlySetupDao extends DatabaseAccessor<SprightlySetupDatabase>
     await getReady();
     if (details.wasCreated) {
       // todo: do first time activity
-      await updateAppSetting('dbVersion', db.schemaVersion.toString());
       // already done through _queries.setupInitiation
       // await updateAppSetting('primarySetupComplete', false.toString());
+    }
+    if (details.wasCreated || details.hadUpgrade) {
+      // sync dbVersion
+      await updateAppSetting('dbVersion', db.schemaVersion.toString());
     }
   }
 

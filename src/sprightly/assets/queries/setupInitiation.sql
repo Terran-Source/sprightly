@@ -7,7 +7,7 @@ BEGIN TRANSACTION;
 -- table: FontCombos
 -- table: ColorCombos
 -- table: AppSettings
-INSERT INTO AppSettings(name,value,type) VALUES('dbVersion', '0', 'Number');
+INSERT INTO AppSettings(name,value,type) VALUES('dbVersion', '1', 'Number');
 INSERT INTO AppSettings(name,value,type) VALUES('primarySetupComplete', 'false', 'Bool');
 INSERT INTO AppSettings(name,value,type) VALUES('themeMode', 'Dark', 'String');
 
