@@ -49,7 +49,18 @@ Future<String> getFileText(
 }) async {
   var file = await getFile(filePath,
       isSupportFile: isSupportFile, isAbsolute: isAbsolute);
-  if (await file.exists()) return await file.readAsString();
+  if (await file.exists()) return file.readAsString();
+  return null;
+}
+
+Future<Uint8List> getFileContent(
+  String filePath, {
+  bool isSupportFile = false,
+  bool isAbsolute = false,
+}) async {
+  var file = await getFile(filePath,
+      isSupportFile: isSupportFile, isAbsolute: isAbsolute);
+  if (await file.exists()) return file.readAsBytes();
   return null;
 }
 
@@ -198,9 +209,29 @@ class RemoteFileCache {
     }
   }
 
+  Future<String> _getRemoteFileAndCache(String source, String identifier,
+          {Map<String, String> headers = const {}}) async =>
+      // todo: implementation
+      null;
+
   Future<String> getRemoteFileAsText(String identifier, String source,
       {Map<String, String> headers = const {}}) async {
-    return '';
+    if (!_fileCache.containsKey(identifier)) {
+      _fileCache[identifier] =
+          await _getRemoteFileAndCache(source, identifier, headers: headers);
+    }
+    var filePath = _fileCache[identifier];
+    return getFileText(filePath, isAbsolute: true);
+  }
+
+  Future<Uint8List> getRemoteFileContent(String identifier, String source,
+      {Map<String, String> headers = const {}}) async {
+    if (!_fileCache.containsKey(identifier)) {
+      _fileCache[identifier] =
+          await _getRemoteFileAndCache(source, identifier, headers: headers);
+    }
+    var filePath = _fileCache[identifier];
+    return getFileContent(filePath, isAbsolute: true);
   }
 
   Future<void> cleanUp([bool force = false]) async {
