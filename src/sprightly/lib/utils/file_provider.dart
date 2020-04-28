@@ -149,10 +149,10 @@ class DirectoryInfo {
   }
 
   static Future<void> cleanUp(_DirectoryCleanUp target) async {
-    target.directoryInfo.files
-        .where((file) => !target.cache.containsValue(file.path))
-        .forEach((file) async => await file.delete());
-    target.directoryInfo.directories.forEach((dir) async {
+    target.directoryInfo?.files
+        ?.where((file) => !target.cache.containsValue(file.path))
+        ?.forEach((file) async => await file.delete());
+    target.directoryInfo?.directories?.forEach((dir) async {
       if (dir.isEmpty)
         await dir.current.delete();
       else
@@ -174,16 +174,12 @@ class RemoteFileCache {
   DirectoryInfo _directoryInfo;
   DirectoryInfo get directoryInfo => _directoryInfo;
 
-  static RemoteFileCache _cache = RemoteFileCache._();
-  RemoteFileCache._() {
-    _init();
-  }
-  factory RemoteFileCache() => _cache;
+  static RemoteFileCache current = RemoteFileCache();
 
   bool initialized = false;
   bool _working = false;
 
-  Future<void> _init() async {
+  Future<void> init() async {
     if (!initialized && !_working) {
       _working = true;
       var cacheDirectory = await getDirectory(_cacheDirectory);
@@ -193,11 +189,18 @@ class RemoteFileCache {
         if (null != oldFileCache) _fileCache.addAll(json.decode(oldFileCache));
       } else
         await cacheDirectory.create(recursive: true);
-      _directoryInfo =
-          await compute(DirectoryInfo.readDirectory, cacheDirectory);
+
+      // non-essential for startup. let it be on its own
+      compute(DirectoryInfo.readDirectory, cacheDirectory)
+          .then((info) => _directoryInfo = info);
       initialized = true;
       _working = false;
     }
+  }
+
+  Future<String> getRemoteFileAsText(String identifier, String source,
+      {Map<String, String> headers = const {}}) async {
+    return '';
   }
 
   Future<void> cleanUp([bool force = false]) async {

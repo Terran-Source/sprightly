@@ -379,25 +379,76 @@ class AppSettings extends Table {
 String get sqlAssetDirectory => 'assets/queries_min';
 Future<String> _getSqlQueryFromAsset(String fileName) => getAssetText(fileName,
     assetDirectory: sqlAssetDirectory, extension: '.sql');
+Future<String> _getSqlQueryFromRemote(CustomQuery customQuery) =>
+    RemoteFileCache.current.getRemoteFileAsText(
+        customQuery.identifier, customQuery.source,
+        headers: customQuery.headers);
 
+enum SourceFrom { Asset, Web }
+
+/// Used to get complex queries from outside.
+///
+/// Either a filename(without extension) inside [sqlAssetDirectory]
+/// or an accessible web address of the file
+///
+/// Example:
+/// ```dart
+/// var customQueryFromFile = CustomQuery.fromAsset('queryFileName');
+/// // or
+/// var customQueryFromWeb = CustomQuery.fromWeb('customQueryFromWeb',
+///   'https://example.com/some/source/queryFileName.sql');
+/// // or if any custom header is required
+/// var customQueryFromWeb = CustomQuery.fromWeb('customQueryFromWeb',
+///   'https://example.com/some/source/queryFileName.sql',
+///   headers: {HttpHeaders.authorizationHeader: 'Bearer $token'});
+/// ```
 class CustomQuery {
-  /// either a filename(without extension) inside [sqlAssetDirectory]
+  /// Either a filename(without extension) inside [sqlAssetDirectory]
   /// or an accessible web address of the file
   ///
   /// Example:
   /// ```dart
-  /// var customQueryFromFile = CustomQuery('queryFileName');
+  /// var customQueryFromFile = CustomQuery.fromAsset('queryFileName');
   /// // or
-  /// var customQueryFromWeb = CustomQuery('https://example.com/some/source/queryFileName.sql');
+  /// var customQueryFromWeb = CustomQuery.fromWeb('customQueryFromWeb',
+  ///   'https://example.com/some/source/queryFileName.sql');
+  /// // or if any custom header is required
+  /// var customQueryFromWeb = CustomQuery.fromWeb('customQueryFromWeb',
+  ///   'https://example.com/some/source/queryFileName.sql',
+  ///   headers: {HttpHeaders.authorizationHeader: 'Bearer $token'});
   /// ```
   final String source;
+  final String identifier;
+  final SourceFrom _from;
+  final Map<String, String> headers;
+
   String _query;
 
-  CustomQuery(this.source);
+  CustomQuery._(this.source, this._from, this.identifier,
+      {this.headers = const {}});
+
+  factory CustomQuery.fromAsset(String fileNameWithoutExtension,
+          {String identifier}) =>
+      CustomQuery._(fileNameWithoutExtension, SourceFrom.Asset,
+          identifier ?? fileNameWithoutExtension);
+
+  factory CustomQuery.fromWeb(String identifier, String address,
+          {Map<String, String> headers = const {}}) =>
+      CustomQuery._(address, SourceFrom.Web, identifier, headers: headers);
+
+  Future<String> _load() {
+    switch (_from) {
+      case SourceFrom.Asset:
+        return compute(_getSqlQueryFromAsset, source);
+      case SourceFrom.Web:
+        return compute(_getSqlQueryFromRemote, this);
+      default:
+        return null;
+    }
+  }
 
   /// Asynchronously load the sql file content
-  Future<String> load() async =>
-      _query ??= await compute(_getSqlQueryFromAsset, source);
+  Future<String> load() async => _query ??= await _load();
 
   /// the actual sql statements after the [load] is called at least once
   String get query => _query;
@@ -412,33 +463,37 @@ class SprightlyQueries {
 
   // startup queries
   CustomQuery get defaultStartupStatement =>
-      CustomQuery("defaultStartupStatement");
+      CustomQuery.fromAsset("defaultStartupStatement");
 
   // custom queries
   CustomQuery get selectGroupAccountMembers =>
-      CustomQuery("selectGroupAccountMembers");
+      CustomQuery.fromAsset("selectGroupAccountMembers");
   CustomQuery get selectGroupOnlyMembers =>
-      CustomQuery("selectGroupOnlyMembers");
+      CustomQuery.fromAsset("selectGroupOnlyMembers");
   CustomQuery get selectGroupSettlements =>
-      CustomQuery("selectGroupSettlements");
+      CustomQuery.fromAsset("selectGroupSettlements");
   CustomQuery get selectGroupTransactions =>
-      CustomQuery("selectGroupTransactions");
+      CustomQuery.fromAsset("selectGroupTransactions");
 
   // beforeOpen queries
-  CustomQuery get dataInitiation => CustomQuery("dataInitiation");
-  CustomQuery get setupInitiation => CustomQuery("setupInitiation");
+  CustomQuery get dataInitiation => CustomQuery.fromAsset("dataInitiation");
+  CustomQuery get setupInitiation => CustomQuery.fromAsset("setupInitiation");
 
   // Migration queries
   Map<int, CustomQuery> dataMigrations = {
-    // 0: CustomQuery("dataMigrationFrom1"),
+    // 1: CustomQuery.fromWeb("dataMigrationFrom1",
+    //     'https://example.com/some/source/dataMigrationFrom1.sql'),
   };
   Map<int, CustomQuery> setupMigrations = {
-    // 0: CustomQuery("setupMigrationFrom1"),
+    // 1: CustomQuery.fromWeb("setupMigrationFrom1",
+    //     'https://example.com/some/source/setupMigrationFrom1.sql'),
   };
 
   Future _init() async {
     if (!initialized && !_working) {
       _working = true;
+      // Required for fetching file from web
+      await RemoteFileCache.current.init();
 
       // custom queries
       await selectGroupAccountMembers.load();
