@@ -2,6 +2,7 @@ library sprightly.moor_database;
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:moor/moor.dart';
 import 'package:moor_ffi/moor_ffi.dart';
 import 'package:sprightly/extensions/enum_extensions.dart';
@@ -376,7 +377,7 @@ class AppSettings extends Table {
 //#region Custom query & classes
 /// asset path for custom sql files
 String get sqlAssetDirectory => 'assets/queries_min';
-Future<String> getSqlQueryFromAsset(String fileName) => getAssetText(fileName,
+Future<String> _getSqlQueryFromAsset(String fileName) => getAssetText(fileName,
     assetDirectory: sqlAssetDirectory, extension: '.sql');
 
 class CustomQuery {
@@ -395,7 +396,8 @@ class CustomQuery {
   CustomQuery(this.source);
 
   /// Asynchronously load the sql file content
-  Future<String> load() async => _query ??= await getSqlQueryFromAsset(source);
+  Future<String> load() async =>
+      _query ??= await compute(_getSqlQueryFromAsset, source);
 
   /// the actual sql statements after the [load] is called at least once
   String get query => _query;
