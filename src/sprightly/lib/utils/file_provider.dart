@@ -24,18 +24,6 @@ Future<File> getFile(String filePath,
   return file;
 }
 
-Future<File> writeText(String filePath, String text,
-    {bool isSupportFile = false}) async {
-  var file = await getFile(filePath, isSupportFile: isSupportFile);
-  return file.writeAsString(text, mode: FileMode.writeOnly, flush: true);
-}
-
-Future<File> appendText(String filePath, String text,
-    {bool isSupportFile = false}) async {
-  var file = await getFile(filePath, isSupportFile: isSupportFile);
-  return file.writeAsString(text, mode: FileMode.writeOnlyAppend, flush: true);
-}
-
 Future<String> getFileText(String filePath,
     {bool isSupportFile = false}) async {
   var file = await getFile(filePath, isSupportFile: isSupportFile);
@@ -43,18 +31,44 @@ Future<String> getFileText(String filePath,
   return null;
 }
 
+Future<File> saveTextFile(
+  String filePath,
+  String text, {
+  FileMode mode = FileMode.writeOnly,
+  bool isSupportFile = false,
+}) async {
+  var file = await getFile(filePath, isSupportFile: isSupportFile);
+  return file.writeAsString(text, mode: mode, flush: true);
+}
+
+Future<File> appendTextToFile(
+  String filePath,
+  String text, {
+  bool isSupportFile = false,
+}) =>
+    saveTextFile(filePath, text,
+        mode: FileMode.writeOnlyAppend, isSupportFile: isSupportFile);
+
+Future<File> saveFileAsBytes(
+  String filePath,
+  Uint8List fileContent, {
+  FileMode mode = FileMode.writeOnly,
+  bool isSupportFile = false,
+}) async {
+  var file = await getFile(filePath, isSupportFile: isSupportFile);
+  return file.writeAsBytes(fileContent, mode: mode, flush: true);
+}
+
+Future<File> appendBytesToFile(String filePath, Uint8List fileContent,
+        {bool isSupportFile = false}) =>
+    saveFileAsBytes(filePath, fileContent,
+        mode: FileMode.writeOnlyAppend, isSupportFile: isSupportFile);
+
 // Future<File> cacheRemoteFile(String fileUri,
 //         {Map<String, String> headers,
 //         String cacheRelativePath,
 //         bool isSupportFile = false}) =>
 //     null;
-
-Future<File> cacheFile(Uint8List fileContent, String cacheRelativePath,
-    {bool isSupportFile = false}) async {
-  var file = await getFile(cacheRelativePath, isSupportFile: isSupportFile);
-  return file.writeAsBytes(fileContent.toList(),
-      mode: FileMode.writeOnly, flush: true);
-}
 
 Future<String> getAssetText(
   String fileName, {
@@ -64,13 +78,17 @@ Future<String> getAssetText(
     rootBundle.loadString(
         p.join(assetDirectory ?? '', '$fileName${extension ?? ''}'));
 
-Future<String> getSqlQuery(
+Future<Uint8List> getAssetBytes(
   String fileName, {
-  String path,
+  String assetDirectory,
   String extension,
-}) =>
-    getAssetText(fileName,
-        assetDirectory: path, extension: extension ?? '.sql');
+}) async =>
+    (await rootBundle
+            .load(p.join(assetDirectory ?? '', '$fileName${extension ?? ''}')))
+        .buffer
+        .asUint8List();
+
+class DirectoryInfo {}
 
 class RemoteFileCache {
   final String _cacheDirectory = '__fileCache';
@@ -102,6 +120,6 @@ class RemoteFileCache {
 
   /// to be called before application ends,
   /// or else, any changes after last [dump] will be lost
-  Future<void> dump() =>
-      writeText(p.join(_cacheDirectory, _cacheFile), json.encode(_fileCache));
+  Future<void> dump() => saveTextFile(
+      p.join(_cacheDirectory, _cacheFile), json.encode(_fileCache));
 }
