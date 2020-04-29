@@ -4,9 +4,11 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 import 'package:sprightly/extensions/file_system_entity_extensions.dart';
+import 'package:sprightly/extensions/http_response_extensions.dart';
 
 Future<String> getAbsolutePath(
   String path, {
@@ -44,12 +46,13 @@ Future<File> getFile(
 
 Future<String> getFileText(
   String filePath, {
+  Encoding encoding = utf8,
   bool isSupportFile = false,
   bool isAbsolute = false,
 }) async {
   var file = await getFile(filePath,
       isSupportFile: isSupportFile, isAbsolute: isAbsolute);
-  if (await file.exists()) return file.readAsString();
+  if (await file.exists()) return file.readAsString(encoding: encoding);
   return null;
 }
 
@@ -68,22 +71,25 @@ Future<File> saveTextFile(
   String filePath,
   String text, {
   FileMode mode = FileMode.writeOnly,
+  Encoding encoding = utf8,
   bool isSupportFile = false,
   bool isAbsolute = false,
 }) async {
   var file = await getFile(filePath,
       isSupportFile: isSupportFile, isAbsolute: isAbsolute);
-  return file.writeAsString(text, mode: mode, flush: true);
+  return file.writeAsString(text, mode: mode, encoding: encoding, flush: true);
 }
 
 Future<File> appendTextToFile(
   String filePath,
   String text, {
+  Encoding encoding = utf8,
   bool isSupportFile = false,
   bool isAbsolute = false,
 }) =>
     saveTextFile(filePath, text,
         mode: FileMode.writeOnlyAppend,
+        encoding: encoding,
         isSupportFile: isSupportFile,
         isAbsolute: isAbsolute);
 
@@ -110,11 +116,34 @@ Future<File> appendBytesToFile(
         isSupportFile: isSupportFile,
         isAbsolute: isAbsolute);
 
-// Future<File> cacheRemoteFile(String fileUri,
-//         {Map<String, String> headers,
-//         String cacheRelativePath,
-//         bool isSupportFile = false}) =>
-//     null;
+Future<File> saveFileAsByteStream(
+  String filePath,
+  Stream<List<int>> fileContent, {
+  FileMode mode = FileMode.writeOnly,
+  Encoding encoding = utf8,
+  bool isSupportFile = false,
+  bool isAbsolute = false,
+}) async {
+  var file = await getFile(filePath,
+      isSupportFile: isSupportFile, isAbsolute: isAbsolute);
+  var sink = file.openWrite(mode: mode, encoding: encoding);
+  await fileContent.pipe(sink);
+  sink.close();
+  return file;
+}
+
+Future<File> appendByteStreamToFile(
+  String filePath,
+  Stream<List<int>> fileContent, {
+  Encoding encoding = utf8,
+  bool isSupportFile = false,
+  bool isAbsolute = false,
+}) =>
+    saveFileAsByteStream(filePath, fileContent,
+        mode: FileMode.writeOnlyAppend,
+        encoding: encoding,
+        isSupportFile: isSupportFile,
+        isAbsolute: isAbsolute);
 
 Future<String> getAssetText(
   String fileName, {
@@ -180,6 +209,7 @@ class DirectoryInfo {
 class RemoteFileCache {
   final String _cacheDirectory = '__fileCache';
   final String _cacheFile = '__fileCache.json';
+  final http.Client _client = http.Client();
   final Map<String, String> _fileCache = {};
 
   DirectoryInfo _directoryInfo;
@@ -209,10 +239,25 @@ class RemoteFileCache {
     }
   }
 
+  /// Fetch the file from the [source] url and store in a the local [_cacheDirectory].
+  /// Then returns the absolute path of the locally saved file.
   Future<String> _getRemoteFileAndCache(String source, String identifier,
-          {Map<String, String> headers = const {}}) async =>
-      // todo: implementation
-      null;
+      {Map<String, String> headers = const {}}) async {
+    File result;
+    var request = http.Request('GET', Uri.parse(source));
+    request.headers.addAll(headers);
+    final response = await _client.send(request);
+    //final response = await _client.get(Uri.parse(source), headers: headers);
+    if (response.isSuccessStatusCode) {
+      var fileName =
+          response.fileName ?? "$identifier${response.fileExtension}";
+      result = await saveFileAsByteStream(
+          p.join(_cacheDirectory, fileName), response.stream,
+          encoding: response.encoding);
+    }
+    _client.close();
+    return result?.path;
+  }
 
   Future<String> getRemoteFileAsText(String identifier, String source,
       {Map<String, String> headers = const {}}) async {

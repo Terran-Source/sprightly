@@ -433,8 +433,10 @@ class CustomQuery {
           identifier ?? fileNameWithoutExtension);
 
   factory CustomQuery.fromWeb(String identifier, String address,
-          {Map<String, String> headers = const {}}) =>
-      CustomQuery._(address, SourceFrom.Web, identifier, headers: headers);
+      {Map<String, String> headers = const {}}) {
+    Uri.parse(address);
+    return CustomQuery._(address, SourceFrom.Web, identifier, headers: headers);
+  }
 
   Future<String> _load() {
     switch (_from) {
