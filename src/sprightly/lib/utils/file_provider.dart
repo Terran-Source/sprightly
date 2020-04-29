@@ -189,16 +189,31 @@ class DirectoryInfo {
   }
 
   static Future<void> cleanUp(_DirectoryCleanUp target) async {
-    target.directoryInfo?.files
-        ?.where((file) =>
-            !target.cache.values.any((cache) => file.path == cache.path))
-        ?.forEach((file) async => await file.delete());
-    target.directoryInfo?.directories?.forEach((dir) async {
-      if (dir.isEmpty)
-        await dir.current.delete();
-      else
-        await cleanUp(_DirectoryCleanUp(dir, target.cache));
-    });
+    if (null != target.directoryInfo) {
+      List<File> remainingFiles = [];
+      for (var file in target.directoryInfo.files) {
+        if (target.cache.values.any((cache) => file.path == cache.path))
+          remainingFiles.add(file);
+        else
+          await file.delete();
+      }
+      if (null != remainingFiles) target.directoryInfo.files = remainingFiles;
+
+      List<DirectoryInfo> remainingDirs = [];
+      for (var dir in target.directoryInfo.directories) {
+        if (dir.isEmpty)
+          await dir.current.delete();
+        else {
+          await cleanUp(_DirectoryCleanUp(dir, target.cache));
+          if (dir.isEmpty)
+            await dir.current.delete();
+          else
+            remainingDirs.add(dir);
+        }
+      }
+      if (null != remainingDirs)
+        target.directoryInfo.directories = remainingDirs;
+    }
   }
 
   DirectoryInfo(this.current);
@@ -311,10 +326,11 @@ class RemoteFileCache {
     return getFileContent(filePath.path, isAbsolute: true);
   }
 
-  Future<void> cleanUp([bool force = false]) async {
-    if (!_working || force) {
-      return DirectoryInfo.cleanUp(
-          _DirectoryCleanUp(_directoryInfo, _fileCache));
+  Future<void> cleanUp([bool dummy = false]) async {
+    if (initialized && !_working) {
+      _working = true;
+      DirectoryInfo.cleanUp(_DirectoryCleanUp(_directoryInfo, _fileCache))
+          .whenComplete(() => _working = false);
     }
   }
 
