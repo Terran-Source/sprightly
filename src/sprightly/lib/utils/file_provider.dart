@@ -165,7 +165,7 @@ Future<Uint8List> getAssetBytes(
 
 class _DirectoryCleanUp {
   final DirectoryInfo directoryInfo;
-  final Map<String, String> cache;
+  final Map<String, CacheFile> cache;
 
   _DirectoryCleanUp(this.directoryInfo, this.cache);
 }
@@ -190,7 +190,8 @@ class DirectoryInfo {
 
   static Future<void> cleanUp(_DirectoryCleanUp target) async {
     target.directoryInfo?.files
-        ?.where((file) => !target.cache.containsValue(file.path))
+        ?.where((file) =>
+            !target.cache.values.any((cache) => file.path == cache.path))
         ?.forEach((file) async => await file.delete());
     target.directoryInfo?.directories?.forEach((dir) async {
       if (dir.isEmpty)
@@ -206,11 +207,30 @@ class DirectoryInfo {
   bool get isEmpty => files.length == 0 && directories.length == 0;
 }
 
+class CacheFile {
+  final String identifier;
+  final String source;
+  Map<String, String> headers;
+  final String path;
+  final ContentType contentType;
+  final DateTime downloadOn;
+  DateTime lastAccessedOn;
+
+  CacheFile(
+    this.identifier,
+    this.source,
+    this.path,
+    this.contentType,
+    this.downloadOn, {
+    this.headers = const {},
+  });
+}
+
 class RemoteFileCache {
   final String _cacheDirectory = '__fileCache';
   final String _cacheFile = '__fileCache.json';
   final http.Client _client = http.Client();
-  final Map<String, String> _fileCache = {};
+  final Map<String, CacheFile> _fileCache = {};
 
   DirectoryInfo _directoryInfo;
   DirectoryInfo get directoryInfo => _directoryInfo;
@@ -231,19 +251,21 @@ class RemoteFileCache {
       } else
         await cacheDirectory.create(recursive: true);
 
-      // non-essential for startup. let it be on its own
-      compute(DirectoryInfo.readDirectory, cacheDirectory)
-          .then((info) => _directoryInfo = info);
-      initialized = true;
-      _working = false;
+      // non-essential for startup. let it be on its own.
+      // i.e. not await(ing)
+      compute(DirectoryInfo.readDirectory, cacheDirectory).then((info) {
+        _directoryInfo = info;
+        initialized = true;
+        _working = false;
+      });
     }
   }
 
   /// Fetch the file from the [source] url and store in a the local [_cacheDirectory].
   /// Then returns the absolute path of the locally saved file.
-  Future<String> _getRemoteFileAndCache(String source, String identifier,
+  Future<CacheFile> _getRemoteFileAndCache(String source, String identifier,
       {Map<String, String> headers = const {}}) async {
-    File result;
+    CacheFile result;
     var request = http.Request('GET', Uri.parse(source));
     request.headers.addAll(headers);
     final response = await _client.send(request);
@@ -251,12 +273,20 @@ class RemoteFileCache {
     if (response.isSuccessStatusCode) {
       var fileName =
           response.fileName ?? "$identifier${response.fileExtension}";
-      result = await saveFileAsByteStream(
+      var file = await saveFileAsByteStream(
           p.join(_cacheDirectory, fileName), response.stream,
           encoding: response.encoding);
+      result = CacheFile(
+        identifier,
+        source,
+        file.path,
+        response.contentType,
+        DateTime.now().toUtc(),
+        headers: headers,
+      );
     }
     _client.close();
-    return result?.path;
+    return result;
   }
 
   Future<String> getRemoteFileAsText(String identifier, String source,
@@ -266,7 +296,8 @@ class RemoteFileCache {
           await _getRemoteFileAndCache(source, identifier, headers: headers);
     }
     var filePath = _fileCache[identifier];
-    return getFileText(filePath, isAbsolute: true);
+    filePath.lastAccessedOn = DateTime.now().toUtc();
+    return getFileText(filePath.path, isAbsolute: true);
   }
 
   Future<Uint8List> getRemoteFileContent(String identifier, String source,
@@ -276,13 +307,14 @@ class RemoteFileCache {
           await _getRemoteFileAndCache(source, identifier, headers: headers);
     }
     var filePath = _fileCache[identifier];
-    return getFileContent(filePath, isAbsolute: true);
+    filePath.lastAccessedOn = DateTime.now().toUtc();
+    return getFileContent(filePath.path, isAbsolute: true);
   }
 
   Future<void> cleanUp([bool force = false]) async {
     if (!_working || force) {
-      compute(
-          DirectoryInfo.cleanUp, _DirectoryCleanUp(_directoryInfo, _fileCache));
+      return DirectoryInfo.cleanUp(
+          _DirectoryCleanUp(_directoryInfo, _fileCache));
     }
   }
 
