@@ -1,6 +1,8 @@
+library sprightly.repositories;
+
 import 'package:sprightly/extensions/enum_extensions.dart';
 import 'package:sprightly/models/constants/enums.dart';
-import 'package:sprightly/models/db/dao.dart';
+import 'package:sprightly/models/dao.dart';
 import 'package:sprightly/models/db/database.dart';
 
 abstract class BaseData {
