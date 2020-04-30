@@ -3,6 +3,7 @@ library sprightly.dao;
 import 'package:package_info/package_info.dart';
 import 'package:sprightly/models/constants/enums.dart';
 import 'package:sprightly/models/db/database.dart';
+// import 'package:sprightly/models/entities.dart';
 
 String get groupAccountPrefix => 'GroupAccount';
 

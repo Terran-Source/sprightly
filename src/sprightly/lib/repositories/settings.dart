@@ -4,6 +4,7 @@ import 'package:sprightly/extensions/enum_extensions.dart';
 import 'package:sprightly/models/constants/enums.dart';
 import 'package:sprightly/models/dao.dart';
 import 'package:sprightly/models/db/database.dart';
+// import 'package:sprightly/models/entities.dart';
 
 abstract class BaseData {
   final SettingsDao _dao;
