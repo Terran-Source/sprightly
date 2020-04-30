@@ -380,9 +380,8 @@ String get sqlAssetDirectory => 'assets/queries_min';
 Future<String> _getSqlQueryFromAsset(String fileName) => getAssetText(fileName,
     assetDirectory: sqlAssetDirectory, extension: '.sql');
 Future<String> _getSqlQueryFromRemote(CustomQuery customQuery) =>
-    RemoteFileCache.current.getRemoteFileAsText(
-        customQuery.identifier, customQuery.source,
-        headers: customQuery.headers);
+    RemoteFileCache.current.getRemoteText(customQuery.source,
+        identifier: customQuery.identifier, headers: customQuery.headers);
 
 enum SourceFrom { Asset, Web }
 
@@ -483,11 +482,11 @@ class SprightlyQueries {
 
   // Migration queries
   Map<int, CustomQuery> dataMigrations = {
-    // 1: CustomQuery.fromWeb("dataMigrationFrom1",
+    // 1: CustomQuery.fromWeb("sprightly.moor_database.dataMigrationFrom1",
     //     'https://example.com/some/source/dataMigrationFrom1.sql'),
   };
   Map<int, CustomQuery> setupMigrations = {
-    // 1: CustomQuery.fromWeb("setupMigrationFrom1",
+    // 1: CustomQuery.fromWeb("sprightly.moor_database.setupMigrationFrom1",
     //     'https://example.com/some/source/setupMigrationFrom1.sql'),
   };
 

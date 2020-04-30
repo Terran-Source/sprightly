@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -278,8 +279,11 @@ class RemoteFileCache {
 
   /// Fetch the file from the [source] url and store in a the local [_cacheDirectory].
   /// Then returns the absolute path of the locally saved file.
-  Future<CacheFile> _getRemoteFileAndCache(String source, String identifier,
-      {Map<String, String> headers = const {}}) async {
+  Future<CacheFile> _getRemoteFileAndCache(
+    String source, {
+    String identifier,
+    Map<String, String> headers = const {},
+  }) async {
     CacheFile result;
     var request = http.Request('GET', Uri.parse(source));
     request.headers.addAll(headers);
@@ -292,7 +296,7 @@ class RemoteFileCache {
           p.join(_cacheDirectory, fileName), response.stream,
           encoding: response.encoding);
       result = CacheFile(
-        identifier,
+        identifier ?? source,
         source,
         file.path,
         response.contentType,
@@ -304,27 +308,50 @@ class RemoteFileCache {
     return result;
   }
 
-  Future<String> getRemoteFileAsText(String identifier, String source,
-      {Map<String, String> headers = const {}}) async {
-    if (!_fileCache.containsKey(identifier)) {
-      _fileCache[identifier] =
-          await _getRemoteFileAndCache(source, identifier, headers: headers);
+  Future<String> getRemoteText(String source,
+      {String identifier, Map<String, String> headers = const {}}) async {
+    var id = identifier ?? source;
+    if (!_fileCache.containsKey(id)) {
+      _fileCache[id] = await _getRemoteFileAndCache(source,
+          identifier: identifier, headers: headers);
     }
-    var filePath = _fileCache[identifier];
+    var filePath = _fileCache[id];
     filePath.lastAccessedOn = DateTime.now().toUtc();
     return getFileText(filePath.path, isAbsolute: true);
   }
 
-  Future<Uint8List> getRemoteFileContent(String identifier, String source,
-      {Map<String, String> headers = const {}}) async {
-    if (!_fileCache.containsKey(identifier)) {
-      _fileCache[identifier] =
-          await _getRemoteFileAndCache(source, identifier, headers: headers);
+  Future<Uint8List> getRemoteContent(
+    String source, {
+    String identifier,
+    Map<String, String> headers = const {},
+  }) async {
+    var id = identifier ?? source;
+    if (!_fileCache.containsKey(id)) {
+      _fileCache[id] = await _getRemoteFileAndCache(source,
+          identifier: identifier, headers: headers);
     }
-    var filePath = _fileCache[identifier];
+    var filePath = _fileCache[id];
     filePath.lastAccessedOn = DateTime.now().toUtc();
     return getFileContent(filePath.path, isAbsolute: true);
   }
+
+  Future<T> getRemoteTextAs<T>(
+    String source,
+    FutureOr<T> Function(String content) mapper, {
+    String identifier,
+    Map<String, String> headers = const {},
+  }) async =>
+      mapper(await getRemoteText(source,
+          identifier: identifier, headers: headers));
+
+  Future<T> getRemoteContentAs<T>(
+    String source,
+    FutureOr<T> Function(Uint8List content) mapper, {
+    String identifier,
+    Map<String, String> headers = const {},
+  }) async =>
+      mapper(await getRemoteContent(source,
+          identifier: identifier, headers: headers));
 
   Future<void> cleanUp([bool dummy = false]) async {
     if (initialized && !_working) {
