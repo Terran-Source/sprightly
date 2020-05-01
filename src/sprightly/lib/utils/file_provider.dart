@@ -299,7 +299,10 @@ class RemoteFileCache {
   }
 
   /// Fetch the file from the [source] url and store in a the local [_cacheDirectory].
-  /// Then returns the absolute path of the locally saved file.
+  /// Then returns the [CacheFile] containing absolute path of the locally saved file.
+  ///
+  /// an optional [identifier] can be specified to speed up the cache searching process.
+  /// If [identifier] is not specified, [source] will be taken as the cache key.
   Future<CacheFile> _getRemoteFileAndCache(
     String source, {
     String identifier,
