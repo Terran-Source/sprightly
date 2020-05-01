@@ -495,17 +495,20 @@ class SprightlyQueries {
   Future _init() async {
     if (!initialized && !_working) {
       _working = true;
-      // Required for fetching file from web
-      await RemoteFileCache.current.init();
+      try {
+        // Required for fetching file from web
+        await RemoteFileCache.current.init();
 
-      // custom queries
-      await selectGroupAccountMembers.load();
-      await selectGroupOnlyMembers.load();
-      await selectGroupSettlements.load();
-      await selectGroupTransactions.load();
+        // custom queries
+        await selectGroupAccountMembers.load();
+        await selectGroupOnlyMembers.load();
+        await selectGroupSettlements.load();
+        await selectGroupTransactions.load();
 
-      initialized = true;
-      _working = false;
+        initialized = true;
+      } finally {
+        _working = false;
+      }
     }
   }
 }
@@ -612,10 +615,13 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
   Future getReady() async {
     if (!_initialized && !_working) {
       _working = true;
-      await super.getReady();
-      _sharedGroupList = await getGroups(GroupType.Shared);
-      _initialized = true;
-      _working = false;
+      try {
+        await super.getReady();
+        _sharedGroupList = await getGroups(GroupType.Shared);
+        _initialized = true;
+      } finally {
+        _working = false;
+      }
     }
   }
 
@@ -1103,14 +1109,17 @@ class SprightlySetupDao extends DatabaseAccessor<SprightlySetupDatabase>
   Future getReady() async {
     if (!_initialized && !_working) {
       _working = true;
-      await super.getReady();
-      await _appInformation.getReady();
-      _allAppSettings = await getAppSettings();
-      _allAppFonts = await getAppFonts();
-      _allFontCombos = await getFontCombos();
-      _allColorCombos = await getColorCombos();
-      _initialized = true;
-      _working = false;
+      try {
+        await super.getReady();
+        await _appInformation.getReady();
+        _allAppSettings = await getAppSettings();
+        _allAppFonts = await getAppFonts();
+        _allFontCombos = await getFontCombos();
+        _allColorCombos = await getColorCombos();
+        _initialized = true;
+      } finally {
+        _working = false;
+      }
     }
   }
 
@@ -1197,12 +1206,13 @@ LazyDatabase _openConnection(
   bool recreateDatabase = false,
 }) =>
     LazyDatabase(() async => VmDatabase(
-        await getFile(
-          dbFile,
-          isSupportFile: isSupportFile,
-          recreateFile: recreateDatabase,
-        ),
-        logStatements: logStatements));
+          await getFile(
+            dbFile,
+            isSupportFile: isSupportFile,
+            recreateFile: recreateDatabase,
+          ),
+          logStatements: logStatements,
+        ));
 
 @UseMoor(
   tables: [
@@ -1219,8 +1229,10 @@ LazyDatabase _openConnection(
 class SprightlyDatabase extends _$SprightlyDatabase {
   bool enableDebug;
   bool recreateDatabase;
-  SprightlyDatabase({this.enableDebug = false, this.recreateDatabase = false})
-      : super(_openConnection(
+  SprightlyDatabase({
+    this.enableDebug = false,
+    this.recreateDatabase = false,
+  }) : super(_openConnection(
           appDataDbFile,
           logStatements: enableDebug,
           recreateDatabase: recreateDatabase,
@@ -1252,9 +1264,10 @@ class SprightlyDatabase extends _$SprightlyDatabase {
 class SprightlySetupDatabase extends _$SprightlySetupDatabase {
   bool enableDebug;
   bool recreateDatabase;
-  SprightlySetupDatabase(
-      {this.enableDebug = false, this.recreateDatabase = false})
-      : super(_openConnection(
+  SprightlySetupDatabase({
+    this.enableDebug = false,
+    this.recreateDatabase = false,
+  }) : super(_openConnection(
           setupDataDbFile,
           logStatements: enableDebug,
           recreateDatabase: recreateDatabase,

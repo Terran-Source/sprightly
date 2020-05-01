@@ -368,7 +368,7 @@ class RemoteFileCache {
       mapper(await getRemoteContent(source,
           identifier: identifier, headers: headers));
 
-  Future<void> _cleanFileCache() async {
+  Future<bool> _cleanFileCache() async {
     if (_fileCache.isNotEmpty) {
       Map<String, CacheFile> tempFileCache = {};
       for (var fc in _fileCache.entries) {
@@ -383,16 +383,16 @@ class RemoteFileCache {
         ..clear()
         ..addAll(tempFileCache);
     }
+    return true;
   }
 
-  Future<void> cleanUp([FutureOr<void> Function() callback]) async {
+  Future<void> cleanUp() async {
     if (initialized && !_working) {
       _working = true;
-      _cleanFileCache().whenComplete(() =>
+      return _cleanFileCache().whenComplete(() =>
           DirectoryInfo.cleanUp(_DirectoryCleanUp(_directoryInfo, _fileCache))
               .whenComplete(() {
             _working = false;
-            if (null != callback) callback();
           }));
     }
   }
