@@ -11,6 +11,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sprightly/extensions/file_system_entity_extensions.dart';
 import 'package:sprightly/extensions/http_response_extensions.dart';
 
+int get maxCachedRetentionMins => 7 * 24 * 60; // 7 days
+
 Future<String> getAbsolutePath(
   String path, {
   bool isSupportDirectory = false,
@@ -146,6 +148,17 @@ Future<File> appendByteStreamToFile(
         isSupportFile: isSupportFile,
         isAbsolute: isAbsolute);
 
+Future<File> deleteFile(
+  String filePath, {
+  bool isSupportFile = false,
+  bool isAbsolute = false,
+}) async {
+  var file = await getFile(filePath,
+      isSupportFile: isSupportFile, isAbsolute: isAbsolute);
+  if (await file.exists()) return file.delete();
+  return file;
+}
+
 Future<String> getAssetText(
   String fileName, {
   String assetDirectory,
@@ -263,7 +276,10 @@ class RemoteFileCache {
       if (await cacheDirectory.exists()) {
         var oldFileCache =
             await getFileText(p.join(_cacheDirectory, _cacheFile));
-        if (null != oldFileCache) _fileCache.addAll(json.decode(oldFileCache));
+        if (null != oldFileCache)
+          _fileCache
+            ..clear()
+            ..addAll(json.decode(oldFileCache));
       } else
         await cacheDirectory.create(recursive: true);
 
@@ -272,8 +288,7 @@ class RemoteFileCache {
       compute(DirectoryInfo.readDirectory, cacheDirectory).then((info) {
         _directoryInfo = info;
         initialized = true;
-        _working = false;
-      });
+      }).whenComplete(() => _working = false);
     }
   }
 
@@ -353,11 +368,32 @@ class RemoteFileCache {
       mapper(await getRemoteContent(source,
           identifier: identifier, headers: headers));
 
-  Future<void> cleanUp([bool dummy = false]) async {
+  Future<void> _cleanFileCache() async {
+    if (_fileCache.isNotEmpty) {
+      Map<String, CacheFile> tempFileCache = {};
+      for (var fc in _fileCache.entries) {
+        if (fc.value.lastAccessedOn
+            .add(Duration(minutes: maxCachedRetentionMins))
+            .isBefore(DateTime.now().toUtc())) {
+          await deleteFile(fc.value.path, isAbsolute: true);
+        } else
+          tempFileCache[fc.key] = fc.value;
+      }
+      _fileCache
+        ..clear()
+        ..addAll(tempFileCache);
+    }
+  }
+
+  Future<void> cleanUp([FutureOr<void> Function() callback]) async {
     if (initialized && !_working) {
       _working = true;
-      DirectoryInfo.cleanUp(_DirectoryCleanUp(_directoryInfo, _fileCache))
-          .whenComplete(() => _working = false);
+      _cleanFileCache().whenComplete(() =>
+          DirectoryInfo.cleanUp(_DirectoryCleanUp(_directoryInfo, _fileCache))
+              .whenComplete(() {
+            _working = false;
+            if (null != callback) callback();
+          }));
     }
   }
 
