@@ -131,7 +131,8 @@ Future<File> saveFileAsByteStream(
       isSupportFile: isSupportFile, isAbsolute: isAbsolute);
   var sink = file.openWrite(mode: mode, encoding: encoding);
   await fileContent.pipe(sink);
-  sink.close();
+  await sink.flush();
+  await sink.close();
   return file;
 }
 
@@ -300,16 +301,22 @@ class RemoteFileCache {
     Map<String, String> headers = const {},
   }) async {
     CacheFile result;
-    var request = http.Request('GET', Uri.parse(source));
-    request.headers.addAll(headers);
-    final response = await _client.send(request);
-    //final response = await _client.get(Uri.parse(source), headers: headers);
+    // :Old Method:
+    // var request = http.Request('GET', Uri.parse(source));
+    // request.headers.addAll(headers);
+    // final response = await _client.send(request);
+    // :New Method:
+    final response = await _client.get(Uri.parse(source), headers: headers);
     if (response.isSuccessStatusCode) {
       var fileName =
           response.fileName ?? "$identifier${response.fileExtension}";
-      var file = await saveFileAsByteStream(
-          p.join(_cacheDirectory, fileName), response.stream,
-          encoding: response.encoding);
+      // :Old Method:
+      // var file = await saveFileAsByteStream(
+      //     p.join(_cacheDirectory, fileName), response.stream,
+      //     encoding: response.encoding);
+      // :New Method:
+      var file = await saveFileAsBytes(
+          p.join(_cacheDirectory, fileName), response.bodyBytes);
       result = CacheFile(
         identifier ?? source,
         source,
