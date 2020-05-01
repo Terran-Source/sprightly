@@ -13,10 +13,11 @@ import 'package:sprightly/utils/happy_hash.dart';
 
 part 'database.g.dart';
 
-const String appDataDbFile = 'sprightly_db.lite';
-const String setupDataDbFile = 'sprightly_setup.lite';
-const int hashedIdMinLength = 16;
-const int uniqueRetry = 5;
+String get appDataDbFile => 'sprightly_db.lite';
+String get setupDataDbFile => 'sprightly_setup.lite';
+String get sqlAssetDirectory => 'assets/queries_min';
+int get hashedIdMinLength => 16;
+int get uniqueRetry => 5;
 
 //#region Database
 //#region Database: sprightly_db
@@ -378,7 +379,6 @@ class AppSettings extends Table {
 
 //#region Custom query & classes
 /// asset path for custom sql files
-String get sqlAssetDirectory => 'assets/queries_min';
 Future<String> _getSqlQueryFromAsset(String fileName) => getAssetText(fileName,
     assetDirectory: sqlAssetDirectory, extension: '.sql');
 Future<String> _getSqlQueryFromRemote(CustomQuery customQuery) =>
