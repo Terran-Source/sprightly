@@ -273,23 +273,28 @@ class RemoteFileCache {
   Future<void> init() async {
     if (!initialized && !_working) {
       _working = true;
-      var cacheDirectory = await getDirectory(_cacheDirectory);
-      if (await cacheDirectory.exists()) {
-        var oldFileCache =
-            await getFileText(p.join(_cacheDirectory, _cacheFile));
-        if (null != oldFileCache)
-          _fileCache
-            ..clear()
-            ..addAll(json.decode(oldFileCache));
-      } else
-        await cacheDirectory.create(recursive: true);
+      try {
+        var cacheDirectory = await getDirectory(_cacheDirectory);
+        if (await cacheDirectory.exists()) {
+          var oldFileCache =
+              await getFileText(p.join(_cacheDirectory, _cacheFile));
+          if (null != oldFileCache)
+            _fileCache
+              ..clear()
+              ..addAll(json.decode(oldFileCache));
+        } else
+          await cacheDirectory.create(recursive: true);
 
-      // non-essential for startup. let it be on its own.
-      // i.e. not await(ing)
-      compute(DirectoryInfo.readDirectory, cacheDirectory).then((info) {
-        _directoryInfo = info;
-        initialized = true;
-      }).whenComplete(() => _working = false);
+        // non-essential for startup. let it be on its own.
+        // i.e. not await(ing)
+        compute(DirectoryInfo.readDirectory, cacheDirectory).then((info) {
+          _directoryInfo = info;
+          initialized = true;
+        }).whenComplete(() => _working = false);
+      } catch (error) {
+        _working = false;
+        rethrow;
+      }
     }
   }
 
