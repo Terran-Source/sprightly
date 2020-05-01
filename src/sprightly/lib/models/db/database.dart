@@ -233,6 +233,8 @@ class Transactions extends Table {
   TextColumn get notes => text().named('notes').nullable()();
   TextColumn get attachments => text().named('attachments').nullable()();
   TextColumn get tags => text().named('tags').nullable()();
+  DateTimeColumn get doneOn =>
+      dateTime().named('doneOn').clientDefault(() => DateTime.now().toUtc())();
   DateTimeColumn get createdOn => dateTime()
       .named('createdOn')
       .clientDefault(() => DateTime.now().toUtc())();
@@ -845,6 +847,7 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
     String notes,
     List<String> attachments,
     List<String> tags,
+    DateTime doneOn,
   }) async {
     var recordExists =
         await recordWithIdExists(settlements.actualTableName, id);
@@ -859,6 +862,7 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
         notes: notes,
         attachments: attachments,
         tags: tags,
+        doneOn: doneOn,
       );
       settleMent.copyWith(
         settledAmount: settledAmount,
@@ -908,6 +912,7 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
     String notes,
     List<String> attachments,
     List<String> tags,
+    DateTime doneOn,
   }) async {
     if (null != id)
       id = await _uniqueId(
@@ -926,6 +931,7 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
       notes: Value(notes),
       attachments: Value(attachments.join(',')),
       tags: Value(tags.join(',')),
+      doneOn: Value(doneOn ?? DateTime.now().toUtc()),
     );
     into(transactions).insert(transactionComp);
     return getTransaction(id);
@@ -942,6 +948,7 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
     String notes,
     List<String> attachments,
     List<String> tags,
+    DateTime doneOn,
   }) async {
     var transaction = await getTransaction(transactionId);
     if (null == transaction.settlementId) {
@@ -955,6 +962,7 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
         notes: notes,
         attachments: attachments.join(','),
         tags: tags.join(','),
+        doneOn: doneOn,
         updatedOn: DateTime.now().toUtc(),
       );
       await updateRecord(transactions, transaction);

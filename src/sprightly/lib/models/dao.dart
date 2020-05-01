@@ -106,6 +106,7 @@ abstract class SystemDao extends AppDao {
     String notes,
     List<String> attachments,
     List<String> tags,
+    DateTime doneOn,
   });
   Future<int> deleteTempSettlements(String groupId);
 
@@ -125,6 +126,7 @@ abstract class SystemDao extends AppDao {
     String notes,
     List<String> attachments,
     List<String> tags,
+    DateTime doneOn,
   });
   Future<Transaction> updateTransaction(
     String transactionId, {
@@ -137,6 +139,7 @@ abstract class SystemDao extends AppDao {
     String notes,
     List<String> attachments,
     List<String> tags,
+    DateTime doneOn,
   });
   Future<int> deleteTransaction(String transactionId);
 
