@@ -170,19 +170,6 @@ abstract class SystemDao extends AppDao {
   Future<int> deleteGroup(String groupId);
 }
 
-class SettingNames {
-  static SettingNames _cache = SettingNames();
-  factory SettingNames() => _cache;
-
-  String get dbVersion => 'dbVersion';
-
-  // Other settings
-  String get primarySetupComplete => 'primarySetupComplete';
-
-  // Themes
-  String get themeMode => 'themeMode';
-}
-
 abstract class SettingsDao extends AppDao {
   AppInformation get appInformation;
   List<AppSetting> get allAppSettings;

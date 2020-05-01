@@ -4762,7 +4762,7 @@ class $AppSettingsTable extends AppSettings
   GeneratedTextColumn _constructType() {
     return GeneratedTextColumn('type', $tableName, true,
         $customConstraints:
-            'CHECK (type IN (\'String\',\'Number\',\'Bool\',\'List\',\'AppInfo\')) NOT NULL  DEFAULT \'String\'');
+            'CHECK (type IN (\'String\',\'Number\',\'Bool\',\'List\',\'AppInfo\',\'ThemeMode\')) NOT NULL  DEFAULT \'String\'');
   }
 
   final VerificationMeta _createdOnMeta = const VerificationMeta('createdOn');

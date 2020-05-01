@@ -2,8 +2,10 @@ library sprightly.repositories;
 
 import 'package:sprightly/extensions/enum_extensions.dart';
 import 'package:sprightly/models/constants/enums.dart';
+import 'package:sprightly/models/constants/values.dart';
 import 'package:sprightly/models/dao.dart';
 import 'package:sprightly/models/db/database.dart';
+import 'package:sprightly/utils/app_parameter.dart';
 // import 'package:sprightly/models/entities.dart';
 
 abstract class BaseData {
@@ -12,26 +14,22 @@ abstract class BaseData {
   BaseData(this._dao);
 }
 
-class Setting<T> {
-  final String name;
-  final T value;
-
-  Setting(this.name, this.value);
-
-  static Setting _ofType<Tp>(String name, Tp value) => Setting<Tp>(name, value);
-
+class Setting<T> extends Parameter<T> {
   factory Setting.from(AppSetting appSetting, AppSettingType type) {
     switch (type) {
       case AppSettingType.AppInfo:
       case AppSettingType.String:
-        return Setting._ofType(appSetting.name, appSetting.value);
+        return Parameter.ofType(appSetting.name, appSetting.value);
       case AppSettingType.Number:
-        return Setting._ofType(
+        return Parameter.ofType(
             appSetting.name, double.tryParse(appSetting.value));
       case AppSettingType.Bool:
-        return Setting._ofType(appSetting.name, appSetting.value == 'true');
+        return Parameter.ofType(appSetting.name, appSetting.value == 'true');
       case AppSettingType.List:
-        return Setting._ofType(appSetting.name, appSetting.value.split(','));
+        return Parameter.ofType(appSetting.name, appSetting.value.split(','));
+      case AppSettingType.ThemeMode:
+        return Parameter.ofType(
+            appSetting.name, ThemeMode.values.find(appSetting.value));
       default:
         return null;
     }
@@ -41,7 +39,7 @@ class Setting<T> {
 class AppSettings extends BaseData {
   static AppSettings _cache;
   final Map<String, Setting> _settings;
-  final SettingNames _setting = SettingNames();
+  AppSettingNames get _setting => AppSettingNames.universal;
 
   AppSettings._(SettingsDao _dao)
       : _settings = {},
@@ -61,11 +59,15 @@ class AppSettings extends BaseData {
   List<ColorCombo> get _colorCombos => _dao.allColorCombos;
 
   T _getSettings<T>(String name) => (_settings[name] as Setting<T>).value;
-  void _setSettings<T>(String name, T value) {
-    updateAppSetting(name, T.toString()).then((success) {
-      if (success) _settings[name] = Setting._ofType(name, T.toString());
+  void _setSettings<T>(String name, T value, {bool isEnum = false}) {
+    updateAppSetting(name, isEnum ? T.toEnumString() : T.toString())
+        .then((success) {
+      if (success) _settings[name].value = T;
     });
   }
+
+  Stream<T> _getStream<T>(String name) =>
+      (_settings[name] as Setting<T>).stream;
 
   // AppInfo details
   // todo: set it during MigrationStrategy initiation
@@ -79,12 +81,14 @@ class AppSettings extends BaseData {
   bool get primarySetupComplete => _getSettings(_setting.primarySetupComplete);
   set primarySetupComplete(bool value) =>
       _setSettings(_setting.primarySetupComplete, value);
+  Stream<bool> get primarySetupCompleteStream =>
+      _getStream(_setting.primarySetupComplete);
 
   // Themes
-  ThemeMode get themeMode =>
-      ThemeMode.values.find(_getSettings<String>(_setting.themeMode));
+  ThemeMode get themeMode => _getSettings(_setting.themeMode);
   set themeMode(ThemeMode mode) =>
-      _setSettings(_setting.themeMode, mode.toEnumString());
+      _setSettings(_setting.themeMode, mode, isEnum: true);
+  Stream<ThemeMode> get themeModeStream => _getStream(_setting.themeMode);
 
   Future<bool> updateAppSetting(String name, String value) =>
       _dao.updateAppSetting(name, value);

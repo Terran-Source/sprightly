@@ -10,8 +10,8 @@ dependencies:
     sdk: flutter
 
   # languages & internationalization
-  applocale: ^1.0.2
-  interpolation: ^1.0.0
+  applocale: ^1.0.3
+  interpolation: ^1.0.1
 
   # The following adds the Cupertino Icons font to your application.
   cupertino_icons: ^0.1.3

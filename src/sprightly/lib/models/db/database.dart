@@ -362,7 +362,7 @@ class AppSettings extends Table {
   TextColumn get name => text().named('name').withLength(max: 50)();
   TextColumn get value => text().named('value')();
   TextColumn get type => text().named('type').nullable().customConstraint(
-      "CHECK (type IN ('String','Number','Bool','List','AppInfo')) NOT NULL  DEFAULT 'String'")();
+      "CHECK (type IN ('String','Number','Bool','List','AppInfo','ThemeMode')) NOT NULL  DEFAULT 'String'")();
   DateTimeColumn get createdOn => dateTime()
       .named('createdOn')
       .clientDefault(() => DateTime.now().toUtc())();
@@ -382,7 +382,7 @@ class AppSettings extends Table {
 Future<String> _getSqlQueryFromAsset(String fileName) => getAssetText(fileName,
     assetDirectory: sqlAssetDirectory, extension: '.sql');
 Future<String> _getSqlQueryFromRemote(CustomQuery customQuery) =>
-    RemoteFileCache.current.getRemoteText(customQuery.source,
+    RemoteFileCache.universal.getRemoteText(customQuery.source,
         identifier: customQuery.identifier, headers: customQuery.headers);
 
 enum SourceFrom { Asset, Web }
@@ -497,7 +497,7 @@ class SprightlyQueries {
       _working = true;
       try {
         // Required for fetching file from web
-        await RemoteFileCache.current.init();
+        await RemoteFileCache.universal.init();
 
         // custom queries
         await selectGroupAccountMembers.load();
