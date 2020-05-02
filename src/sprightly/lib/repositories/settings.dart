@@ -8,10 +8,8 @@ import 'package:sprightly/models/db/database.dart';
 import 'package:sprightly/utils/app_parameter.dart';
 // import 'package:sprightly/models/entities.dart';
 
-abstract class BaseData {
-  final SettingsDao _dao;
-
-  BaseData(this._dao);
+mixin _BaseData {
+  SettingsDao _dao;
 }
 
 class Setting<T> extends Parameter<T> {
@@ -36,14 +34,13 @@ class Setting<T> extends Parameter<T> {
   }
 }
 
-class AppSettings extends BaseData {
-  static AppSettings _cache;
-  final Map<String, Setting> _settings;
-  AppSettingNames get _setting => AppSettingNames.universal;
+class AppSettings with _BaseData {
+  final Map<String, Setting> _settings = {};
 
-  AppSettings._(SettingsDao _dao)
-      : _settings = {},
-        super(_dao) {
+  static AppSettings _cache;
+
+  AppSettings._(SettingsDao _dao) {
+    super._dao = _dao;
     _dao.allAppSettings.forEach((appSetting) {
       _settings.putIfAbsent(
           appSetting.name,
@@ -53,6 +50,8 @@ class AppSettings extends BaseData {
   }
 
   factory AppSettings(SettingsDao dao) => _cache ??= AppSettings._(dao);
+
+  AppSettingNames get _setting => AppSettingNames.universal;
 
   List<AppFont> get _appFonts => _dao.allAppFonts;
   List<FontCombo> get _fontCombos => _dao.allFontCombos;
