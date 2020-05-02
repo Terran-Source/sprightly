@@ -55,6 +55,24 @@ class AppParameter<T extends Parameter> {
   Tp getValue<Tp>(String name) => (_parameters[name] as Parameter<Tp>).value;
   void setValue<Tp>(String name, Tp value) => _parameters[name].value = value;
 
+  @protected
+  static List<T> getParamList<T extends Parameter>(
+    Map<String, dynamic> jsonValue, {
+    List<TypeConverter> typeConverters,
+  }) {
+    if (null != typeConverters) {
+      return jsonValue.entries.map((j) {
+        var val = j.value;
+        var converter =
+            typeConverters.firstWhere((tc) => tc.parameterName == j.key);
+        if (null != converter) val = converter.convert(val);
+        return Parameter.ofType(j.key, val);
+      });
+    } else {
+      return jsonValue.entries.map((j) => Parameter.ofType(j.key, j.value));
+    }
+  }
+
   static Future<List<T>> load<T extends Parameter>(
     String source, {
     String assetDirectory,
@@ -74,17 +92,7 @@ class AppParameter<T extends Parameter> {
       }
       if (null != sourceAsText && sourceAsText.isNotEmpty) {
         Map<String, dynamic> jsonValue = await json.decode(sourceAsText);
-        if (null != typeConverters) {
-          return jsonValue.entries.map((j) {
-            var val = j.value;
-            var converter =
-                typeConverters.firstWhere((tc) => tc.parameterName == j.key);
-            if (null != converter) val = converter.convert(val);
-            return Parameter.ofType(j.key, val);
-          });
-        } else {
-          return jsonValue.entries.map((j) => Parameter.ofType(j.key, j.value));
-        }
+        return getParamList(jsonValue, typeConverters: typeConverters);
       }
       throw new FormatException("[source] is either null or empty");
     }
