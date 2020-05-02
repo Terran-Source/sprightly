@@ -12,7 +12,6 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:sprightly/extensions/file_system_entity_extensions.dart';
 import 'package:sprightly/extensions/http_response_extensions.dart';
-import 'package:sprightly/utils/app_parameter.dart';
 import 'package:sprightly/utils/formatted_exception.dart';
 
 int get maxCachedRetentionMins => 7 * 24 * 60; // 7 days
@@ -270,7 +269,8 @@ FormattedException<T> formattedException<T extends Exception>(
     FormattedException(exception,
         stackTrace: stackTrace,
         messageParams: messageParams,
-        moduleName: AppParameter.universal.fileIoModuleName);
+        appName: '', // todo:
+        moduleName: ''); // todo:
 
 class RemoteFileCache {
   static RemoteFileCache universal = RemoteFileCache();

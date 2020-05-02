@@ -2,7 +2,6 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:interpolation/interpolation.dart';
-import 'package:sprightly/utils/app_parameter.dart';
 
 const Map<Type, String> exceptionDisplay = {
   Exception: "Something went wrong. {message}",
@@ -18,9 +17,9 @@ class FormattedException<T extends Exception> {
   final T _exception;
   final Map<String, dynamic> messageParams;
   final StackTrace stackTrace;
+  final String appName;
   final String moduleName;
 
-  String get appName => AppParameter.universal.appName;
   // todo: set debug flag
   static bool _debug = false;
   // todo: set Logger
@@ -30,6 +29,7 @@ class FormattedException<T extends Exception> {
     this._exception, {
     this.messageParams = const {},
     this.stackTrace,
+    this.appName,
     this.moduleName,
   }) {
     if (_debug) {
@@ -47,7 +47,8 @@ class FormattedException<T extends Exception> {
   String get message => _exception.toString();
   Type get exceptionType => _exception.runtimeType;
   Map<Type, String> get _display => exceptionDisplay;
-  String get logSource => '$appName:$moduleName';
+  String get logSource =>
+      '${appName ?? 'FormattedException'}:${moduleName ?? 'Generic'}';
   String get displayedMessage => _interpolation
       .eval(_display.containsKey(T) ? _display[T] : _display[Exception],
           messageParams)

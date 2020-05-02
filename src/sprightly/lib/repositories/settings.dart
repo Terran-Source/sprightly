@@ -34,17 +34,15 @@ class Setting<T> extends Parameter<T> {
   }
 }
 
-class AppSettings with _BaseData {
-  final Map<String, Setting> _settings = {};
-
+class AppSettings extends AppParameter<Setting> with _BaseData {
   static AppSettings _cache;
 
   AppSettings._(SettingsDao _dao) {
     super._dao = _dao;
     _dao.allAppSettings.forEach((appSetting) {
-      _settings.putIfAbsent(
+      super.setParameter(
           appSetting.name,
-          () => Setting.from(
+          Setting.from(
               appSetting, AppSettingType.values.find(appSetting.type)));
     });
   }
@@ -57,26 +55,34 @@ class AppSettings with _BaseData {
   List<FontCombo> get _fontCombos => _dao.allFontCombos;
   List<ColorCombo> get _colorCombos => _dao.allColorCombos;
 
-  T _getSettings<T>(String name) => (_settings[name] as Setting<T>).value;
+  T _getSettings<T>(String name) => super.getValue<T>(name);
   void _setSettings<T>(String name, T value, {bool isEnum = false}) {
     updateAppSetting(name, isEnum ? T.toEnumString() : T.toString())
         .then((success) {
-      if (success) _settings[name].value = T;
+      if (success) super.setValue<T>(name, value);
     });
   }
 
   Stream<T> _getStream<T>(String name) =>
-      (_settings[name] as Setting<T>).stream;
+      (super.parameters[name] as Setting<T>).stream;
 
   // AppInfo details
-  // todo: set it during MigrationStrategy initiation
   String get appName => _dao.appInformation.appName;
   String get packageName => _dao.appInformation.packageName;
   String get version => _dao.appInformation.version;
   String get buildNumber => _dao.appInformation.buildNumber;
   int get dbVersion => _getSettings<double>(_setting.dbVersion).round();
 
-  // Other settings
+  // Debug related
+  String get environment => _getSettings(_setting.environment);
+  String get dbModuleName => _setting.dbModuleName;
+  String get fileIoModuleName => _setting.fileIoModuleName;
+
+  bool get debug => _getSettings(_setting.debug);
+  set debug(bool value) => _setSettings(_setting.debug, value);
+  Stream<bool> get debugStream => _getStream(_setting.debug);
+
+  // database AppSettings
   bool get primarySetupComplete => _getSettings(_setting.primarySetupComplete);
   set primarySetupComplete(bool value) =>
       _setSettings(_setting.primarySetupComplete, value);

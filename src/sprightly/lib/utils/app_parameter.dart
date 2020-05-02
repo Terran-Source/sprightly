@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:sprightly/models/constants/values.dart';
 
 class Parameter<T> {
   final String name;
@@ -14,6 +13,7 @@ class Parameter<T> {
     }
   }
 
+  @protected
   StreamController<T> _controller = StreamController(sync: false);
 
   Type get type => _value.runtimeType;
@@ -26,27 +26,20 @@ class Parameter<T> {
       Parameter<Tp>(name, value);
 }
 
-class AppParameter {
-  static AppParameter universal = AppParameter();
-  factory AppParameter() => universal;
+class AppParameter<T extends Parameter> {
+  // static AppParameter universal = AppParameter();
+  // factory AppParameter() => universal;
 
-  final Map<String, Parameter> _parameters = const {};
+  @protected
+  final Map<String, T> _parameters = const {};
+  @protected
+  Map<String, T> get parameters => _parameters;
 
-  AppParameterNames get _params => AppParameterNames.universal;
-
-  Parameter<T> set<T>(String name, T value) =>
+  Parameter<Tp> setParameterValue<Tp>(String name, Tp value) =>
       _parameters[name] = Parameter.ofType(name, value);
 
-  T getParameter<T>(String name) => _parameters[name].value;
-  void setParameter<T>(String name, T value) => _parameters[name].value = value;
+  T setParameter(String name, T param) => _parameters[name] = param;
 
-  String get environment => getParameter(_params.environment);
-  set environment(String value) => setParameter(_params.environment, value);
-  bool get debug => getParameter(_params.debug);
-  set debug(bool value) => setParameter(_params.debug, value);
-
-  String get appName => getParameter(_params.appName);
-  set appName(String value) => setParameter(_params.appName, value);
-  String get dbModuleName => _params.dbModuleName;
-  String get fileIoModuleName => _params.fileIoModuleName;
+  Tp getValue<Tp>(String name) => (_parameters[name] as Parameter<Tp>).value;
+  void setValue<Tp>(String name, Tp value) => _parameters[name].value = value;
 }
