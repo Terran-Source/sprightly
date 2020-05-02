@@ -1,3 +1,5 @@
+library sprightly.functional_exception;
+
 import 'dart:developer';
 import 'dart:io';
 

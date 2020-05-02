@@ -385,8 +385,6 @@ Future<String> _getSqlQueryFromRemote(CustomQuery customQuery) =>
     RemoteFileCache.universal.getRemoteText(customQuery.source,
         identifier: customQuery.identifier, headers: customQuery.headers);
 
-enum SourceFrom { Asset, Web }
-
 /// Used to get complex queries from outside.
 ///
 /// Either a filename(without extension) inside [sqlAssetDirectory]
@@ -420,7 +418,7 @@ class CustomQuery {
   /// ```
   final String source;
   final String identifier;
-  final SourceFrom _from;
+  final ResourceFrom _from;
   final Map<String, String> headers;
 
   String _query;
@@ -430,20 +428,21 @@ class CustomQuery {
 
   factory CustomQuery.fromAsset(String fileNameWithoutExtension,
           {String identifier}) =>
-      CustomQuery._(fileNameWithoutExtension, SourceFrom.Asset,
+      CustomQuery._(fileNameWithoutExtension, ResourceFrom.Asset,
           identifier ?? fileNameWithoutExtension);
 
   factory CustomQuery.fromWeb(String identifier, String address,
       {Map<String, String> headers = const {}}) {
     Uri.parse(address);
-    return CustomQuery._(address, SourceFrom.Web, identifier, headers: headers);
+    return CustomQuery._(address, ResourceFrom.Web, identifier,
+        headers: headers);
   }
 
   Future<String> _load() {
     switch (_from) {
-      case SourceFrom.Asset:
+      case ResourceFrom.Asset:
         return compute(_getSqlQueryFromAsset, source);
-      case SourceFrom.Web:
+      case ResourceFrom.Web:
         return compute(_getSqlQueryFromRemote, this);
       default:
         return null;
