@@ -57,47 +57,45 @@ class AppParameter<T extends Parameter> {
 
   @protected
   static List<T> getParamList<T extends Parameter>(
-    Map<String, dynamic> jsonValue, {
+    String jsonText, {
     List<TypeConverter> typeConverters,
   }) {
-    if (null != typeConverters) {
-      return jsonValue.entries.map((j) {
-        var val = j.value;
-        var converter =
-            typeConverters.firstWhere((tc) => tc.parameterName == j.key);
-        if (null != converter) val = converter.convert(val);
-        return Parameter.ofType(j.key, val);
-      });
-    } else {
-      return jsonValue.entries.map((j) => Parameter.ofType(j.key, j.value));
+    if (null != jsonText && jsonText.isNotEmpty) {
+      Map<String, dynamic> jsonValue = json.decode(jsonText);
+      if (null != typeConverters) {
+        return jsonValue.entries.map((j) {
+          var val = j.value;
+          var converter =
+              typeConverters.firstWhere((tc) => tc.parameterName == j.key);
+          if (null != converter) val = converter.convert(val);
+          return Parameter.ofType(j.key, val);
+        });
+      } else {
+        return jsonValue.entries.map((j) => Parameter.ofType(j.key, j.value));
+      }
     }
+    throw new FormatException("[jsonText] is either null or empty");
   }
 
-  static Future<List<T>> load<T extends Parameter>(
+  static Future<List<T>> loadParamsRemote<T extends Parameter>(
     String source, {
-    String assetDirectory,
     String identifier,
     Map<String, String> headers,
     List<TypeConverter> typeConverters,
   }) async {
-    if (null != source) {
-      String sourceAsText;
-      try {
-        Uri.parse(source);
-        sourceAsText = await RemoteFileCache.universal
-            .getRemoteText(source, identifier: identifier, headers: headers);
-      } on FormatException {
-        sourceAsText =
-            await getAssetText(source, assetDirectory: assetDirectory);
-      }
-      if (null != sourceAsText && sourceAsText.isNotEmpty) {
-        Map<String, dynamic> jsonValue = await json.decode(sourceAsText);
-        return getParamList(jsonValue, typeConverters: typeConverters);
-      }
-      throw new FormatException("[source] is either null or empty");
-    }
-    throw new FormatException(
-        "Please provide a valid [source]. Either an asset directory path or a web accessible address.",
-        source);
+    Uri.parse(source);
+    var jsonText = await RemoteFileCache.universal
+        .getRemoteText(source, identifier: identifier, headers: headers);
+    return getParamList(jsonText, typeConverters: typeConverters);
+  }
+
+  static Future<List<T>> loadParamsLocal<T extends Parameter>(
+    String source, {
+    String assetDirectory,
+    List<TypeConverter> typeConverters,
+  }) async {
+    var jsonText = await getAssetText(source, assetDirectory: assetDirectory);
+
+    return getParamList(jsonText, typeConverters: typeConverters);
   }
 }
