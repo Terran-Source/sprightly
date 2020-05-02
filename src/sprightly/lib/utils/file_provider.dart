@@ -14,6 +14,7 @@ import 'package:sprightly/extensions/file_system_entity_extensions.dart';
 import 'package:sprightly/extensions/http_response_extensions.dart';
 import 'package:sprightly/utils/formatted_exception.dart';
 
+String get moduleName => 'file_provider';
 int get maxCachedRetentionMins => 7 * 24 * 60; // 7 days
 
 Future<String> getAbsolutePath(
@@ -261,16 +262,17 @@ class CacheFile {
   });
 }
 
-FormattedException<T> formattedException<T extends Exception>(
+FormattedException<T> _formattedException<T extends Exception>(
   T exception, {
   Map<String, dynamic> messageParams = const {},
   StackTrace stackTrace,
 }) =>
-    FormattedException(exception,
-        stackTrace: stackTrace,
-        messageParams: messageParams,
-        appName: '', // todo:
-        moduleName: ''); // todo:
+    FormattedException(
+      exception,
+      stackTrace: stackTrace,
+      messageParams: messageParams,
+      moduleName: moduleName,
+    );
 
 class RemoteFileCache {
   static RemoteFileCache universal = RemoteFileCache();
@@ -353,15 +355,15 @@ class RemoteFileCache {
         );
       }
     } on SocketException catch (e, st) {
-      throw formattedException(e, stackTrace: st);
+      throw _formattedException(e, stackTrace: st);
     } on HttpException catch (e, st) {
-      throw formattedException(
+      throw _formattedException(
         e,
         stackTrace: st,
         messageParams: {"method": "get", "host": e.uri.host},
       );
     } on FormatException catch (e, st) {
-      throw formattedException(e, stackTrace: st);
+      throw _formattedException(e, stackTrace: st);
     } finally {
       _client.close();
     }

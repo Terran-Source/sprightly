@@ -5,8 +5,6 @@ class AppSettingNames {
   // Debug related
   String get environment => 'environment';
   String get debug => 'debug';
-  String get dbModuleName => 'moor_database';
-  String get fileIoModuleName => 'file_provider';
   // Debug related
 
   // database related

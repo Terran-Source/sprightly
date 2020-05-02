@@ -17,9 +17,9 @@ class FormattedException<T extends Exception> {
   final T _exception;
   final Map<String, dynamic> messageParams;
   final StackTrace stackTrace;
-  final String appName;
   final String moduleName;
 
+  static String appName;
   // todo: set debug flag
   static bool _debug = false;
   // todo: set Logger
@@ -29,7 +29,6 @@ class FormattedException<T extends Exception> {
     this._exception, {
     this.messageParams = const {},
     this.stackTrace,
-    this.appName,
     this.moduleName,
   }) {
     if (_debug) {

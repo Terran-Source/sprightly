@@ -49,7 +49,7 @@ class AppSettings extends AppParameter<Setting> with _BaseData {
 
   factory AppSettings(SettingsDao dao) => _cache ??= AppSettings._(dao);
 
-  AppSettingNames get _setting => AppSettingNames.universal;
+  AppSettingNames get _settingNames => AppSettingNames.universal;
 
   List<AppFont> get _appFonts => _dao.allAppFonts;
   List<FontCombo> get _fontCombos => _dao.allFontCombos;
@@ -71,29 +71,28 @@ class AppSettings extends AppParameter<Setting> with _BaseData {
   String get packageName => _dao.appInformation.packageName;
   String get version => _dao.appInformation.version;
   String get buildNumber => _dao.appInformation.buildNumber;
-  int get dbVersion => _getSettings<double>(_setting.dbVersion).round();
+  int get dbVersion => _getSettings<double>(_settingNames.dbVersion).round();
 
   // Debug related
-  String get environment => _getSettings(_setting.environment);
-  String get dbModuleName => _setting.dbModuleName;
-  String get fileIoModuleName => _setting.fileIoModuleName;
+  String get environment => _getSettings(_settingNames.environment);
 
-  bool get debug => _getSettings(_setting.debug);
-  set debug(bool value) => _setSettings(_setting.debug, value);
-  Stream<bool> get debugStream => _getStream(_setting.debug);
+  bool get debug => _getSettings(_settingNames.debug);
+  set debug(bool value) => _setSettings(_settingNames.debug, value);
+  Stream<bool> get debugStream => _getStream(_settingNames.debug);
 
   // database AppSettings
-  bool get primarySetupComplete => _getSettings(_setting.primarySetupComplete);
+  bool get primarySetupComplete =>
+      _getSettings(_settingNames.primarySetupComplete);
   set primarySetupComplete(bool value) =>
-      _setSettings(_setting.primarySetupComplete, value);
+      _setSettings(_settingNames.primarySetupComplete, value);
   Stream<bool> get primarySetupCompleteStream =>
-      _getStream(_setting.primarySetupComplete);
+      _getStream(_settingNames.primarySetupComplete);
 
   // Themes
-  ThemeMode get themeMode => _getSettings(_setting.themeMode);
+  ThemeMode get themeMode => _getSettings(_settingNames.themeMode);
   set themeMode(ThemeMode mode) =>
-      _setSettings(_setting.themeMode, mode, isEnum: true);
-  Stream<ThemeMode> get themeModeStream => _getStream(_setting.themeMode);
+      _setSettings(_settingNames.themeMode, mode, isEnum: true);
+  Stream<ThemeMode> get themeModeStream => _getStream(_settingNames.themeMode);
 
   Future<bool> updateAppSetting(String name, String value) =>
       _dao.updateAppSetting(name, value);

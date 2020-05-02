@@ -4,6 +4,13 @@ import 'package:flutter/foundation.dart';
 
 class Parameter<T> {
   final String name;
+
+  Parameter(this.name, this._value);
+
+  @protected
+  static Parameter ofType<Tp>(String name, Tp value) =>
+      Parameter<Tp>(name, value);
+
   T _value;
   T get value => _value;
   set value(T val) {
@@ -18,18 +25,9 @@ class Parameter<T> {
 
   Type get type => _value.runtimeType;
   Stream<T> get stream => _controller.stream;
-
-  Parameter(this.name, this._value);
-
-  @protected
-  static Parameter ofType<Tp>(String name, Tp value) =>
-      Parameter<Tp>(name, value);
 }
 
 class AppParameter<T extends Parameter> {
-  // static AppParameter universal = AppParameter();
-  // factory AppParameter() => universal;
-
   @protected
   final Map<String, T> _parameters = const {};
   @protected
