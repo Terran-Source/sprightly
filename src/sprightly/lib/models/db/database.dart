@@ -458,8 +458,8 @@ class CustomQuery {
 }
 
 class SprightlyQueries {
-  static SprightlyQueries _cache = SprightlyQueries();
-  factory SprightlyQueries() => _cache;
+  static SprightlyQueries universal = SprightlyQueries();
+  factory SprightlyQueries() => universal;
 
   bool initialized = false;
   bool _working = false;
@@ -514,7 +514,7 @@ class SprightlyQueries {
 }
 
 mixin _GenericDaoMixin<T extends GeneratedDatabase> on DatabaseAccessor<T> {
-  SprightlyQueries _queries = SprightlyQueries();
+  SprightlyQueries _queries = SprightlyQueries.universal;
 
   bool get ready => _queries.initialized;
 
