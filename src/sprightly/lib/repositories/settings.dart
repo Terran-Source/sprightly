@@ -37,8 +37,9 @@ class Setting<T> extends Parameter<T> {
 class AppSettings extends AppParameter<Setting> with _BaseData {
   static AppSettings _cache;
 
-  AppSettings._(SettingsDao _dao) {
+  AppSettings._(SettingsDao _dao, String environment) {
     super._dao = _dao;
+    super.setValue(_settingNames.environment, environment);
     _dao.allAppSettings.forEach((appSetting) {
       super.updateParameter(
           appSetting.name,
@@ -47,7 +48,8 @@ class AppSettings extends AppParameter<Setting> with _BaseData {
     });
   }
 
-  factory AppSettings(SettingsDao dao) => _cache ??= AppSettings._(dao);
+  factory AppSettings(SettingsDao dao, {String environment = 'Prod'}) =>
+      _cache ??= AppSettings._(dao, environment);
 
   AppSettingNames get _settingNames => AppSettingNames.universal;
 
