@@ -5,8 +5,8 @@ import 'package:sprightly/models/constants/enums.dart';
 import 'package:sprightly/models/constants/values.dart';
 import 'package:sprightly/models/dao.dart';
 import 'package:sprightly/models/db/database.dart';
-import 'package:sprightly/utils/app_parameter.dart';
 // import 'package:sprightly/models/entities.dart';
+import 'package:sprightly/utils/app_parameter.dart';
 
 mixin _BaseData {
   SettingsDao _dao;
