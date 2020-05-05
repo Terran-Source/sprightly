@@ -553,7 +553,7 @@ mixin _GenericDaoMixin<T extends GeneratedDatabase> on DatabaseAccessor<T> {
 
   Future<bool> recordWithColumnValueExists(
           String tableName, String column, String value) async =>
-      await customSelectQuery(
+      await customSelect(
         "SELECT COUNT(1) AS counting FROM $tableName t WHERE t.$column=:value",
         variables: [Variable.withString(value)],
       ).map((row) => row.readInt("counting")).getSingle() >
@@ -562,8 +562,8 @@ mixin _GenericDaoMixin<T extends GeneratedDatabase> on DatabaseAccessor<T> {
   Selectable<QueryRow> getRecordsWithColumnValue(
           String tableName, String column, String value,
           {TableInfo table}) =>
-      customSelectQuery(
-        "SELECT t.* AS counting FROM $tableName t WHERE t.$column=:value",
+      customSelect(
+        "SELECT t.* FROM $tableName t WHERE t.$column=:value",
         variables: [Variable.withString(value)],
         readsFrom: null == table ? null : {table},
       );
@@ -660,12 +660,11 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
   List<Group> _sharedGroupList;
   List<Group> get sharedGroupList => _sharedGroupList;
 
-  Selectable<Member> _selectGroupAccountMembers(String groupId) =>
-      customSelectQuery(
+  Selectable<Member> _selectGroupAccountMembers(String groupId) => customSelect(
         _queries.selectGroupAccountMembers.query,
         variables: [Variable.withString(groupId)],
         readsFrom: {members, groupMembers},
-      ).map((row) => Member.fromData(row.data, db));
+      ).map((row) => Member.fromData(row.data, attachedDatabase));
 
   Future<List<Member>> getGroupAccountMembers(String groupId) =>
       _selectGroupAccountMembers(groupId).get();
@@ -673,12 +672,11 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
   Stream<List<Member>> watchGroupAccountMembers(String groupId) =>
       _selectGroupAccountMembers(groupId).watch();
 
-  Selectable<Member> _selectGroupOnlyMembers(String groupId) =>
-      customSelectQuery(
+  Selectable<Member> _selectGroupOnlyMembers(String groupId) => customSelect(
         _queries.selectGroupOnlyMembers.query,
         variables: [Variable.withString(groupId)],
         readsFrom: {members, groupMembers},
-      ).map((row) => Member.fromData(row.data, db));
+      ).map((row) => Member.fromData(row.data, attachedDatabase));
 
   Future<List<Member>> getGroupOnlyMembers(String groupId) =>
       _selectGroupOnlyMembers(groupId).get();
@@ -792,14 +790,14 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
 
   Selectable<Settlement> _selectGroupSettlements(String groupId,
           {bool isTemporary}) =>
-      customSelectQuery(
+      customSelect(
         _queries.selectGroupSettlements.query,
         variables: [
           Variable.withString(groupId),
           Variable.withBool(isTemporary)
         ],
         readsFrom: {settlements, groups},
-      ).map((row) => Settlement.fromData(row.data, db));
+      ).map((row) => Settlement.fromData(row.data, attachedDatabase));
 
   Future<List<Settlement>> getGroupSettlements(String groupId,
           {bool isTemporary}) =>
@@ -891,11 +889,11 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
           .go());
 
   Selectable<Transaction> _selectGroupTransactions(String groupId) =>
-      customSelectQuery(
+      customSelect(
         _queries.selectGroupTransactions.query,
         variables: [Variable.withString(groupId)],
         readsFrom: {transactions, groups},
-      ).map((row) => Transaction.fromData(row.data, db));
+      ).map((row) => Transaction.fromData(row.data, attachedDatabase));
 
   Future<List<Transaction>> getGroupTransactions(String groupId) =>
       _selectGroupTransactions(groupId).get();
@@ -1037,7 +1035,7 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
         column,
         value,
         table: groups,
-      ).map((row) => Group.fromData(row.data, db));
+      ).map((row) => Group.fromData(row.data, attachedDatabase));
 
   Future<List<Group>> getGroups(GroupType type) async =>
       await _selectGroupBy('type', type.toEnumString()).get();
@@ -1147,7 +1145,8 @@ class SprightlySetupDao extends DatabaseAccessor<SprightlySetupDatabase>
     }
     if (details.wasCreated || details.hadUpgrade) {
       // sync dbVersion
-      await updateAppSetting('dbVersion', db.schemaVersion.toString());
+      await updateAppSetting(
+          'dbVersion', attachedDatabase.schemaVersion.toString());
     }
   }
 
@@ -1168,7 +1167,7 @@ class SprightlySetupDao extends DatabaseAccessor<SprightlySetupDatabase>
 
   Future<AppSetting> getAppSetting(String name) async => AppSetting.fromData(
       await getRecordWithColumnValue(appSettings.actualTableName, 'name', name),
-      db);
+      attachedDatabase);
 
   Future<bool> updateAppSetting(String name, String value,
       {AppSettingType type, bool batchOperation = false}) async {

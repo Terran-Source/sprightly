@@ -60,6 +60,45 @@ class Member extends DataClass implements Insertable<Member> {
           .mapFromDatabaseResponse(data['${effectivePrefix}updatedOn']),
     );
   }
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (!nullToAbsent || id != null) {
+      map['id'] = Variable<String>(id);
+    }
+    if (!nullToAbsent || name != null) {
+      map['name'] = Variable<String>(name);
+    }
+    if (!nullToAbsent || nickName != null) {
+      map['nickName'] = Variable<String>(nickName);
+    }
+    if (!nullToAbsent || avatar != null) {
+      map['avatar'] = Variable<String>(avatar);
+    }
+    if (!nullToAbsent || idType != null) {
+      map['idType'] = Variable<String>(idType);
+    }
+    if (!nullToAbsent || idValue != null) {
+      map['idValue'] = Variable<String>(idValue);
+    }
+    if (!nullToAbsent || secondaryIdValue != null) {
+      map['secondaryIdValue'] = Variable<String>(secondaryIdValue);
+    }
+    if (!nullToAbsent || isGroupExpense != null) {
+      map['isGroupExpense'] = Variable<bool>(isGroupExpense);
+    }
+    if (!nullToAbsent || signature != null) {
+      map['signature'] = Variable<String>(signature);
+    }
+    if (!nullToAbsent || createdOn != null) {
+      map['createdOn'] = Variable<DateTime>(createdOn);
+    }
+    if (!nullToAbsent || updatedOn != null) {
+      map['updatedOn'] = Variable<DateTime>(updatedOn);
+    }
+    return map;
+  }
+
   factory Member.fromJson(Map<String, dynamic> json,
       {ValueSerializer serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
@@ -93,39 +132,6 @@ class Member extends DataClass implements Insertable<Member> {
       'createdOn': serializer.toJson<DateTime>(createdOn),
       'updatedOn': serializer.toJson<DateTime>(updatedOn),
     };
-  }
-
-  @override
-  MembersCompanion createCompanion(bool nullToAbsent) {
-    return MembersCompanion(
-      id: id == null && nullToAbsent ? const Value.absent() : Value(id),
-      name: name == null && nullToAbsent ? const Value.absent() : Value(name),
-      nickName: nickName == null && nullToAbsent
-          ? const Value.absent()
-          : Value(nickName),
-      avatar:
-          avatar == null && nullToAbsent ? const Value.absent() : Value(avatar),
-      idType:
-          idType == null && nullToAbsent ? const Value.absent() : Value(idType),
-      idValue: idValue == null && nullToAbsent
-          ? const Value.absent()
-          : Value(idValue),
-      secondaryIdValue: secondaryIdValue == null && nullToAbsent
-          ? const Value.absent()
-          : Value(secondaryIdValue),
-      isGroupExpense: isGroupExpense == null && nullToAbsent
-          ? const Value.absent()
-          : Value(isGroupExpense),
-      signature: signature == null && nullToAbsent
-          ? const Value.absent()
-          : Value(signature),
-      createdOn: createdOn == null && nullToAbsent
-          ? const Value.absent()
-          : Value(createdOn),
-      updatedOn: updatedOn == null && nullToAbsent
-          ? const Value.absent()
-          : Value(updatedOn),
-    );
   }
 
   Member copyWith(
@@ -249,6 +255,34 @@ class MembersCompanion extends UpdateCompanion<Member> {
   })  : id = Value(id),
         idType = Value(idType),
         idValue = Value(idValue);
+  static Insertable<Member> custom({
+    Expression<String> id,
+    Expression<String> name,
+    Expression<String> nickName,
+    Expression<String> avatar,
+    Expression<String> idType,
+    Expression<String> idValue,
+    Expression<String> secondaryIdValue,
+    Expression<bool> isGroupExpense,
+    Expression<String> signature,
+    Expression<DateTime> createdOn,
+    Expression<DateTime> updatedOn,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (nickName != null) 'nickName': nickName,
+      if (avatar != null) 'avatar': avatar,
+      if (idType != null) 'idType': idType,
+      if (idValue != null) 'idValue': idValue,
+      if (secondaryIdValue != null) 'secondaryIdValue': secondaryIdValue,
+      if (isGroupExpense != null) 'isGroupExpense': isGroupExpense,
+      if (signature != null) 'signature': signature,
+      if (createdOn != null) 'createdOn': createdOn,
+      if (updatedOn != null) 'updatedOn': updatedOn,
+    });
+  }
+
   MembersCompanion copyWith(
       {Value<String> id,
       Value<String> name,
@@ -274,6 +308,45 @@ class MembersCompanion extends UpdateCompanion<Member> {
       createdOn: createdOn ?? this.createdOn,
       updatedOn: updatedOn ?? this.updatedOn,
     );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (nickName.present) {
+      map['nickName'] = Variable<String>(nickName.value);
+    }
+    if (avatar.present) {
+      map['avatar'] = Variable<String>(avatar.value);
+    }
+    if (idType.present) {
+      map['idType'] = Variable<String>(idType.value);
+    }
+    if (idValue.present) {
+      map['idValue'] = Variable<String>(idValue.value);
+    }
+    if (secondaryIdValue.present) {
+      map['secondaryIdValue'] = Variable<String>(secondaryIdValue.value);
+    }
+    if (isGroupExpense.present) {
+      map['isGroupExpense'] = Variable<bool>(isGroupExpense.value);
+    }
+    if (signature.present) {
+      map['signature'] = Variable<String>(signature.value);
+    }
+    if (createdOn.present) {
+      map['createdOn'] = Variable<DateTime>(createdOn.value);
+    }
+    if (updatedOn.present) {
+      map['updatedOn'] = Variable<DateTime>(updatedOn.value);
+    }
+    return map;
   }
 }
 
@@ -414,61 +487,62 @@ class $MembersTable extends Members with TableInfo<$MembersTable, Member> {
   @override
   final String actualTableName = 'Members';
   @override
-  VerificationContext validateIntegrity(MembersCompanion d,
+  VerificationContext validateIntegrity(Insertable<Member> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
-    if (d.id.present) {
-      context.handle(_idMeta, id.isAcceptableValue(d.id.value, _idMeta));
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id'], _idMeta));
     } else if (isInserting) {
       context.missing(_idMeta);
     }
-    if (d.name.present) {
+    if (data.containsKey('name')) {
       context.handle(
-          _nameMeta, name.isAcceptableValue(d.name.value, _nameMeta));
+          _nameMeta, name.isAcceptableOrUnknown(data['name'], _nameMeta));
     }
-    if (d.nickName.present) {
+    if (data.containsKey('nickName')) {
       context.handle(_nickNameMeta,
-          nickName.isAcceptableValue(d.nickName.value, _nickNameMeta));
+          nickName.isAcceptableOrUnknown(data['nickName'], _nickNameMeta));
     }
-    if (d.avatar.present) {
-      context.handle(
-          _avatarMeta, avatar.isAcceptableValue(d.avatar.value, _avatarMeta));
+    if (data.containsKey('avatar')) {
+      context.handle(_avatarMeta,
+          avatar.isAcceptableOrUnknown(data['avatar'], _avatarMeta));
     }
-    if (d.idType.present) {
-      context.handle(
-          _idTypeMeta, idType.isAcceptableValue(d.idType.value, _idTypeMeta));
+    if (data.containsKey('idType')) {
+      context.handle(_idTypeMeta,
+          idType.isAcceptableOrUnknown(data['idType'], _idTypeMeta));
     } else if (isInserting) {
       context.missing(_idTypeMeta);
     }
-    if (d.idValue.present) {
+    if (data.containsKey('idValue')) {
       context.handle(_idValueMeta,
-          idValue.isAcceptableValue(d.idValue.value, _idValueMeta));
+          idValue.isAcceptableOrUnknown(data['idValue'], _idValueMeta));
     } else if (isInserting) {
       context.missing(_idValueMeta);
     }
-    if (d.secondaryIdValue.present) {
+    if (data.containsKey('secondaryIdValue')) {
       context.handle(
           _secondaryIdValueMeta,
-          secondaryIdValue.isAcceptableValue(
-              d.secondaryIdValue.value, _secondaryIdValueMeta));
+          secondaryIdValue.isAcceptableOrUnknown(
+              data['secondaryIdValue'], _secondaryIdValueMeta));
     }
-    if (d.isGroupExpense.present) {
+    if (data.containsKey('isGroupExpense')) {
       context.handle(
           _isGroupExpenseMeta,
-          isGroupExpense.isAcceptableValue(
-              d.isGroupExpense.value, _isGroupExpenseMeta));
+          isGroupExpense.isAcceptableOrUnknown(
+              data['isGroupExpense'], _isGroupExpenseMeta));
     }
-    if (d.signature.present) {
+    if (data.containsKey('signature')) {
       context.handle(_signatureMeta,
-          signature.isAcceptableValue(d.signature.value, _signatureMeta));
+          signature.isAcceptableOrUnknown(data['signature'], _signatureMeta));
     }
-    if (d.createdOn.present) {
+    if (data.containsKey('createdOn')) {
       context.handle(_createdOnMeta,
-          createdOn.isAcceptableValue(d.createdOn.value, _createdOnMeta));
+          createdOn.isAcceptableOrUnknown(data['createdOn'], _createdOnMeta));
     }
-    if (d.updatedOn.present) {
+    if (data.containsKey('updatedOn')) {
       context.handle(_updatedOnMeta,
-          updatedOn.isAcceptableValue(d.updatedOn.value, _updatedOnMeta));
+          updatedOn.isAcceptableOrUnknown(data['updatedOn'], _updatedOnMeta));
     }
     return context;
   }
@@ -479,46 +553,6 @@ class $MembersTable extends Members with TableInfo<$MembersTable, Member> {
   Member map(Map<String, dynamic> data, {String tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
     return Member.fromData(data, _db, prefix: effectivePrefix);
-  }
-
-  @override
-  Map<String, Variable> entityToSql(MembersCompanion d) {
-    final map = <String, Variable>{};
-    if (d.id.present) {
-      map['id'] = Variable<String, StringType>(d.id.value);
-    }
-    if (d.name.present) {
-      map['name'] = Variable<String, StringType>(d.name.value);
-    }
-    if (d.nickName.present) {
-      map['nickName'] = Variable<String, StringType>(d.nickName.value);
-    }
-    if (d.avatar.present) {
-      map['avatar'] = Variable<String, StringType>(d.avatar.value);
-    }
-    if (d.idType.present) {
-      map['idType'] = Variable<String, StringType>(d.idType.value);
-    }
-    if (d.idValue.present) {
-      map['idValue'] = Variable<String, StringType>(d.idValue.value);
-    }
-    if (d.secondaryIdValue.present) {
-      map['secondaryIdValue'] =
-          Variable<String, StringType>(d.secondaryIdValue.value);
-    }
-    if (d.isGroupExpense.present) {
-      map['isGroupExpense'] = Variable<bool, BoolType>(d.isGroupExpense.value);
-    }
-    if (d.signature.present) {
-      map['signature'] = Variable<String, StringType>(d.signature.value);
-    }
-    if (d.createdOn.present) {
-      map['createdOn'] = Variable<DateTime, DateTimeType>(d.createdOn.value);
-    }
-    if (d.updatedOn.present) {
-      map['updatedOn'] = Variable<DateTime, DateTimeType>(d.updatedOn.value);
-    }
-    return map;
   }
 
   @override
@@ -559,6 +593,30 @@ class Group extends DataClass implements Insertable<Group> {
           .mapFromDatabaseResponse(data['${effectivePrefix}updatedOn']),
     );
   }
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (!nullToAbsent || id != null) {
+      map['id'] = Variable<String>(id);
+    }
+    if (!nullToAbsent || name != null) {
+      map['name'] = Variable<String>(name);
+    }
+    if (!nullToAbsent || type != null) {
+      map['type'] = Variable<String>(type);
+    }
+    if (!nullToAbsent || isHidden != null) {
+      map['isHidden'] = Variable<bool>(isHidden);
+    }
+    if (!nullToAbsent || createdOn != null) {
+      map['createdOn'] = Variable<DateTime>(createdOn);
+    }
+    if (!nullToAbsent || updatedOn != null) {
+      map['updatedOn'] = Variable<DateTime>(updatedOn);
+    }
+    return map;
+  }
+
   factory Group.fromJson(Map<String, dynamic> json,
       {ValueSerializer serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
@@ -582,24 +640,6 @@ class Group extends DataClass implements Insertable<Group> {
       'createdOn': serializer.toJson<DateTime>(createdOn),
       'updatedOn': serializer.toJson<DateTime>(updatedOn),
     };
-  }
-
-  @override
-  GroupsCompanion createCompanion(bool nullToAbsent) {
-    return GroupsCompanion(
-      id: id == null && nullToAbsent ? const Value.absent() : Value(id),
-      name: name == null && nullToAbsent ? const Value.absent() : Value(name),
-      type: type == null && nullToAbsent ? const Value.absent() : Value(type),
-      isHidden: isHidden == null && nullToAbsent
-          ? const Value.absent()
-          : Value(isHidden),
-      createdOn: createdOn == null && nullToAbsent
-          ? const Value.absent()
-          : Value(createdOn),
-      updatedOn: updatedOn == null && nullToAbsent
-          ? const Value.absent()
-          : Value(updatedOn),
-    );
   }
 
   Group copyWith(
@@ -675,6 +715,24 @@ class GroupsCompanion extends UpdateCompanion<Group> {
     this.updatedOn = const Value.absent(),
   })  : id = Value(id),
         name = Value(name);
+  static Insertable<Group> custom({
+    Expression<String> id,
+    Expression<String> name,
+    Expression<String> type,
+    Expression<bool> isHidden,
+    Expression<DateTime> createdOn,
+    Expression<DateTime> updatedOn,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (type != null) 'type': type,
+      if (isHidden != null) 'isHidden': isHidden,
+      if (createdOn != null) 'createdOn': createdOn,
+      if (updatedOn != null) 'updatedOn': updatedOn,
+    });
+  }
+
   GroupsCompanion copyWith(
       {Value<String> id,
       Value<String> name,
@@ -690,6 +748,30 @@ class GroupsCompanion extends UpdateCompanion<Group> {
       createdOn: createdOn ?? this.createdOn,
       updatedOn: updatedOn ?? this.updatedOn,
     );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (type.present) {
+      map['type'] = Variable<String>(type.value);
+    }
+    if (isHidden.present) {
+      map['isHidden'] = Variable<bool>(isHidden.value);
+    }
+    if (createdOn.present) {
+      map['createdOn'] = Variable<DateTime>(createdOn.value);
+    }
+    if (updatedOn.present) {
+      map['updatedOn'] = Variable<DateTime>(updatedOn.value);
+    }
+    return map;
   }
 }
 
@@ -766,35 +848,36 @@ class $GroupsTable extends Groups with TableInfo<$GroupsTable, Group> {
   @override
   final String actualTableName = 'Groups';
   @override
-  VerificationContext validateIntegrity(GroupsCompanion d,
+  VerificationContext validateIntegrity(Insertable<Group> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
-    if (d.id.present) {
-      context.handle(_idMeta, id.isAcceptableValue(d.id.value, _idMeta));
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id'], _idMeta));
     } else if (isInserting) {
       context.missing(_idMeta);
     }
-    if (d.name.present) {
+    if (data.containsKey('name')) {
       context.handle(
-          _nameMeta, name.isAcceptableValue(d.name.value, _nameMeta));
+          _nameMeta, name.isAcceptableOrUnknown(data['name'], _nameMeta));
     } else if (isInserting) {
       context.missing(_nameMeta);
     }
-    if (d.type.present) {
+    if (data.containsKey('type')) {
       context.handle(
-          _typeMeta, type.isAcceptableValue(d.type.value, _typeMeta));
+          _typeMeta, type.isAcceptableOrUnknown(data['type'], _typeMeta));
     }
-    if (d.isHidden.present) {
+    if (data.containsKey('isHidden')) {
       context.handle(_isHiddenMeta,
-          isHidden.isAcceptableValue(d.isHidden.value, _isHiddenMeta));
+          isHidden.isAcceptableOrUnknown(data['isHidden'], _isHiddenMeta));
     }
-    if (d.createdOn.present) {
+    if (data.containsKey('createdOn')) {
       context.handle(_createdOnMeta,
-          createdOn.isAcceptableValue(d.createdOn.value, _createdOnMeta));
+          createdOn.isAcceptableOrUnknown(data['createdOn'], _createdOnMeta));
     }
-    if (d.updatedOn.present) {
+    if (data.containsKey('updatedOn')) {
       context.handle(_updatedOnMeta,
-          updatedOn.isAcceptableValue(d.updatedOn.value, _updatedOnMeta));
+          updatedOn.isAcceptableOrUnknown(data['updatedOn'], _updatedOnMeta));
     }
     return context;
   }
@@ -805,30 +888,6 @@ class $GroupsTable extends Groups with TableInfo<$GroupsTable, Group> {
   Group map(Map<String, dynamic> data, {String tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
     return Group.fromData(data, _db, prefix: effectivePrefix);
-  }
-
-  @override
-  Map<String, Variable> entityToSql(GroupsCompanion d) {
-    final map = <String, Variable>{};
-    if (d.id.present) {
-      map['id'] = Variable<String, StringType>(d.id.value);
-    }
-    if (d.name.present) {
-      map['name'] = Variable<String, StringType>(d.name.value);
-    }
-    if (d.type.present) {
-      map['type'] = Variable<String, StringType>(d.type.value);
-    }
-    if (d.isHidden.present) {
-      map['isHidden'] = Variable<bool, BoolType>(d.isHidden.value);
-    }
-    if (d.createdOn.present) {
-      map['createdOn'] = Variable<DateTime, DateTimeType>(d.createdOn.value);
-    }
-    if (d.updatedOn.present) {
-      map['updatedOn'] = Variable<DateTime, DateTimeType>(d.updatedOn.value);
-    }
-    return map;
   }
 
   @override
@@ -867,6 +926,27 @@ class GroupMember extends DataClass implements Insertable<GroupMember> {
           .mapFromDatabaseResponse(data['${effectivePrefix}updatedOn']),
     );
   }
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (!nullToAbsent || id != null) {
+      map['id'] = Variable<int>(id);
+    }
+    if (!nullToAbsent || groupId != null) {
+      map['groupId'] = Variable<String>(groupId);
+    }
+    if (!nullToAbsent || memberId != null) {
+      map['memberId'] = Variable<String>(memberId);
+    }
+    if (!nullToAbsent || createdOn != null) {
+      map['createdOn'] = Variable<DateTime>(createdOn);
+    }
+    if (!nullToAbsent || updatedOn != null) {
+      map['updatedOn'] = Variable<DateTime>(updatedOn);
+    }
+    return map;
+  }
+
   factory GroupMember.fromJson(Map<String, dynamic> json,
       {ValueSerializer serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
@@ -888,25 +968,6 @@ class GroupMember extends DataClass implements Insertable<GroupMember> {
       'createdOn': serializer.toJson<DateTime>(createdOn),
       'updatedOn': serializer.toJson<DateTime>(updatedOn),
     };
-  }
-
-  @override
-  GroupMembersCompanion createCompanion(bool nullToAbsent) {
-    return GroupMembersCompanion(
-      id: id == null && nullToAbsent ? const Value.absent() : Value(id),
-      groupId: groupId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(groupId),
-      memberId: memberId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(memberId),
-      createdOn: createdOn == null && nullToAbsent
-          ? const Value.absent()
-          : Value(createdOn),
-      updatedOn: updatedOn == null && nullToAbsent
-          ? const Value.absent()
-          : Value(updatedOn),
-    );
   }
 
   GroupMember copyWith(
@@ -973,6 +1034,22 @@ class GroupMembersCompanion extends UpdateCompanion<GroupMember> {
     this.updatedOn = const Value.absent(),
   })  : groupId = Value(groupId),
         memberId = Value(memberId);
+  static Insertable<GroupMember> custom({
+    Expression<int> id,
+    Expression<String> groupId,
+    Expression<String> memberId,
+    Expression<DateTime> createdOn,
+    Expression<DateTime> updatedOn,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (groupId != null) 'groupId': groupId,
+      if (memberId != null) 'memberId': memberId,
+      if (createdOn != null) 'createdOn': createdOn,
+      if (updatedOn != null) 'updatedOn': updatedOn,
+    });
+  }
+
   GroupMembersCompanion copyWith(
       {Value<int> id,
       Value<String> groupId,
@@ -986,6 +1063,27 @@ class GroupMembersCompanion extends UpdateCompanion<GroupMember> {
       createdOn: createdOn ?? this.createdOn,
       updatedOn: updatedOn ?? this.updatedOn,
     );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (groupId.present) {
+      map['groupId'] = Variable<String>(groupId.value);
+    }
+    if (memberId.present) {
+      map['memberId'] = Variable<String>(memberId.value);
+    }
+    if (createdOn.present) {
+      map['createdOn'] = Variable<DateTime>(createdOn.value);
+    }
+    if (updatedOn.present) {
+      map['updatedOn'] = Variable<DateTime>(updatedOn.value);
+    }
+    return map;
   }
 }
 
@@ -1058,31 +1156,32 @@ class $GroupMembersTable extends GroupMembers
   @override
   final String actualTableName = 'GroupMembers';
   @override
-  VerificationContext validateIntegrity(GroupMembersCompanion d,
+  VerificationContext validateIntegrity(Insertable<GroupMember> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
-    if (d.id.present) {
-      context.handle(_idMeta, id.isAcceptableValue(d.id.value, _idMeta));
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id'], _idMeta));
     }
-    if (d.groupId.present) {
+    if (data.containsKey('groupId')) {
       context.handle(_groupIdMeta,
-          groupId.isAcceptableValue(d.groupId.value, _groupIdMeta));
+          groupId.isAcceptableOrUnknown(data['groupId'], _groupIdMeta));
     } else if (isInserting) {
       context.missing(_groupIdMeta);
     }
-    if (d.memberId.present) {
+    if (data.containsKey('memberId')) {
       context.handle(_memberIdMeta,
-          memberId.isAcceptableValue(d.memberId.value, _memberIdMeta));
+          memberId.isAcceptableOrUnknown(data['memberId'], _memberIdMeta));
     } else if (isInserting) {
       context.missing(_memberIdMeta);
     }
-    if (d.createdOn.present) {
+    if (data.containsKey('createdOn')) {
       context.handle(_createdOnMeta,
-          createdOn.isAcceptableValue(d.createdOn.value, _createdOnMeta));
+          createdOn.isAcceptableOrUnknown(data['createdOn'], _createdOnMeta));
     }
-    if (d.updatedOn.present) {
+    if (data.containsKey('updatedOn')) {
       context.handle(_updatedOnMeta,
-          updatedOn.isAcceptableValue(d.updatedOn.value, _updatedOnMeta));
+          updatedOn.isAcceptableOrUnknown(data['updatedOn'], _updatedOnMeta));
     }
     return context;
   }
@@ -1093,27 +1192,6 @@ class $GroupMembersTable extends GroupMembers
   GroupMember map(Map<String, dynamic> data, {String tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
     return GroupMember.fromData(data, _db, prefix: effectivePrefix);
-  }
-
-  @override
-  Map<String, Variable> entityToSql(GroupMembersCompanion d) {
-    final map = <String, Variable>{};
-    if (d.id.present) {
-      map['id'] = Variable<int, IntType>(d.id.value);
-    }
-    if (d.groupId.present) {
-      map['groupId'] = Variable<String, StringType>(d.groupId.value);
-    }
-    if (d.memberId.present) {
-      map['memberId'] = Variable<String, StringType>(d.memberId.value);
-    }
-    if (d.createdOn.present) {
-      map['createdOn'] = Variable<DateTime, DateTimeType>(d.createdOn.value);
-    }
-    if (d.updatedOn.present) {
-      map['updatedOn'] = Variable<DateTime, DateTimeType>(d.updatedOn.value);
-    }
-    return map;
   }
 
   @override
@@ -1167,6 +1245,39 @@ class Account extends DataClass implements Insertable<Account> {
           .mapFromDatabaseResponse(data['${effectivePrefix}updatedOn']),
     );
   }
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (!nullToAbsent || id != null) {
+      map['id'] = Variable<int>(id);
+    }
+    if (!nullToAbsent || name != null) {
+      map['name'] = Variable<String>(name);
+    }
+    if (!nullToAbsent || groupId != null) {
+      map['groupId'] = Variable<String>(groupId);
+    }
+    if (!nullToAbsent || parentId != null) {
+      map['parentId'] = Variable<int>(parentId);
+    }
+    if (!nullToAbsent || type != null) {
+      map['type'] = Variable<String>(type);
+    }
+    if (!nullToAbsent || memberId != null) {
+      map['memberId'] = Variable<String>(memberId);
+    }
+    if (!nullToAbsent || balance != null) {
+      map['balance'] = Variable<double>(balance);
+    }
+    if (!nullToAbsent || createdOn != null) {
+      map['createdOn'] = Variable<DateTime>(createdOn);
+    }
+    if (!nullToAbsent || updatedOn != null) {
+      map['updatedOn'] = Variable<DateTime>(updatedOn);
+    }
+    return map;
+  }
+
   factory Account.fromJson(Map<String, dynamic> json,
       {ValueSerializer serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
@@ -1196,33 +1307,6 @@ class Account extends DataClass implements Insertable<Account> {
       'createdOn': serializer.toJson<DateTime>(createdOn),
       'updatedOn': serializer.toJson<DateTime>(updatedOn),
     };
-  }
-
-  @override
-  AccountsCompanion createCompanion(bool nullToAbsent) {
-    return AccountsCompanion(
-      id: id == null && nullToAbsent ? const Value.absent() : Value(id),
-      name: name == null && nullToAbsent ? const Value.absent() : Value(name),
-      groupId: groupId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(groupId),
-      parentId: parentId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(parentId),
-      type: type == null && nullToAbsent ? const Value.absent() : Value(type),
-      memberId: memberId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(memberId),
-      balance: balance == null && nullToAbsent
-          ? const Value.absent()
-          : Value(balance),
-      createdOn: createdOn == null && nullToAbsent
-          ? const Value.absent()
-          : Value(createdOn),
-      updatedOn: updatedOn == null && nullToAbsent
-          ? const Value.absent()
-          : Value(updatedOn),
-    );
   }
 
   Account copyWith(
@@ -1327,6 +1411,30 @@ class AccountsCompanion extends UpdateCompanion<Account> {
     this.updatedOn = const Value.absent(),
   })  : name = Value(name),
         groupId = Value(groupId);
+  static Insertable<Account> custom({
+    Expression<int> id,
+    Expression<String> name,
+    Expression<String> groupId,
+    Expression<int> parentId,
+    Expression<String> type,
+    Expression<String> memberId,
+    Expression<double> balance,
+    Expression<DateTime> createdOn,
+    Expression<DateTime> updatedOn,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (groupId != null) 'groupId': groupId,
+      if (parentId != null) 'parentId': parentId,
+      if (type != null) 'type': type,
+      if (memberId != null) 'memberId': memberId,
+      if (balance != null) 'balance': balance,
+      if (createdOn != null) 'createdOn': createdOn,
+      if (updatedOn != null) 'updatedOn': updatedOn,
+    });
+  }
+
   AccountsCompanion copyWith(
       {Value<int> id,
       Value<String> name,
@@ -1348,6 +1456,39 @@ class AccountsCompanion extends UpdateCompanion<Account> {
       createdOn: createdOn ?? this.createdOn,
       updatedOn: updatedOn ?? this.updatedOn,
     );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (groupId.present) {
+      map['groupId'] = Variable<String>(groupId.value);
+    }
+    if (parentId.present) {
+      map['parentId'] = Variable<int>(parentId.value);
+    }
+    if (type.present) {
+      map['type'] = Variable<String>(type.value);
+    }
+    if (memberId.present) {
+      map['memberId'] = Variable<String>(memberId.value);
+    }
+    if (balance.present) {
+      map['balance'] = Variable<double>(balance.value);
+    }
+    if (createdOn.present) {
+      map['createdOn'] = Variable<DateTime>(createdOn.value);
+    }
+    if (updatedOn.present) {
+      map['updatedOn'] = Variable<DateTime>(updatedOn.value);
+    }
+    return map;
   }
 }
 
@@ -1463,47 +1604,48 @@ class $AccountsTable extends Accounts with TableInfo<$AccountsTable, Account> {
   @override
   final String actualTableName = 'Accounts';
   @override
-  VerificationContext validateIntegrity(AccountsCompanion d,
+  VerificationContext validateIntegrity(Insertable<Account> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
-    if (d.id.present) {
-      context.handle(_idMeta, id.isAcceptableValue(d.id.value, _idMeta));
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id'], _idMeta));
     }
-    if (d.name.present) {
+    if (data.containsKey('name')) {
       context.handle(
-          _nameMeta, name.isAcceptableValue(d.name.value, _nameMeta));
+          _nameMeta, name.isAcceptableOrUnknown(data['name'], _nameMeta));
     } else if (isInserting) {
       context.missing(_nameMeta);
     }
-    if (d.groupId.present) {
+    if (data.containsKey('groupId')) {
       context.handle(_groupIdMeta,
-          groupId.isAcceptableValue(d.groupId.value, _groupIdMeta));
+          groupId.isAcceptableOrUnknown(data['groupId'], _groupIdMeta));
     } else if (isInserting) {
       context.missing(_groupIdMeta);
     }
-    if (d.parentId.present) {
+    if (data.containsKey('parentId')) {
       context.handle(_parentIdMeta,
-          parentId.isAcceptableValue(d.parentId.value, _parentIdMeta));
+          parentId.isAcceptableOrUnknown(data['parentId'], _parentIdMeta));
     }
-    if (d.type.present) {
+    if (data.containsKey('type')) {
       context.handle(
-          _typeMeta, type.isAcceptableValue(d.type.value, _typeMeta));
+          _typeMeta, type.isAcceptableOrUnknown(data['type'], _typeMeta));
     }
-    if (d.memberId.present) {
+    if (data.containsKey('memberId')) {
       context.handle(_memberIdMeta,
-          memberId.isAcceptableValue(d.memberId.value, _memberIdMeta));
+          memberId.isAcceptableOrUnknown(data['memberId'], _memberIdMeta));
     }
-    if (d.balance.present) {
+    if (data.containsKey('balance')) {
       context.handle(_balanceMeta,
-          balance.isAcceptableValue(d.balance.value, _balanceMeta));
+          balance.isAcceptableOrUnknown(data['balance'], _balanceMeta));
     }
-    if (d.createdOn.present) {
+    if (data.containsKey('createdOn')) {
       context.handle(_createdOnMeta,
-          createdOn.isAcceptableValue(d.createdOn.value, _createdOnMeta));
+          createdOn.isAcceptableOrUnknown(data['createdOn'], _createdOnMeta));
     }
-    if (d.updatedOn.present) {
+    if (data.containsKey('updatedOn')) {
       context.handle(_updatedOnMeta,
-          updatedOn.isAcceptableValue(d.updatedOn.value, _updatedOnMeta));
+          updatedOn.isAcceptableOrUnknown(data['updatedOn'], _updatedOnMeta));
     }
     return context;
   }
@@ -1514,39 +1656,6 @@ class $AccountsTable extends Accounts with TableInfo<$AccountsTable, Account> {
   Account map(Map<String, dynamic> data, {String tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
     return Account.fromData(data, _db, prefix: effectivePrefix);
-  }
-
-  @override
-  Map<String, Variable> entityToSql(AccountsCompanion d) {
-    final map = <String, Variable>{};
-    if (d.id.present) {
-      map['id'] = Variable<int, IntType>(d.id.value);
-    }
-    if (d.name.present) {
-      map['name'] = Variable<String, StringType>(d.name.value);
-    }
-    if (d.groupId.present) {
-      map['groupId'] = Variable<String, StringType>(d.groupId.value);
-    }
-    if (d.parentId.present) {
-      map['parentId'] = Variable<int, IntType>(d.parentId.value);
-    }
-    if (d.type.present) {
-      map['type'] = Variable<String, StringType>(d.type.value);
-    }
-    if (d.memberId.present) {
-      map['memberId'] = Variable<String, StringType>(d.memberId.value);
-    }
-    if (d.balance.present) {
-      map['balance'] = Variable<double, RealType>(d.balance.value);
-    }
-    if (d.createdOn.present) {
-      map['createdOn'] = Variable<DateTime, DateTimeType>(d.createdOn.value);
-    }
-    if (d.updatedOn.present) {
-      map['updatedOn'] = Variable<DateTime, DateTimeType>(d.updatedOn.value);
-    }
-    return map;
   }
 
   @override
@@ -1587,6 +1696,30 @@ class Category extends DataClass implements Insertable<Category> {
           .mapFromDatabaseResponse(data['${effectivePrefix}updatedOn']),
     );
   }
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (!nullToAbsent || id != null) {
+      map['id'] = Variable<int>(id);
+    }
+    if (!nullToAbsent || name != null) {
+      map['name'] = Variable<String>(name);
+    }
+    if (!nullToAbsent || parentId != null) {
+      map['parentId'] = Variable<int>(parentId);
+    }
+    if (!nullToAbsent || type != null) {
+      map['type'] = Variable<String>(type);
+    }
+    if (!nullToAbsent || createdOn != null) {
+      map['createdOn'] = Variable<DateTime>(createdOn);
+    }
+    if (!nullToAbsent || updatedOn != null) {
+      map['updatedOn'] = Variable<DateTime>(updatedOn);
+    }
+    return map;
+  }
+
   factory Category.fromJson(Map<String, dynamic> json,
       {ValueSerializer serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
@@ -1610,24 +1743,6 @@ class Category extends DataClass implements Insertable<Category> {
       'createdOn': serializer.toJson<DateTime>(createdOn),
       'updatedOn': serializer.toJson<DateTime>(updatedOn),
     };
-  }
-
-  @override
-  CategoriesCompanion createCompanion(bool nullToAbsent) {
-    return CategoriesCompanion(
-      id: id == null && nullToAbsent ? const Value.absent() : Value(id),
-      name: name == null && nullToAbsent ? const Value.absent() : Value(name),
-      parentId: parentId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(parentId),
-      type: type == null && nullToAbsent ? const Value.absent() : Value(type),
-      createdOn: createdOn == null && nullToAbsent
-          ? const Value.absent()
-          : Value(createdOn),
-      updatedOn: updatedOn == null && nullToAbsent
-          ? const Value.absent()
-          : Value(updatedOn),
-    );
   }
 
   Category copyWith(
@@ -1702,6 +1817,24 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     this.createdOn = const Value.absent(),
     this.updatedOn = const Value.absent(),
   }) : name = Value(name);
+  static Insertable<Category> custom({
+    Expression<int> id,
+    Expression<String> name,
+    Expression<int> parentId,
+    Expression<String> type,
+    Expression<DateTime> createdOn,
+    Expression<DateTime> updatedOn,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (parentId != null) 'parentId': parentId,
+      if (type != null) 'type': type,
+      if (createdOn != null) 'createdOn': createdOn,
+      if (updatedOn != null) 'updatedOn': updatedOn,
+    });
+  }
+
   CategoriesCompanion copyWith(
       {Value<int> id,
       Value<String> name,
@@ -1717,6 +1850,30 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
       createdOn: createdOn ?? this.createdOn,
       updatedOn: updatedOn ?? this.updatedOn,
     );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (parentId.present) {
+      map['parentId'] = Variable<int>(parentId.value);
+    }
+    if (type.present) {
+      map['type'] = Variable<String>(type.value);
+    }
+    if (createdOn.present) {
+      map['createdOn'] = Variable<DateTime>(createdOn.value);
+    }
+    if (updatedOn.present) {
+      map['updatedOn'] = Variable<DateTime>(updatedOn.value);
+    }
+    return map;
   }
 }
 
@@ -1795,33 +1952,34 @@ class $CategoriesTable extends Categories
   @override
   final String actualTableName = 'Categories';
   @override
-  VerificationContext validateIntegrity(CategoriesCompanion d,
+  VerificationContext validateIntegrity(Insertable<Category> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
-    if (d.id.present) {
-      context.handle(_idMeta, id.isAcceptableValue(d.id.value, _idMeta));
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id'], _idMeta));
     }
-    if (d.name.present) {
+    if (data.containsKey('name')) {
       context.handle(
-          _nameMeta, name.isAcceptableValue(d.name.value, _nameMeta));
+          _nameMeta, name.isAcceptableOrUnknown(data['name'], _nameMeta));
     } else if (isInserting) {
       context.missing(_nameMeta);
     }
-    if (d.parentId.present) {
+    if (data.containsKey('parentId')) {
       context.handle(_parentIdMeta,
-          parentId.isAcceptableValue(d.parentId.value, _parentIdMeta));
+          parentId.isAcceptableOrUnknown(data['parentId'], _parentIdMeta));
     }
-    if (d.type.present) {
+    if (data.containsKey('type')) {
       context.handle(
-          _typeMeta, type.isAcceptableValue(d.type.value, _typeMeta));
+          _typeMeta, type.isAcceptableOrUnknown(data['type'], _typeMeta));
     }
-    if (d.createdOn.present) {
+    if (data.containsKey('createdOn')) {
       context.handle(_createdOnMeta,
-          createdOn.isAcceptableValue(d.createdOn.value, _createdOnMeta));
+          createdOn.isAcceptableOrUnknown(data['createdOn'], _createdOnMeta));
     }
-    if (d.updatedOn.present) {
+    if (data.containsKey('updatedOn')) {
       context.handle(_updatedOnMeta,
-          updatedOn.isAcceptableValue(d.updatedOn.value, _updatedOnMeta));
+          updatedOn.isAcceptableOrUnknown(data['updatedOn'], _updatedOnMeta));
     }
     return context;
   }
@@ -1832,30 +1990,6 @@ class $CategoriesTable extends Categories
   Category map(Map<String, dynamic> data, {String tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
     return Category.fromData(data, _db, prefix: effectivePrefix);
-  }
-
-  @override
-  Map<String, Variable> entityToSql(CategoriesCompanion d) {
-    final map = <String, Variable>{};
-    if (d.id.present) {
-      map['id'] = Variable<int, IntType>(d.id.value);
-    }
-    if (d.name.present) {
-      map['name'] = Variable<String, StringType>(d.name.value);
-    }
-    if (d.parentId.present) {
-      map['parentId'] = Variable<int, IntType>(d.parentId.value);
-    }
-    if (d.type.present) {
-      map['type'] = Variable<String, StringType>(d.type.value);
-    }
-    if (d.createdOn.present) {
-      map['createdOn'] = Variable<DateTime, DateTimeType>(d.createdOn.value);
-    }
-    if (d.updatedOn.present) {
-      map['updatedOn'] = Variable<DateTime, DateTimeType>(d.updatedOn.value);
-    }
-    return map;
   }
 
   @override
@@ -1919,6 +2053,45 @@ class Settlement extends DataClass implements Insertable<Settlement> {
           .mapFromDatabaseResponse(data['${effectivePrefix}updatedOn']),
     );
   }
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (!nullToAbsent || id != null) {
+      map['id'] = Variable<String>(id);
+    }
+    if (!nullToAbsent || groupId != null) {
+      map['groupId'] = Variable<String>(groupId);
+    }
+    if (!nullToAbsent || fromMemberId != null) {
+      map['fromMemberId'] = Variable<String>(fromMemberId);
+    }
+    if (!nullToAbsent || toMemberId != null) {
+      map['toMemberId'] = Variable<String>(toMemberId);
+    }
+    if (!nullToAbsent || amount != null) {
+      map['amount'] = Variable<double>(amount);
+    }
+    if (!nullToAbsent || settledAmount != null) {
+      map['settledAmount'] = Variable<double>(settledAmount);
+    }
+    if (!nullToAbsent || isTemporary != null) {
+      map['isTemporary'] = Variable<bool>(isTemporary);
+    }
+    if (!nullToAbsent || transactionId != null) {
+      map['transactionId'] = Variable<String>(transactionId);
+    }
+    if (!nullToAbsent || signature != null) {
+      map['signature'] = Variable<String>(signature);
+    }
+    if (!nullToAbsent || createdOn != null) {
+      map['createdOn'] = Variable<DateTime>(createdOn);
+    }
+    if (!nullToAbsent || updatedOn != null) {
+      map['updatedOn'] = Variable<DateTime>(updatedOn);
+    }
+    return map;
+  }
+
   factory Settlement.fromJson(Map<String, dynamic> json,
       {ValueSerializer serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
@@ -1952,42 +2125,6 @@ class Settlement extends DataClass implements Insertable<Settlement> {
       'createdOn': serializer.toJson<DateTime>(createdOn),
       'updatedOn': serializer.toJson<DateTime>(updatedOn),
     };
-  }
-
-  @override
-  SettlementsCompanion createCompanion(bool nullToAbsent) {
-    return SettlementsCompanion(
-      id: id == null && nullToAbsent ? const Value.absent() : Value(id),
-      groupId: groupId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(groupId),
-      fromMemberId: fromMemberId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(fromMemberId),
-      toMemberId: toMemberId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(toMemberId),
-      amount:
-          amount == null && nullToAbsent ? const Value.absent() : Value(amount),
-      settledAmount: settledAmount == null && nullToAbsent
-          ? const Value.absent()
-          : Value(settledAmount),
-      isTemporary: isTemporary == null && nullToAbsent
-          ? const Value.absent()
-          : Value(isTemporary),
-      transactionId: transactionId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(transactionId),
-      signature: signature == null && nullToAbsent
-          ? const Value.absent()
-          : Value(signature),
-      createdOn: createdOn == null && nullToAbsent
-          ? const Value.absent()
-          : Value(createdOn),
-      updatedOn: updatedOn == null && nullToAbsent
-          ? const Value.absent()
-          : Value(updatedOn),
-    );
   }
 
   Settlement copyWith(
@@ -2113,6 +2250,34 @@ class SettlementsCompanion extends UpdateCompanion<Settlement> {
         fromMemberId = Value(fromMemberId),
         toMemberId = Value(toMemberId),
         amount = Value(amount);
+  static Insertable<Settlement> custom({
+    Expression<String> id,
+    Expression<String> groupId,
+    Expression<String> fromMemberId,
+    Expression<String> toMemberId,
+    Expression<double> amount,
+    Expression<double> settledAmount,
+    Expression<bool> isTemporary,
+    Expression<String> transactionId,
+    Expression<String> signature,
+    Expression<DateTime> createdOn,
+    Expression<DateTime> updatedOn,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (groupId != null) 'groupId': groupId,
+      if (fromMemberId != null) 'fromMemberId': fromMemberId,
+      if (toMemberId != null) 'toMemberId': toMemberId,
+      if (amount != null) 'amount': amount,
+      if (settledAmount != null) 'settledAmount': settledAmount,
+      if (isTemporary != null) 'isTemporary': isTemporary,
+      if (transactionId != null) 'transactionId': transactionId,
+      if (signature != null) 'signature': signature,
+      if (createdOn != null) 'createdOn': createdOn,
+      if (updatedOn != null) 'updatedOn': updatedOn,
+    });
+  }
+
   SettlementsCompanion copyWith(
       {Value<String> id,
       Value<String> groupId,
@@ -2138,6 +2303,45 @@ class SettlementsCompanion extends UpdateCompanion<Settlement> {
       createdOn: createdOn ?? this.createdOn,
       updatedOn: updatedOn ?? this.updatedOn,
     );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (groupId.present) {
+      map['groupId'] = Variable<String>(groupId.value);
+    }
+    if (fromMemberId.present) {
+      map['fromMemberId'] = Variable<String>(fromMemberId.value);
+    }
+    if (toMemberId.present) {
+      map['toMemberId'] = Variable<String>(toMemberId.value);
+    }
+    if (amount.present) {
+      map['amount'] = Variable<double>(amount.value);
+    }
+    if (settledAmount.present) {
+      map['settledAmount'] = Variable<double>(settledAmount.value);
+    }
+    if (isTemporary.present) {
+      map['isTemporary'] = Variable<bool>(isTemporary.value);
+    }
+    if (transactionId.present) {
+      map['transactionId'] = Variable<String>(transactionId.value);
+    }
+    if (signature.present) {
+      map['signature'] = Variable<String>(signature.value);
+    }
+    if (createdOn.present) {
+      map['createdOn'] = Variable<DateTime>(createdOn.value);
+    }
+    if (updatedOn.present) {
+      map['updatedOn'] = Variable<DateTime>(updatedOn.value);
+    }
+    return map;
   }
 }
 
@@ -2295,67 +2499,72 @@ class $SettlementsTable extends Settlements
   @override
   final String actualTableName = 'Settlements';
   @override
-  VerificationContext validateIntegrity(SettlementsCompanion d,
+  VerificationContext validateIntegrity(Insertable<Settlement> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
-    if (d.id.present) {
-      context.handle(_idMeta, id.isAcceptableValue(d.id.value, _idMeta));
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id'], _idMeta));
     } else if (isInserting) {
       context.missing(_idMeta);
     }
-    if (d.groupId.present) {
+    if (data.containsKey('groupId')) {
       context.handle(_groupIdMeta,
-          groupId.isAcceptableValue(d.groupId.value, _groupIdMeta));
+          groupId.isAcceptableOrUnknown(data['groupId'], _groupIdMeta));
     } else if (isInserting) {
       context.missing(_groupIdMeta);
     }
-    if (d.fromMemberId.present) {
+    if (data.containsKey('fromMemberId')) {
       context.handle(
           _fromMemberIdMeta,
-          fromMemberId.isAcceptableValue(
-              d.fromMemberId.value, _fromMemberIdMeta));
+          fromMemberId.isAcceptableOrUnknown(
+              data['fromMemberId'], _fromMemberIdMeta));
     } else if (isInserting) {
       context.missing(_fromMemberIdMeta);
     }
-    if (d.toMemberId.present) {
-      context.handle(_toMemberIdMeta,
-          toMemberId.isAcceptableValue(d.toMemberId.value, _toMemberIdMeta));
+    if (data.containsKey('toMemberId')) {
+      context.handle(
+          _toMemberIdMeta,
+          toMemberId.isAcceptableOrUnknown(
+              data['toMemberId'], _toMemberIdMeta));
     } else if (isInserting) {
       context.missing(_toMemberIdMeta);
     }
-    if (d.amount.present) {
-      context.handle(
-          _amountMeta, amount.isAcceptableValue(d.amount.value, _amountMeta));
+    if (data.containsKey('amount')) {
+      context.handle(_amountMeta,
+          amount.isAcceptableOrUnknown(data['amount'], _amountMeta));
     } else if (isInserting) {
       context.missing(_amountMeta);
     }
-    if (d.settledAmount.present) {
+    if (data.containsKey('settledAmount')) {
       context.handle(
           _settledAmountMeta,
-          settledAmount.isAcceptableValue(
-              d.settledAmount.value, _settledAmountMeta));
+          settledAmount.isAcceptableOrUnknown(
+              data['settledAmount'], _settledAmountMeta));
     }
-    if (d.isTemporary.present) {
-      context.handle(_isTemporaryMeta,
-          isTemporary.isAcceptableValue(d.isTemporary.value, _isTemporaryMeta));
+    if (data.containsKey('isTemporary')) {
+      context.handle(
+          _isTemporaryMeta,
+          isTemporary.isAcceptableOrUnknown(
+              data['isTemporary'], _isTemporaryMeta));
     }
-    if (d.transactionId.present) {
+    if (data.containsKey('transactionId')) {
       context.handle(
           _transactionIdMeta,
-          transactionId.isAcceptableValue(
-              d.transactionId.value, _transactionIdMeta));
+          transactionId.isAcceptableOrUnknown(
+              data['transactionId'], _transactionIdMeta));
     }
-    if (d.signature.present) {
+    if (data.containsKey('signature')) {
       context.handle(_signatureMeta,
-          signature.isAcceptableValue(d.signature.value, _signatureMeta));
+          signature.isAcceptableOrUnknown(data['signature'], _signatureMeta));
     }
-    if (d.createdOn.present) {
+    if (data.containsKey('createdOn')) {
       context.handle(_createdOnMeta,
-          createdOn.isAcceptableValue(d.createdOn.value, _createdOnMeta));
+          createdOn.isAcceptableOrUnknown(data['createdOn'], _createdOnMeta));
     }
-    if (d.updatedOn.present) {
+    if (data.containsKey('updatedOn')) {
       context.handle(_updatedOnMeta,
-          updatedOn.isAcceptableValue(d.updatedOn.value, _updatedOnMeta));
+          updatedOn.isAcceptableOrUnknown(data['updatedOn'], _updatedOnMeta));
     }
     return context;
   }
@@ -2366,46 +2575,6 @@ class $SettlementsTable extends Settlements
   Settlement map(Map<String, dynamic> data, {String tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
     return Settlement.fromData(data, _db, prefix: effectivePrefix);
-  }
-
-  @override
-  Map<String, Variable> entityToSql(SettlementsCompanion d) {
-    final map = <String, Variable>{};
-    if (d.id.present) {
-      map['id'] = Variable<String, StringType>(d.id.value);
-    }
-    if (d.groupId.present) {
-      map['groupId'] = Variable<String, StringType>(d.groupId.value);
-    }
-    if (d.fromMemberId.present) {
-      map['fromMemberId'] = Variable<String, StringType>(d.fromMemberId.value);
-    }
-    if (d.toMemberId.present) {
-      map['toMemberId'] = Variable<String, StringType>(d.toMemberId.value);
-    }
-    if (d.amount.present) {
-      map['amount'] = Variable<double, RealType>(d.amount.value);
-    }
-    if (d.settledAmount.present) {
-      map['settledAmount'] = Variable<double, RealType>(d.settledAmount.value);
-    }
-    if (d.isTemporary.present) {
-      map['isTemporary'] = Variable<bool, BoolType>(d.isTemporary.value);
-    }
-    if (d.transactionId.present) {
-      map['transactionId'] =
-          Variable<String, StringType>(d.transactionId.value);
-    }
-    if (d.signature.present) {
-      map['signature'] = Variable<String, StringType>(d.signature.value);
-    }
-    if (d.createdOn.present) {
-      map['createdOn'] = Variable<DateTime, DateTimeType>(d.createdOn.value);
-    }
-    if (d.updatedOn.present) {
-      map['updatedOn'] = Variable<DateTime, DateTimeType>(d.updatedOn.value);
-    }
-    return map;
   }
 
   @override
@@ -2484,6 +2653,57 @@ class Transaction extends DataClass implements Insertable<Transaction> {
           .mapFromDatabaseResponse(data['${effectivePrefix}updatedOn']),
     );
   }
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (!nullToAbsent || id != null) {
+      map['id'] = Variable<String>(id);
+    }
+    if (!nullToAbsent || memberId != null) {
+      map['memberId'] = Variable<String>(memberId);
+    }
+    if (!nullToAbsent || amount != null) {
+      map['amount'] = Variable<double>(amount);
+    }
+    if (!nullToAbsent || groupId != null) {
+      map['groupId'] = Variable<String>(groupId);
+    }
+    if (!nullToAbsent || groupMemberIds != null) {
+      map['groupMemberIds'] = Variable<String>(groupMemberIds);
+    }
+    if (!nullToAbsent || fromAccountId != null) {
+      map['fromAccountId'] = Variable<int>(fromAccountId);
+    }
+    if (!nullToAbsent || toAccountId != null) {
+      map['toAccountId'] = Variable<int>(toAccountId);
+    }
+    if (!nullToAbsent || categoryId != null) {
+      map['categoryId'] = Variable<int>(categoryId);
+    }
+    if (!nullToAbsent || settlementId != null) {
+      map['settlementId'] = Variable<String>(settlementId);
+    }
+    if (!nullToAbsent || notes != null) {
+      map['notes'] = Variable<String>(notes);
+    }
+    if (!nullToAbsent || attachments != null) {
+      map['attachments'] = Variable<String>(attachments);
+    }
+    if (!nullToAbsent || tags != null) {
+      map['tags'] = Variable<String>(tags);
+    }
+    if (!nullToAbsent || doneOn != null) {
+      map['doneOn'] = Variable<DateTime>(doneOn);
+    }
+    if (!nullToAbsent || createdOn != null) {
+      map['createdOn'] = Variable<DateTime>(createdOn);
+    }
+    if (!nullToAbsent || updatedOn != null) {
+      map['updatedOn'] = Variable<DateTime>(updatedOn);
+    }
+    return map;
+  }
+
   factory Transaction.fromJson(Map<String, dynamic> json,
       {ValueSerializer serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
@@ -2525,50 +2745,6 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       'createdOn': serializer.toJson<DateTime>(createdOn),
       'updatedOn': serializer.toJson<DateTime>(updatedOn),
     };
-  }
-
-  @override
-  TransactionsCompanion createCompanion(bool nullToAbsent) {
-    return TransactionsCompanion(
-      id: id == null && nullToAbsent ? const Value.absent() : Value(id),
-      memberId: memberId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(memberId),
-      amount:
-          amount == null && nullToAbsent ? const Value.absent() : Value(amount),
-      groupId: groupId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(groupId),
-      groupMemberIds: groupMemberIds == null && nullToAbsent
-          ? const Value.absent()
-          : Value(groupMemberIds),
-      fromAccountId: fromAccountId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(fromAccountId),
-      toAccountId: toAccountId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(toAccountId),
-      categoryId: categoryId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(categoryId),
-      settlementId: settlementId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(settlementId),
-      notes:
-          notes == null && nullToAbsent ? const Value.absent() : Value(notes),
-      attachments: attachments == null && nullToAbsent
-          ? const Value.absent()
-          : Value(attachments),
-      tags: tags == null && nullToAbsent ? const Value.absent() : Value(tags),
-      doneOn:
-          doneOn == null && nullToAbsent ? const Value.absent() : Value(doneOn),
-      createdOn: createdOn == null && nullToAbsent
-          ? const Value.absent()
-          : Value(createdOn),
-      updatedOn: updatedOn == null && nullToAbsent
-          ? const Value.absent()
-          : Value(updatedOn),
-    );
   }
 
   Transaction copyWith(
@@ -2731,6 +2907,42 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
         memberId = Value(memberId),
         amount = Value(amount),
         groupId = Value(groupId);
+  static Insertable<Transaction> custom({
+    Expression<String> id,
+    Expression<String> memberId,
+    Expression<double> amount,
+    Expression<String> groupId,
+    Expression<String> groupMemberIds,
+    Expression<int> fromAccountId,
+    Expression<int> toAccountId,
+    Expression<int> categoryId,
+    Expression<String> settlementId,
+    Expression<String> notes,
+    Expression<String> attachments,
+    Expression<String> tags,
+    Expression<DateTime> doneOn,
+    Expression<DateTime> createdOn,
+    Expression<DateTime> updatedOn,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (memberId != null) 'memberId': memberId,
+      if (amount != null) 'amount': amount,
+      if (groupId != null) 'groupId': groupId,
+      if (groupMemberIds != null) 'groupMemberIds': groupMemberIds,
+      if (fromAccountId != null) 'fromAccountId': fromAccountId,
+      if (toAccountId != null) 'toAccountId': toAccountId,
+      if (categoryId != null) 'categoryId': categoryId,
+      if (settlementId != null) 'settlementId': settlementId,
+      if (notes != null) 'notes': notes,
+      if (attachments != null) 'attachments': attachments,
+      if (tags != null) 'tags': tags,
+      if (doneOn != null) 'doneOn': doneOn,
+      if (createdOn != null) 'createdOn': createdOn,
+      if (updatedOn != null) 'updatedOn': updatedOn,
+    });
+  }
+
   TransactionsCompanion copyWith(
       {Value<String> id,
       Value<String> memberId,
@@ -2764,6 +2976,57 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
       createdOn: createdOn ?? this.createdOn,
       updatedOn: updatedOn ?? this.updatedOn,
     );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (memberId.present) {
+      map['memberId'] = Variable<String>(memberId.value);
+    }
+    if (amount.present) {
+      map['amount'] = Variable<double>(amount.value);
+    }
+    if (groupId.present) {
+      map['groupId'] = Variable<String>(groupId.value);
+    }
+    if (groupMemberIds.present) {
+      map['groupMemberIds'] = Variable<String>(groupMemberIds.value);
+    }
+    if (fromAccountId.present) {
+      map['fromAccountId'] = Variable<int>(fromAccountId.value);
+    }
+    if (toAccountId.present) {
+      map['toAccountId'] = Variable<int>(toAccountId.value);
+    }
+    if (categoryId.present) {
+      map['categoryId'] = Variable<int>(categoryId.value);
+    }
+    if (settlementId.present) {
+      map['settlementId'] = Variable<String>(settlementId.value);
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
+    if (attachments.present) {
+      map['attachments'] = Variable<String>(attachments.value);
+    }
+    if (tags.present) {
+      map['tags'] = Variable<String>(tags.value);
+    }
+    if (doneOn.present) {
+      map['doneOn'] = Variable<DateTime>(doneOn.value);
+    }
+    if (createdOn.present) {
+      map['createdOn'] = Variable<DateTime>(createdOn.value);
+    }
+    if (updatedOn.present) {
+      map['updatedOn'] = Variable<DateTime>(updatedOn.value);
+    }
+    return map;
   }
 }
 
@@ -2969,81 +3232,88 @@ class $TransactionsTable extends Transactions
   @override
   final String actualTableName = 'Transactions';
   @override
-  VerificationContext validateIntegrity(TransactionsCompanion d,
+  VerificationContext validateIntegrity(Insertable<Transaction> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
-    if (d.id.present) {
-      context.handle(_idMeta, id.isAcceptableValue(d.id.value, _idMeta));
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id'], _idMeta));
     } else if (isInserting) {
       context.missing(_idMeta);
     }
-    if (d.memberId.present) {
+    if (data.containsKey('memberId')) {
       context.handle(_memberIdMeta,
-          memberId.isAcceptableValue(d.memberId.value, _memberIdMeta));
+          memberId.isAcceptableOrUnknown(data['memberId'], _memberIdMeta));
     } else if (isInserting) {
       context.missing(_memberIdMeta);
     }
-    if (d.amount.present) {
-      context.handle(
-          _amountMeta, amount.isAcceptableValue(d.amount.value, _amountMeta));
+    if (data.containsKey('amount')) {
+      context.handle(_amountMeta,
+          amount.isAcceptableOrUnknown(data['amount'], _amountMeta));
     } else if (isInserting) {
       context.missing(_amountMeta);
     }
-    if (d.groupId.present) {
+    if (data.containsKey('groupId')) {
       context.handle(_groupIdMeta,
-          groupId.isAcceptableValue(d.groupId.value, _groupIdMeta));
+          groupId.isAcceptableOrUnknown(data['groupId'], _groupIdMeta));
     } else if (isInserting) {
       context.missing(_groupIdMeta);
     }
-    if (d.groupMemberIds.present) {
+    if (data.containsKey('groupMemberIds')) {
       context.handle(
           _groupMemberIdsMeta,
-          groupMemberIds.isAcceptableValue(
-              d.groupMemberIds.value, _groupMemberIdsMeta));
+          groupMemberIds.isAcceptableOrUnknown(
+              data['groupMemberIds'], _groupMemberIdsMeta));
     }
-    if (d.fromAccountId.present) {
+    if (data.containsKey('fromAccountId')) {
       context.handle(
           _fromAccountIdMeta,
-          fromAccountId.isAcceptableValue(
-              d.fromAccountId.value, _fromAccountIdMeta));
+          fromAccountId.isAcceptableOrUnknown(
+              data['fromAccountId'], _fromAccountIdMeta));
     }
-    if (d.toAccountId.present) {
-      context.handle(_toAccountIdMeta,
-          toAccountId.isAcceptableValue(d.toAccountId.value, _toAccountIdMeta));
+    if (data.containsKey('toAccountId')) {
+      context.handle(
+          _toAccountIdMeta,
+          toAccountId.isAcceptableOrUnknown(
+              data['toAccountId'], _toAccountIdMeta));
     }
-    if (d.categoryId.present) {
-      context.handle(_categoryIdMeta,
-          categoryId.isAcceptableValue(d.categoryId.value, _categoryIdMeta));
+    if (data.containsKey('categoryId')) {
+      context.handle(
+          _categoryIdMeta,
+          categoryId.isAcceptableOrUnknown(
+              data['categoryId'], _categoryIdMeta));
     }
-    if (d.settlementId.present) {
+    if (data.containsKey('settlementId')) {
       context.handle(
           _settlementIdMeta,
-          settlementId.isAcceptableValue(
-              d.settlementId.value, _settlementIdMeta));
+          settlementId.isAcceptableOrUnknown(
+              data['settlementId'], _settlementIdMeta));
     }
-    if (d.notes.present) {
+    if (data.containsKey('notes')) {
       context.handle(
-          _notesMeta, notes.isAcceptableValue(d.notes.value, _notesMeta));
+          _notesMeta, notes.isAcceptableOrUnknown(data['notes'], _notesMeta));
     }
-    if (d.attachments.present) {
-      context.handle(_attachmentsMeta,
-          attachments.isAcceptableValue(d.attachments.value, _attachmentsMeta));
-    }
-    if (d.tags.present) {
+    if (data.containsKey('attachments')) {
       context.handle(
-          _tagsMeta, tags.isAcceptableValue(d.tags.value, _tagsMeta));
+          _attachmentsMeta,
+          attachments.isAcceptableOrUnknown(
+              data['attachments'], _attachmentsMeta));
     }
-    if (d.doneOn.present) {
+    if (data.containsKey('tags')) {
       context.handle(
-          _doneOnMeta, doneOn.isAcceptableValue(d.doneOn.value, _doneOnMeta));
+          _tagsMeta, tags.isAcceptableOrUnknown(data['tags'], _tagsMeta));
     }
-    if (d.createdOn.present) {
+    if (data.containsKey('doneOn')) {
+      context.handle(_doneOnMeta,
+          doneOn.isAcceptableOrUnknown(data['doneOn'], _doneOnMeta));
+    }
+    if (data.containsKey('createdOn')) {
       context.handle(_createdOnMeta,
-          createdOn.isAcceptableValue(d.createdOn.value, _createdOnMeta));
+          createdOn.isAcceptableOrUnknown(data['createdOn'], _createdOnMeta));
     }
-    if (d.updatedOn.present) {
+    if (data.containsKey('updatedOn')) {
       context.handle(_updatedOnMeta,
-          updatedOn.isAcceptableValue(d.updatedOn.value, _updatedOnMeta));
+          updatedOn.isAcceptableOrUnknown(data['updatedOn'], _updatedOnMeta));
     }
     return context;
   }
@@ -3054,58 +3324,6 @@ class $TransactionsTable extends Transactions
   Transaction map(Map<String, dynamic> data, {String tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
     return Transaction.fromData(data, _db, prefix: effectivePrefix);
-  }
-
-  @override
-  Map<String, Variable> entityToSql(TransactionsCompanion d) {
-    final map = <String, Variable>{};
-    if (d.id.present) {
-      map['id'] = Variable<String, StringType>(d.id.value);
-    }
-    if (d.memberId.present) {
-      map['memberId'] = Variable<String, StringType>(d.memberId.value);
-    }
-    if (d.amount.present) {
-      map['amount'] = Variable<double, RealType>(d.amount.value);
-    }
-    if (d.groupId.present) {
-      map['groupId'] = Variable<String, StringType>(d.groupId.value);
-    }
-    if (d.groupMemberIds.present) {
-      map['groupMemberIds'] =
-          Variable<String, StringType>(d.groupMemberIds.value);
-    }
-    if (d.fromAccountId.present) {
-      map['fromAccountId'] = Variable<int, IntType>(d.fromAccountId.value);
-    }
-    if (d.toAccountId.present) {
-      map['toAccountId'] = Variable<int, IntType>(d.toAccountId.value);
-    }
-    if (d.categoryId.present) {
-      map['categoryId'] = Variable<int, IntType>(d.categoryId.value);
-    }
-    if (d.settlementId.present) {
-      map['settlementId'] = Variable<String, StringType>(d.settlementId.value);
-    }
-    if (d.notes.present) {
-      map['notes'] = Variable<String, StringType>(d.notes.value);
-    }
-    if (d.attachments.present) {
-      map['attachments'] = Variable<String, StringType>(d.attachments.value);
-    }
-    if (d.tags.present) {
-      map['tags'] = Variable<String, StringType>(d.tags.value);
-    }
-    if (d.doneOn.present) {
-      map['doneOn'] = Variable<DateTime, DateTimeType>(d.doneOn.value);
-    }
-    if (d.createdOn.present) {
-      map['createdOn'] = Variable<DateTime, DateTimeType>(d.createdOn.value);
-    }
-    if (d.updatedOn.present) {
-      map['updatedOn'] = Variable<DateTime, DateTimeType>(d.updatedOn.value);
-    }
-    return map;
   }
 
   @override
@@ -3189,6 +3407,36 @@ class AppFont extends DataClass implements Insertable<AppFont> {
           .mapFromDatabaseResponse(data['${effectivePrefix}updatedOn']),
     );
   }
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (!nullToAbsent || id != null) {
+      map['id'] = Variable<int>(id);
+    }
+    if (!nullToAbsent || name != null) {
+      map['name'] = Variable<String>(name);
+    }
+    if (!nullToAbsent || family != null) {
+      map['family'] = Variable<String>(family);
+    }
+    if (!nullToAbsent || type != null) {
+      map['type'] = Variable<String>(type);
+    }
+    if (!nullToAbsent || style != null) {
+      map['style'] = Variable<String>(style);
+    }
+    if (!nullToAbsent || weight != null) {
+      map['weight'] = Variable<int>(weight);
+    }
+    if (!nullToAbsent || createdOn != null) {
+      map['createdOn'] = Variable<DateTime>(createdOn);
+    }
+    if (!nullToAbsent || updatedOn != null) {
+      map['updatedOn'] = Variable<DateTime>(updatedOn);
+    }
+    return map;
+  }
+
   factory AppFont.fromJson(Map<String, dynamic> json,
       {ValueSerializer serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
@@ -3216,27 +3464,6 @@ class AppFont extends DataClass implements Insertable<AppFont> {
       'createdOn': serializer.toJson<DateTime>(createdOn),
       'updatedOn': serializer.toJson<DateTime>(updatedOn),
     };
-  }
-
-  @override
-  AppFontsCompanion createCompanion(bool nullToAbsent) {
-    return AppFontsCompanion(
-      id: id == null && nullToAbsent ? const Value.absent() : Value(id),
-      name: name == null && nullToAbsent ? const Value.absent() : Value(name),
-      family:
-          family == null && nullToAbsent ? const Value.absent() : Value(family),
-      type: type == null && nullToAbsent ? const Value.absent() : Value(type),
-      style:
-          style == null && nullToAbsent ? const Value.absent() : Value(style),
-      weight:
-          weight == null && nullToAbsent ? const Value.absent() : Value(weight),
-      createdOn: createdOn == null && nullToAbsent
-          ? const Value.absent()
-          : Value(createdOn),
-      updatedOn: updatedOn == null && nullToAbsent
-          ? const Value.absent()
-          : Value(updatedOn),
-    );
   }
 
   AppFont copyWith(
@@ -3332,6 +3559,28 @@ class AppFontsCompanion extends UpdateCompanion<AppFont> {
         family = Value(family),
         type = Value(type),
         style = Value(style);
+  static Insertable<AppFont> custom({
+    Expression<int> id,
+    Expression<String> name,
+    Expression<String> family,
+    Expression<String> type,
+    Expression<String> style,
+    Expression<int> weight,
+    Expression<DateTime> createdOn,
+    Expression<DateTime> updatedOn,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (family != null) 'family': family,
+      if (type != null) 'type': type,
+      if (style != null) 'style': style,
+      if (weight != null) 'weight': weight,
+      if (createdOn != null) 'createdOn': createdOn,
+      if (updatedOn != null) 'updatedOn': updatedOn,
+    });
+  }
+
   AppFontsCompanion copyWith(
       {Value<int> id,
       Value<String> name,
@@ -3351,6 +3600,36 @@ class AppFontsCompanion extends UpdateCompanion<AppFont> {
       createdOn: createdOn ?? this.createdOn,
       updatedOn: updatedOn ?? this.updatedOn,
     );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (family.present) {
+      map['family'] = Variable<String>(family.value);
+    }
+    if (type.present) {
+      map['type'] = Variable<String>(type.value);
+    }
+    if (style.present) {
+      map['style'] = Variable<String>(style.value);
+    }
+    if (weight.present) {
+      map['weight'] = Variable<int>(weight.value);
+    }
+    if (createdOn.present) {
+      map['createdOn'] = Variable<DateTime>(createdOn.value);
+    }
+    if (updatedOn.present) {
+      map['updatedOn'] = Variable<DateTime>(updatedOn.value);
+    }
+    return map;
   }
 }
 
@@ -3445,47 +3724,48 @@ class $AppFontsTable extends AppFonts with TableInfo<$AppFontsTable, AppFont> {
   @override
   final String actualTableName = 'AppFonts';
   @override
-  VerificationContext validateIntegrity(AppFontsCompanion d,
+  VerificationContext validateIntegrity(Insertable<AppFont> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
-    if (d.id.present) {
-      context.handle(_idMeta, id.isAcceptableValue(d.id.value, _idMeta));
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id'], _idMeta));
     }
-    if (d.name.present) {
+    if (data.containsKey('name')) {
       context.handle(
-          _nameMeta, name.isAcceptableValue(d.name.value, _nameMeta));
+          _nameMeta, name.isAcceptableOrUnknown(data['name'], _nameMeta));
     } else if (isInserting) {
       context.missing(_nameMeta);
     }
-    if (d.family.present) {
-      context.handle(
-          _familyMeta, family.isAcceptableValue(d.family.value, _familyMeta));
+    if (data.containsKey('family')) {
+      context.handle(_familyMeta,
+          family.isAcceptableOrUnknown(data['family'], _familyMeta));
     } else if (isInserting) {
       context.missing(_familyMeta);
     }
-    if (d.type.present) {
+    if (data.containsKey('type')) {
       context.handle(
-          _typeMeta, type.isAcceptableValue(d.type.value, _typeMeta));
+          _typeMeta, type.isAcceptableOrUnknown(data['type'], _typeMeta));
     } else if (isInserting) {
       context.missing(_typeMeta);
     }
-    if (d.style.present) {
+    if (data.containsKey('style')) {
       context.handle(
-          _styleMeta, style.isAcceptableValue(d.style.value, _styleMeta));
+          _styleMeta, style.isAcceptableOrUnknown(data['style'], _styleMeta));
     } else if (isInserting) {
       context.missing(_styleMeta);
     }
-    if (d.weight.present) {
-      context.handle(
-          _weightMeta, weight.isAcceptableValue(d.weight.value, _weightMeta));
+    if (data.containsKey('weight')) {
+      context.handle(_weightMeta,
+          weight.isAcceptableOrUnknown(data['weight'], _weightMeta));
     }
-    if (d.createdOn.present) {
+    if (data.containsKey('createdOn')) {
       context.handle(_createdOnMeta,
-          createdOn.isAcceptableValue(d.createdOn.value, _createdOnMeta));
+          createdOn.isAcceptableOrUnknown(data['createdOn'], _createdOnMeta));
     }
-    if (d.updatedOn.present) {
+    if (data.containsKey('updatedOn')) {
       context.handle(_updatedOnMeta,
-          updatedOn.isAcceptableValue(d.updatedOn.value, _updatedOnMeta));
+          updatedOn.isAcceptableOrUnknown(data['updatedOn'], _updatedOnMeta));
     }
     return context;
   }
@@ -3496,36 +3776,6 @@ class $AppFontsTable extends AppFonts with TableInfo<$AppFontsTable, AppFont> {
   AppFont map(Map<String, dynamic> data, {String tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
     return AppFont.fromData(data, _db, prefix: effectivePrefix);
-  }
-
-  @override
-  Map<String, Variable> entityToSql(AppFontsCompanion d) {
-    final map = <String, Variable>{};
-    if (d.id.present) {
-      map['id'] = Variable<int, IntType>(d.id.value);
-    }
-    if (d.name.present) {
-      map['name'] = Variable<String, StringType>(d.name.value);
-    }
-    if (d.family.present) {
-      map['family'] = Variable<String, StringType>(d.family.value);
-    }
-    if (d.type.present) {
-      map['type'] = Variable<String, StringType>(d.type.value);
-    }
-    if (d.style.present) {
-      map['style'] = Variable<String, StringType>(d.style.value);
-    }
-    if (d.weight.present) {
-      map['weight'] = Variable<int, IntType>(d.weight.value);
-    }
-    if (d.createdOn.present) {
-      map['createdOn'] = Variable<DateTime, DateTimeType>(d.createdOn.value);
-    }
-    if (d.updatedOn.present) {
-      map['updatedOn'] = Variable<DateTime, DateTimeType>(d.updatedOn.value);
-    }
-    return map;
   }
 
   @override
@@ -3603,6 +3853,57 @@ class FontCombo extends DataClass implements Insertable<FontCombo> {
           .mapFromDatabaseResponse(data['${effectivePrefix}updatedOn']),
     );
   }
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (!nullToAbsent || id != null) {
+      map['id'] = Variable<int>(id);
+    }
+    if (!nullToAbsent || name != null) {
+      map['name'] = Variable<String>(name);
+    }
+    if (!nullToAbsent || headerFont != null) {
+      map['headerFont'] = Variable<int>(headerFont);
+    }
+    if (!nullToAbsent || bodyFont != null) {
+      map['bodyFont'] = Variable<int>(bodyFont);
+    }
+    if (!nullToAbsent || bodyFontBig != null) {
+      map['bodyFontBig'] = Variable<int>(bodyFontBig);
+    }
+    if (!nullToAbsent || bodyFontMedium != null) {
+      map['bodyFontMedium'] = Variable<int>(bodyFontMedium);
+    }
+    if (!nullToAbsent || bodyFontSmall != null) {
+      map['bodyFontSmall'] = Variable<int>(bodyFontSmall);
+    }
+    if (!nullToAbsent || bodyFontTiny != null) {
+      map['bodyFontTiny'] = Variable<int>(bodyFontTiny);
+    }
+    if (!nullToAbsent || valueFont != null) {
+      map['valueFont'] = Variable<int>(valueFont);
+    }
+    if (!nullToAbsent || valueFontBig != null) {
+      map['valueFontBig'] = Variable<int>(valueFontBig);
+    }
+    if (!nullToAbsent || valueFontMedium != null) {
+      map['valueFontMedium'] = Variable<int>(valueFontMedium);
+    }
+    if (!nullToAbsent || valueFontSmall != null) {
+      map['valueFontSmall'] = Variable<int>(valueFontSmall);
+    }
+    if (!nullToAbsent || valueFontTiny != null) {
+      map['valueFontTiny'] = Variable<int>(valueFontTiny);
+    }
+    if (!nullToAbsent || createdOn != null) {
+      map['createdOn'] = Variable<DateTime>(createdOn);
+    }
+    if (!nullToAbsent || updatedOn != null) {
+      map['updatedOn'] = Variable<DateTime>(updatedOn);
+    }
+    return map;
+  }
+
   factory FontCombo.fromJson(Map<String, dynamic> json,
       {ValueSerializer serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
@@ -3644,53 +3945,6 @@ class FontCombo extends DataClass implements Insertable<FontCombo> {
       'createdOn': serializer.toJson<DateTime>(createdOn),
       'updatedOn': serializer.toJson<DateTime>(updatedOn),
     };
-  }
-
-  @override
-  FontCombosCompanion createCompanion(bool nullToAbsent) {
-    return FontCombosCompanion(
-      id: id == null && nullToAbsent ? const Value.absent() : Value(id),
-      name: name == null && nullToAbsent ? const Value.absent() : Value(name),
-      headerFont: headerFont == null && nullToAbsent
-          ? const Value.absent()
-          : Value(headerFont),
-      bodyFont: bodyFont == null && nullToAbsent
-          ? const Value.absent()
-          : Value(bodyFont),
-      bodyFontBig: bodyFontBig == null && nullToAbsent
-          ? const Value.absent()
-          : Value(bodyFontBig),
-      bodyFontMedium: bodyFontMedium == null && nullToAbsent
-          ? const Value.absent()
-          : Value(bodyFontMedium),
-      bodyFontSmall: bodyFontSmall == null && nullToAbsent
-          ? const Value.absent()
-          : Value(bodyFontSmall),
-      bodyFontTiny: bodyFontTiny == null && nullToAbsent
-          ? const Value.absent()
-          : Value(bodyFontTiny),
-      valueFont: valueFont == null && nullToAbsent
-          ? const Value.absent()
-          : Value(valueFont),
-      valueFontBig: valueFontBig == null && nullToAbsent
-          ? const Value.absent()
-          : Value(valueFontBig),
-      valueFontMedium: valueFontMedium == null && nullToAbsent
-          ? const Value.absent()
-          : Value(valueFontMedium),
-      valueFontSmall: valueFontSmall == null && nullToAbsent
-          ? const Value.absent()
-          : Value(valueFontSmall),
-      valueFontTiny: valueFontTiny == null && nullToAbsent
-          ? const Value.absent()
-          : Value(valueFontTiny),
-      createdOn: createdOn == null && nullToAbsent
-          ? const Value.absent()
-          : Value(createdOn),
-      updatedOn: updatedOn == null && nullToAbsent
-          ? const Value.absent()
-          : Value(updatedOn),
-    );
   }
 
   FontCombo copyWith(
@@ -3853,6 +4107,42 @@ class FontCombosCompanion extends UpdateCompanion<FontCombo> {
         headerFont = Value(headerFont),
         bodyFont = Value(bodyFont),
         valueFont = Value(valueFont);
+  static Insertable<FontCombo> custom({
+    Expression<int> id,
+    Expression<String> name,
+    Expression<int> headerFont,
+    Expression<int> bodyFont,
+    Expression<int> bodyFontBig,
+    Expression<int> bodyFontMedium,
+    Expression<int> bodyFontSmall,
+    Expression<int> bodyFontTiny,
+    Expression<int> valueFont,
+    Expression<int> valueFontBig,
+    Expression<int> valueFontMedium,
+    Expression<int> valueFontSmall,
+    Expression<int> valueFontTiny,
+    Expression<DateTime> createdOn,
+    Expression<DateTime> updatedOn,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (headerFont != null) 'headerFont': headerFont,
+      if (bodyFont != null) 'bodyFont': bodyFont,
+      if (bodyFontBig != null) 'bodyFontBig': bodyFontBig,
+      if (bodyFontMedium != null) 'bodyFontMedium': bodyFontMedium,
+      if (bodyFontSmall != null) 'bodyFontSmall': bodyFontSmall,
+      if (bodyFontTiny != null) 'bodyFontTiny': bodyFontTiny,
+      if (valueFont != null) 'valueFont': valueFont,
+      if (valueFontBig != null) 'valueFontBig': valueFontBig,
+      if (valueFontMedium != null) 'valueFontMedium': valueFontMedium,
+      if (valueFontSmall != null) 'valueFontSmall': valueFontSmall,
+      if (valueFontTiny != null) 'valueFontTiny': valueFontTiny,
+      if (createdOn != null) 'createdOn': createdOn,
+      if (updatedOn != null) 'updatedOn': updatedOn,
+    });
+  }
+
   FontCombosCompanion copyWith(
       {Value<int> id,
       Value<String> name,
@@ -3886,6 +4176,57 @@ class FontCombosCompanion extends UpdateCompanion<FontCombo> {
       createdOn: createdOn ?? this.createdOn,
       updatedOn: updatedOn ?? this.updatedOn,
     );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (headerFont.present) {
+      map['headerFont'] = Variable<int>(headerFont.value);
+    }
+    if (bodyFont.present) {
+      map['bodyFont'] = Variable<int>(bodyFont.value);
+    }
+    if (bodyFontBig.present) {
+      map['bodyFontBig'] = Variable<int>(bodyFontBig.value);
+    }
+    if (bodyFontMedium.present) {
+      map['bodyFontMedium'] = Variable<int>(bodyFontMedium.value);
+    }
+    if (bodyFontSmall.present) {
+      map['bodyFontSmall'] = Variable<int>(bodyFontSmall.value);
+    }
+    if (bodyFontTiny.present) {
+      map['bodyFontTiny'] = Variable<int>(bodyFontTiny.value);
+    }
+    if (valueFont.present) {
+      map['valueFont'] = Variable<int>(valueFont.value);
+    }
+    if (valueFontBig.present) {
+      map['valueFontBig'] = Variable<int>(valueFontBig.value);
+    }
+    if (valueFontMedium.present) {
+      map['valueFontMedium'] = Variable<int>(valueFontMedium.value);
+    }
+    if (valueFontSmall.present) {
+      map['valueFontSmall'] = Variable<int>(valueFontSmall.value);
+    }
+    if (valueFontTiny.present) {
+      map['valueFontTiny'] = Variable<int>(valueFontTiny.value);
+    }
+    if (createdOn.present) {
+      map['createdOn'] = Variable<DateTime>(createdOn.value);
+    }
+    if (updatedOn.present) {
+      map['updatedOn'] = Variable<DateTime>(updatedOn.value);
+    }
+    return map;
   }
 }
 
@@ -4078,89 +4419,94 @@ class $FontCombosTable extends FontCombos
   @override
   final String actualTableName = 'FontCombos';
   @override
-  VerificationContext validateIntegrity(FontCombosCompanion d,
+  VerificationContext validateIntegrity(Insertable<FontCombo> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
-    if (d.id.present) {
-      context.handle(_idMeta, id.isAcceptableValue(d.id.value, _idMeta));
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id'], _idMeta));
     }
-    if (d.name.present) {
+    if (data.containsKey('name')) {
       context.handle(
-          _nameMeta, name.isAcceptableValue(d.name.value, _nameMeta));
+          _nameMeta, name.isAcceptableOrUnknown(data['name'], _nameMeta));
     } else if (isInserting) {
       context.missing(_nameMeta);
     }
-    if (d.headerFont.present) {
-      context.handle(_headerFontMeta,
-          headerFont.isAcceptableValue(d.headerFont.value, _headerFontMeta));
+    if (data.containsKey('headerFont')) {
+      context.handle(
+          _headerFontMeta,
+          headerFont.isAcceptableOrUnknown(
+              data['headerFont'], _headerFontMeta));
     } else if (isInserting) {
       context.missing(_headerFontMeta);
     }
-    if (d.bodyFont.present) {
+    if (data.containsKey('bodyFont')) {
       context.handle(_bodyFontMeta,
-          bodyFont.isAcceptableValue(d.bodyFont.value, _bodyFontMeta));
+          bodyFont.isAcceptableOrUnknown(data['bodyFont'], _bodyFontMeta));
     } else if (isInserting) {
       context.missing(_bodyFontMeta);
     }
-    if (d.bodyFontBig.present) {
-      context.handle(_bodyFontBigMeta,
-          bodyFontBig.isAcceptableValue(d.bodyFontBig.value, _bodyFontBigMeta));
+    if (data.containsKey('bodyFontBig')) {
+      context.handle(
+          _bodyFontBigMeta,
+          bodyFontBig.isAcceptableOrUnknown(
+              data['bodyFontBig'], _bodyFontBigMeta));
     }
-    if (d.bodyFontMedium.present) {
+    if (data.containsKey('bodyFontMedium')) {
       context.handle(
           _bodyFontMediumMeta,
-          bodyFontMedium.isAcceptableValue(
-              d.bodyFontMedium.value, _bodyFontMediumMeta));
+          bodyFontMedium.isAcceptableOrUnknown(
+              data['bodyFontMedium'], _bodyFontMediumMeta));
     }
-    if (d.bodyFontSmall.present) {
+    if (data.containsKey('bodyFontSmall')) {
       context.handle(
           _bodyFontSmallMeta,
-          bodyFontSmall.isAcceptableValue(
-              d.bodyFontSmall.value, _bodyFontSmallMeta));
+          bodyFontSmall.isAcceptableOrUnknown(
+              data['bodyFontSmall'], _bodyFontSmallMeta));
     }
-    if (d.bodyFontTiny.present) {
+    if (data.containsKey('bodyFontTiny')) {
       context.handle(
           _bodyFontTinyMeta,
-          bodyFontTiny.isAcceptableValue(
-              d.bodyFontTiny.value, _bodyFontTinyMeta));
+          bodyFontTiny.isAcceptableOrUnknown(
+              data['bodyFontTiny'], _bodyFontTinyMeta));
     }
-    if (d.valueFont.present) {
+    if (data.containsKey('valueFont')) {
       context.handle(_valueFontMeta,
-          valueFont.isAcceptableValue(d.valueFont.value, _valueFontMeta));
+          valueFont.isAcceptableOrUnknown(data['valueFont'], _valueFontMeta));
     } else if (isInserting) {
       context.missing(_valueFontMeta);
     }
-    if (d.valueFontBig.present) {
+    if (data.containsKey('valueFontBig')) {
       context.handle(
           _valueFontBigMeta,
-          valueFontBig.isAcceptableValue(
-              d.valueFontBig.value, _valueFontBigMeta));
+          valueFontBig.isAcceptableOrUnknown(
+              data['valueFontBig'], _valueFontBigMeta));
     }
-    if (d.valueFontMedium.present) {
+    if (data.containsKey('valueFontMedium')) {
       context.handle(
           _valueFontMediumMeta,
-          valueFontMedium.isAcceptableValue(
-              d.valueFontMedium.value, _valueFontMediumMeta));
+          valueFontMedium.isAcceptableOrUnknown(
+              data['valueFontMedium'], _valueFontMediumMeta));
     }
-    if (d.valueFontSmall.present) {
+    if (data.containsKey('valueFontSmall')) {
       context.handle(
           _valueFontSmallMeta,
-          valueFontSmall.isAcceptableValue(
-              d.valueFontSmall.value, _valueFontSmallMeta));
+          valueFontSmall.isAcceptableOrUnknown(
+              data['valueFontSmall'], _valueFontSmallMeta));
     }
-    if (d.valueFontTiny.present) {
+    if (data.containsKey('valueFontTiny')) {
       context.handle(
           _valueFontTinyMeta,
-          valueFontTiny.isAcceptableValue(
-              d.valueFontTiny.value, _valueFontTinyMeta));
+          valueFontTiny.isAcceptableOrUnknown(
+              data['valueFontTiny'], _valueFontTinyMeta));
     }
-    if (d.createdOn.present) {
+    if (data.containsKey('createdOn')) {
       context.handle(_createdOnMeta,
-          createdOn.isAcceptableValue(d.createdOn.value, _createdOnMeta));
+          createdOn.isAcceptableOrUnknown(data['createdOn'], _createdOnMeta));
     }
-    if (d.updatedOn.present) {
+    if (data.containsKey('updatedOn')) {
       context.handle(_updatedOnMeta,
-          updatedOn.isAcceptableValue(d.updatedOn.value, _updatedOnMeta));
+          updatedOn.isAcceptableOrUnknown(data['updatedOn'], _updatedOnMeta));
     }
     return context;
   }
@@ -4171,57 +4517,6 @@ class $FontCombosTable extends FontCombos
   FontCombo map(Map<String, dynamic> data, {String tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
     return FontCombo.fromData(data, _db, prefix: effectivePrefix);
-  }
-
-  @override
-  Map<String, Variable> entityToSql(FontCombosCompanion d) {
-    final map = <String, Variable>{};
-    if (d.id.present) {
-      map['id'] = Variable<int, IntType>(d.id.value);
-    }
-    if (d.name.present) {
-      map['name'] = Variable<String, StringType>(d.name.value);
-    }
-    if (d.headerFont.present) {
-      map['headerFont'] = Variable<int, IntType>(d.headerFont.value);
-    }
-    if (d.bodyFont.present) {
-      map['bodyFont'] = Variable<int, IntType>(d.bodyFont.value);
-    }
-    if (d.bodyFontBig.present) {
-      map['bodyFontBig'] = Variable<int, IntType>(d.bodyFontBig.value);
-    }
-    if (d.bodyFontMedium.present) {
-      map['bodyFontMedium'] = Variable<int, IntType>(d.bodyFontMedium.value);
-    }
-    if (d.bodyFontSmall.present) {
-      map['bodyFontSmall'] = Variable<int, IntType>(d.bodyFontSmall.value);
-    }
-    if (d.bodyFontTiny.present) {
-      map['bodyFontTiny'] = Variable<int, IntType>(d.bodyFontTiny.value);
-    }
-    if (d.valueFont.present) {
-      map['valueFont'] = Variable<int, IntType>(d.valueFont.value);
-    }
-    if (d.valueFontBig.present) {
-      map['valueFontBig'] = Variable<int, IntType>(d.valueFontBig.value);
-    }
-    if (d.valueFontMedium.present) {
-      map['valueFontMedium'] = Variable<int, IntType>(d.valueFontMedium.value);
-    }
-    if (d.valueFontSmall.present) {
-      map['valueFontSmall'] = Variable<int, IntType>(d.valueFontSmall.value);
-    }
-    if (d.valueFontTiny.present) {
-      map['valueFontTiny'] = Variable<int, IntType>(d.valueFontTiny.value);
-    }
-    if (d.createdOn.present) {
-      map['createdOn'] = Variable<DateTime, DateTimeType>(d.createdOn.value);
-    }
-    if (d.updatedOn.present) {
-      map['updatedOn'] = Variable<DateTime, DateTimeType>(d.updatedOn.value);
-    }
-    return map;
   }
 
   @override
@@ -4266,6 +4561,33 @@ class ColorCombo extends DataClass implements Insertable<ColorCombo> {
           .mapFromDatabaseResponse(data['${effectivePrefix}updatedOn']),
     );
   }
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (!nullToAbsent || id != null) {
+      map['id'] = Variable<int>(id);
+    }
+    if (!nullToAbsent || name != null) {
+      map['name'] = Variable<String>(name);
+    }
+    if (!nullToAbsent || mode != null) {
+      map['mode'] = Variable<String>(mode);
+    }
+    if (!nullToAbsent || backColor != null) {
+      map['backColor'] = Variable<String>(backColor);
+    }
+    if (!nullToAbsent || foreColor != null) {
+      map['foreColor'] = Variable<String>(foreColor);
+    }
+    if (!nullToAbsent || createdOn != null) {
+      map['createdOn'] = Variable<DateTime>(createdOn);
+    }
+    if (!nullToAbsent || updatedOn != null) {
+      map['updatedOn'] = Variable<DateTime>(updatedOn);
+    }
+    return map;
+  }
+
   factory ColorCombo.fromJson(Map<String, dynamic> json,
       {ValueSerializer serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
@@ -4291,27 +4613,6 @@ class ColorCombo extends DataClass implements Insertable<ColorCombo> {
       'createdOn': serializer.toJson<DateTime>(createdOn),
       'updatedOn': serializer.toJson<DateTime>(updatedOn),
     };
-  }
-
-  @override
-  ColorCombosCompanion createCompanion(bool nullToAbsent) {
-    return ColorCombosCompanion(
-      id: id == null && nullToAbsent ? const Value.absent() : Value(id),
-      name: name == null && nullToAbsent ? const Value.absent() : Value(name),
-      mode: mode == null && nullToAbsent ? const Value.absent() : Value(mode),
-      backColor: backColor == null && nullToAbsent
-          ? const Value.absent()
-          : Value(backColor),
-      foreColor: foreColor == null && nullToAbsent
-          ? const Value.absent()
-          : Value(foreColor),
-      createdOn: createdOn == null && nullToAbsent
-          ? const Value.absent()
-          : Value(createdOn),
-      updatedOn: updatedOn == null && nullToAbsent
-          ? const Value.absent()
-          : Value(updatedOn),
-    );
   }
 
   ColorCombo copyWith(
@@ -4398,6 +4699,26 @@ class ColorCombosCompanion extends UpdateCompanion<ColorCombo> {
         mode = Value(mode),
         backColor = Value(backColor),
         foreColor = Value(foreColor);
+  static Insertable<ColorCombo> custom({
+    Expression<int> id,
+    Expression<String> name,
+    Expression<String> mode,
+    Expression<String> backColor,
+    Expression<String> foreColor,
+    Expression<DateTime> createdOn,
+    Expression<DateTime> updatedOn,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (mode != null) 'mode': mode,
+      if (backColor != null) 'backColor': backColor,
+      if (foreColor != null) 'foreColor': foreColor,
+      if (createdOn != null) 'createdOn': createdOn,
+      if (updatedOn != null) 'updatedOn': updatedOn,
+    });
+  }
+
   ColorCombosCompanion copyWith(
       {Value<int> id,
       Value<String> name,
@@ -4415,6 +4736,33 @@ class ColorCombosCompanion extends UpdateCompanion<ColorCombo> {
       createdOn: createdOn ?? this.createdOn,
       updatedOn: updatedOn ?? this.updatedOn,
     );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (mode.present) {
+      map['mode'] = Variable<String>(mode.value);
+    }
+    if (backColor.present) {
+      map['backColor'] = Variable<String>(backColor.value);
+    }
+    if (foreColor.present) {
+      map['foreColor'] = Variable<String>(foreColor.value);
+    }
+    if (createdOn.present) {
+      map['createdOn'] = Variable<DateTime>(createdOn.value);
+    }
+    if (updatedOn.present) {
+      map['updatedOn'] = Variable<DateTime>(updatedOn.value);
+    }
+    return map;
   }
 }
 
@@ -4501,43 +4849,44 @@ class $ColorCombosTable extends ColorCombos
   @override
   final String actualTableName = 'ColorCombos';
   @override
-  VerificationContext validateIntegrity(ColorCombosCompanion d,
+  VerificationContext validateIntegrity(Insertable<ColorCombo> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
-    if (d.id.present) {
-      context.handle(_idMeta, id.isAcceptableValue(d.id.value, _idMeta));
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id'], _idMeta));
     }
-    if (d.name.present) {
+    if (data.containsKey('name')) {
       context.handle(
-          _nameMeta, name.isAcceptableValue(d.name.value, _nameMeta));
+          _nameMeta, name.isAcceptableOrUnknown(data['name'], _nameMeta));
     } else if (isInserting) {
       context.missing(_nameMeta);
     }
-    if (d.mode.present) {
+    if (data.containsKey('mode')) {
       context.handle(
-          _modeMeta, mode.isAcceptableValue(d.mode.value, _modeMeta));
+          _modeMeta, mode.isAcceptableOrUnknown(data['mode'], _modeMeta));
     } else if (isInserting) {
       context.missing(_modeMeta);
     }
-    if (d.backColor.present) {
+    if (data.containsKey('backColor')) {
       context.handle(_backColorMeta,
-          backColor.isAcceptableValue(d.backColor.value, _backColorMeta));
+          backColor.isAcceptableOrUnknown(data['backColor'], _backColorMeta));
     } else if (isInserting) {
       context.missing(_backColorMeta);
     }
-    if (d.foreColor.present) {
+    if (data.containsKey('foreColor')) {
       context.handle(_foreColorMeta,
-          foreColor.isAcceptableValue(d.foreColor.value, _foreColorMeta));
+          foreColor.isAcceptableOrUnknown(data['foreColor'], _foreColorMeta));
     } else if (isInserting) {
       context.missing(_foreColorMeta);
     }
-    if (d.createdOn.present) {
+    if (data.containsKey('createdOn')) {
       context.handle(_createdOnMeta,
-          createdOn.isAcceptableValue(d.createdOn.value, _createdOnMeta));
+          createdOn.isAcceptableOrUnknown(data['createdOn'], _createdOnMeta));
     }
-    if (d.updatedOn.present) {
+    if (data.containsKey('updatedOn')) {
       context.handle(_updatedOnMeta,
-          updatedOn.isAcceptableValue(d.updatedOn.value, _updatedOnMeta));
+          updatedOn.isAcceptableOrUnknown(data['updatedOn'], _updatedOnMeta));
     }
     return context;
   }
@@ -4548,33 +4897,6 @@ class $ColorCombosTable extends ColorCombos
   ColorCombo map(Map<String, dynamic> data, {String tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
     return ColorCombo.fromData(data, _db, prefix: effectivePrefix);
-  }
-
-  @override
-  Map<String, Variable> entityToSql(ColorCombosCompanion d) {
-    final map = <String, Variable>{};
-    if (d.id.present) {
-      map['id'] = Variable<int, IntType>(d.id.value);
-    }
-    if (d.name.present) {
-      map['name'] = Variable<String, StringType>(d.name.value);
-    }
-    if (d.mode.present) {
-      map['mode'] = Variable<String, StringType>(d.mode.value);
-    }
-    if (d.backColor.present) {
-      map['backColor'] = Variable<String, StringType>(d.backColor.value);
-    }
-    if (d.foreColor.present) {
-      map['foreColor'] = Variable<String, StringType>(d.foreColor.value);
-    }
-    if (d.createdOn.present) {
-      map['createdOn'] = Variable<DateTime, DateTimeType>(d.createdOn.value);
-    }
-    if (d.updatedOn.present) {
-      map['updatedOn'] = Variable<DateTime, DateTimeType>(d.updatedOn.value);
-    }
-    return map;
   }
 
   @override
@@ -4611,6 +4933,27 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
           .mapFromDatabaseResponse(data['${effectivePrefix}updatedOn']),
     );
   }
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (!nullToAbsent || name != null) {
+      map['name'] = Variable<String>(name);
+    }
+    if (!nullToAbsent || value != null) {
+      map['value'] = Variable<String>(value);
+    }
+    if (!nullToAbsent || type != null) {
+      map['type'] = Variable<String>(type);
+    }
+    if (!nullToAbsent || createdOn != null) {
+      map['createdOn'] = Variable<DateTime>(createdOn);
+    }
+    if (!nullToAbsent || updatedOn != null) {
+      map['updatedOn'] = Variable<DateTime>(updatedOn);
+    }
+    return map;
+  }
+
   factory AppSetting.fromJson(Map<String, dynamic> json,
       {ValueSerializer serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
@@ -4632,22 +4975,6 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       'createdOn': serializer.toJson<DateTime>(createdOn),
       'updatedOn': serializer.toJson<DateTime>(updatedOn),
     };
-  }
-
-  @override
-  AppSettingsCompanion createCompanion(bool nullToAbsent) {
-    return AppSettingsCompanion(
-      name: name == null && nullToAbsent ? const Value.absent() : Value(name),
-      value:
-          value == null && nullToAbsent ? const Value.absent() : Value(value),
-      type: type == null && nullToAbsent ? const Value.absent() : Value(type),
-      createdOn: createdOn == null && nullToAbsent
-          ? const Value.absent()
-          : Value(createdOn),
-      updatedOn: updatedOn == null && nullToAbsent
-          ? const Value.absent()
-          : Value(updatedOn),
-    );
   }
 
   AppSetting copyWith(
@@ -4714,6 +5041,22 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
     this.updatedOn = const Value.absent(),
   })  : name = Value(name),
         value = Value(value);
+  static Insertable<AppSetting> custom({
+    Expression<String> name,
+    Expression<String> value,
+    Expression<String> type,
+    Expression<DateTime> createdOn,
+    Expression<DateTime> updatedOn,
+  }) {
+    return RawValuesInsertable({
+      if (name != null) 'name': name,
+      if (value != null) 'value': value,
+      if (type != null) 'type': type,
+      if (createdOn != null) 'createdOn': createdOn,
+      if (updatedOn != null) 'updatedOn': updatedOn,
+    });
+  }
+
   AppSettingsCompanion copyWith(
       {Value<String> name,
       Value<String> value,
@@ -4727,6 +5070,27 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
       createdOn: createdOn ?? this.createdOn,
       updatedOn: updatedOn ?? this.updatedOn,
     );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (value.present) {
+      map['value'] = Variable<String>(value.value);
+    }
+    if (type.present) {
+      map['type'] = Variable<String>(type.value);
+    }
+    if (createdOn.present) {
+      map['createdOn'] = Variable<DateTime>(createdOn.value);
+    }
+    if (updatedOn.present) {
+      map['updatedOn'] = Variable<DateTime>(updatedOn.value);
+    }
+    return map;
   }
 }
 
@@ -4799,32 +5163,33 @@ class $AppSettingsTable extends AppSettings
   @override
   final String actualTableName = 'AppSettings';
   @override
-  VerificationContext validateIntegrity(AppSettingsCompanion d,
+  VerificationContext validateIntegrity(Insertable<AppSetting> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
-    if (d.name.present) {
+    final data = instance.toColumns(true);
+    if (data.containsKey('name')) {
       context.handle(
-          _nameMeta, name.isAcceptableValue(d.name.value, _nameMeta));
+          _nameMeta, name.isAcceptableOrUnknown(data['name'], _nameMeta));
     } else if (isInserting) {
       context.missing(_nameMeta);
     }
-    if (d.value.present) {
+    if (data.containsKey('value')) {
       context.handle(
-          _valueMeta, value.isAcceptableValue(d.value.value, _valueMeta));
+          _valueMeta, value.isAcceptableOrUnknown(data['value'], _valueMeta));
     } else if (isInserting) {
       context.missing(_valueMeta);
     }
-    if (d.type.present) {
+    if (data.containsKey('type')) {
       context.handle(
-          _typeMeta, type.isAcceptableValue(d.type.value, _typeMeta));
+          _typeMeta, type.isAcceptableOrUnknown(data['type'], _typeMeta));
     }
-    if (d.createdOn.present) {
+    if (data.containsKey('createdOn')) {
       context.handle(_createdOnMeta,
-          createdOn.isAcceptableValue(d.createdOn.value, _createdOnMeta));
+          createdOn.isAcceptableOrUnknown(data['createdOn'], _createdOnMeta));
     }
-    if (d.updatedOn.present) {
+    if (data.containsKey('updatedOn')) {
       context.handle(_updatedOnMeta,
-          updatedOn.isAcceptableValue(d.updatedOn.value, _updatedOnMeta));
+          updatedOn.isAcceptableOrUnknown(data['updatedOn'], _updatedOnMeta));
     }
     return context;
   }
@@ -4835,27 +5200,6 @@ class $AppSettingsTable extends AppSettings
   AppSetting map(Map<String, dynamic> data, {String tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
     return AppSetting.fromData(data, _db, prefix: effectivePrefix);
-  }
-
-  @override
-  Map<String, Variable> entityToSql(AppSettingsCompanion d) {
-    final map = <String, Variable>{};
-    if (d.name.present) {
-      map['name'] = Variable<String, StringType>(d.name.value);
-    }
-    if (d.value.present) {
-      map['value'] = Variable<String, StringType>(d.value.value);
-    }
-    if (d.type.present) {
-      map['type'] = Variable<String, StringType>(d.type.value);
-    }
-    if (d.createdOn.present) {
-      map['createdOn'] = Variable<DateTime, DateTimeType>(d.createdOn.value);
-    }
-    if (d.updatedOn.present) {
-      map['updatedOn'] = Variable<DateTime, DateTimeType>(d.updatedOn.value);
-    }
-    return map;
   }
 
   @override
@@ -4890,17 +5234,17 @@ abstract class _$SprightlySetupDatabase extends GeneratedDatabase {
 // **************************************************************************
 
 mixin _$SprightlyDaoMixin on DatabaseAccessor<SprightlyDatabase> {
-  $MembersTable get members => db.members;
-  $GroupsTable get groups => db.groups;
-  $GroupMembersTable get groupMembers => db.groupMembers;
-  $AccountsTable get accounts => db.accounts;
-  $CategoriesTable get categories => db.categories;
-  $SettlementsTable get settlements => db.settlements;
-  $TransactionsTable get transactions => db.transactions;
+  $MembersTable get members => attachedDatabase.members;
+  $GroupsTable get groups => attachedDatabase.groups;
+  $GroupMembersTable get groupMembers => attachedDatabase.groupMembers;
+  $AccountsTable get accounts => attachedDatabase.accounts;
+  $CategoriesTable get categories => attachedDatabase.categories;
+  $SettlementsTable get settlements => attachedDatabase.settlements;
+  $TransactionsTable get transactions => attachedDatabase.transactions;
 }
 mixin _$SprightlySetupDaoMixin on DatabaseAccessor<SprightlySetupDatabase> {
-  $AppFontsTable get appFonts => db.appFonts;
-  $FontCombosTable get fontCombos => db.fontCombos;
-  $ColorCombosTable get colorCombos => db.colorCombos;
-  $AppSettingsTable get appSettings => db.appSettings;
+  $AppFontsTable get appFonts => attachedDatabase.appFonts;
+  $FontCombosTable get fontCombos => attachedDatabase.fontCombos;
+  $ColorCombosTable get colorCombos => attachedDatabase.colorCombos;
+  $AppSettingsTable get appSettings => attachedDatabase.appSettings;
 }
