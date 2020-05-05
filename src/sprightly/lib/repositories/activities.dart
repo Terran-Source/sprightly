@@ -5,32 +5,41 @@ import 'package:sprightly/models/dao.dart';
 import 'package:sprightly/models/db/database.dart';
 // import 'package:sprightly/models/entities.dart';
 
-abstract class BaseData {
-  final SystemDao _dao;
-
-  BaseData(this._dao);
+mixin _BaseData {
+  SystemDao _dao;
 }
 
-class GroupAccountMember extends BaseData {
+class GroupAccountMember with _BaseData {
   final String groupId;
+
+  GroupAccountMember(SystemDao _dao, this.groupId) {
+    super._dao = _dao;
+  }
+
   Future<List<Member>> get members => _dao.getGroupAccountMembers(groupId);
   Stream<List<Member>> get watchedMembers =>
       _dao.watchGroupAccountMembers(groupId);
-
-  GroupAccountMember(SystemDao _dao, this.groupId) : super(_dao);
 }
 
-class GroupOnlyMember extends BaseData {
+class GroupOnlyMember with _BaseData {
   final String groupId;
+
+  GroupOnlyMember(SystemDao _dao, this.groupId) {
+    super._dao = _dao;
+  }
+
   Future<List<Member>> get members => _dao.getGroupOnlyMembers(groupId);
   Stream<List<Member>> get watchedMembers =>
       _dao.watchGroupOnlyMembers(groupId);
-
-  GroupOnlyMember(SystemDao _dao, this.groupId) : super(_dao);
 }
 
-class GroupSettlement extends BaseData {
+class GroupSettlement with _BaseData {
   final String groupId;
+
+  GroupSettlement(SystemDao _dao, this.groupId) {
+    super._dao = _dao;
+  }
+
   Future<List<Settlement>> get settlements => _dao.getGroupSettlements(groupId);
   Stream<List<Settlement>> get watchedSettlements =>
       _dao.watchGroupSettlements(groupId);
@@ -42,18 +51,19 @@ class GroupSettlement extends BaseData {
       _dao.getGroupSettlements(groupId, isTemporary: true);
   Stream<List<Settlement>> get watchedTempSettlements =>
       _dao.watchGroupSettlements(groupId, isTemporary: true);
-
-  GroupSettlement(SystemDao _dao, this.groupId) : super(_dao);
 }
 
-class GroupTransaction extends BaseData {
+class GroupTransaction with _BaseData {
   final String groupId;
+
+  GroupTransaction(SystemDao _dao, this.groupId) {
+    super._dao = _dao;
+  }
+
   Future<List<Transaction>> get transactions =>
       _dao.getGroupTransactions(groupId);
   Stream<List<Transaction>> get watchedTransactions =>
       _dao.watchGroupTransactions(groupId);
-
-  GroupTransaction(SystemDao _dao, this.groupId) : super(_dao);
 }
 
 /// The callback type delegator for [GroupActivity] events
@@ -89,7 +99,7 @@ class Contribution {
   operator >(Contribution compared) => compared.amount - this.amount;
 }
 
-class GroupActivity extends BaseData {
+class GroupActivity with _BaseData {
   final String groupId;
   final String memberId;
   final GroupAccountMember groupAccountMember;
@@ -101,8 +111,9 @@ class GroupActivity extends BaseData {
       : this.groupAccountMember = GroupAccountMember(_dao, groupId),
         this.groupMember = GroupOnlyMember(_dao, groupId),
         this.groupSettlement = GroupSettlement(_dao, groupId),
-        this.groupTransaction = GroupTransaction(_dao, groupId),
-        super(_dao);
+        this.groupTransaction = GroupTransaction(_dao, groupId) {
+    super._dao = _dao;
+  }
 
   Group _group;
   Group get group =>

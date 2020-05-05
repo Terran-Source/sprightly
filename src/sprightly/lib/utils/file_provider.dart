@@ -1,3 +1,5 @@
+library sprightly.file_provider;
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -10,7 +12,9 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:sprightly/extensions/file_system_entity_extensions.dart';
 import 'package:sprightly/extensions/http_response_extensions.dart';
+import 'package:sprightly/utils/formatted_exception.dart';
 
+String get _moduleName => 'file_provider';
 int get maxCachedRetentionMins => 7 * 24 * 60; // 7 days
 
 Future<String> getAbsolutePath(
@@ -207,7 +211,8 @@ class DirectoryInfo {
     if (null != target.directoryInfo) {
       List<File> remainingFiles = [];
       for (var file in target.directoryInfo.files) {
-        if (target.cache.values.any((cache) => file.path == cache.path))
+        if (target.cache.values.any(
+            (cache) => file.path == cache.path && null != cache.downloadOn))
           remainingFiles.add(file);
         else
           await file.delete();
@@ -243,20 +248,36 @@ class CacheFile {
   Map<String, String> headers;
   final String path;
   final ContentType contentType;
-  final DateTime downloadOn;
+  DateTime downloadOn;
   DateTime lastAccessedOn;
 
   CacheFile(
     this.identifier,
     this.source,
     this.path,
-    this.contentType,
-    this.downloadOn, {
+    this.contentType, {
+    this.downloadOn,
+    this.lastAccessedOn,
     this.headers = const {},
   });
 }
 
+FormattedException<T> _formattedException<T extends Exception>(
+  T exception, {
+  Map<String, dynamic> messageParams = const {},
+  StackTrace stackTrace,
+}) =>
+    FormattedException(
+      exception,
+      stackTrace: stackTrace,
+      messageParams: messageParams,
+      moduleName: _moduleName,
+    );
+
 class RemoteFileCache {
+  static RemoteFileCache universal = RemoteFileCache();
+  factory RemoteFileCache() => universal;
+
   final String _cacheDirectory = '__fileCache';
   final String _cacheFile = '__fileCache.json';
   final http.Client _client = http.Client();
@@ -264,8 +285,6 @@ class RemoteFileCache {
 
   DirectoryInfo _directoryInfo;
   DirectoryInfo get directoryInfo => _directoryInfo;
-
-  static RemoteFileCache current = RemoteFileCache();
 
   bool initialized = false;
   bool _working = false;
@@ -309,45 +328,77 @@ class RemoteFileCache {
     Map<String, String> headers = const {},
   }) async {
     CacheFile result;
-    // :Old Method:
-    // var request = http.Request('GET', Uri.parse(source));
-    // request.headers.addAll(headers);
-    // final response = await _client.send(request);
-    // :New Method:
-    final response = await _client.get(Uri.parse(source), headers: headers);
-    if (response.isSuccessStatusCode) {
-      var fileName =
-          response.fileName ?? "$identifier${response.fileExtension}";
+    try {
       // :Old Method:
-      // var file = await saveFileAsByteStream(
-      //     p.join(_cacheDirectory, fileName), response.stream,
-      //     encoding: response.encoding);
+      // var request = http.Request('GET', Uri.parse(source));
+      // request.headers.addAll(headers);
+      // final response = await _client.send(request);
       // :New Method:
-      var file = await saveFileAsBytes(
-          p.join(_cacheDirectory, fileName), response.bodyBytes);
-      result = CacheFile(
-        identifier ?? source,
-        source,
-        file.path,
-        response.contentType,
-        DateTime.now().toUtc(),
-        headers: headers,
+      final response = await _client.get(Uri.parse(source), headers: headers);
+      if (response.isSuccessStatusCode) {
+        var fileName =
+            response.fileName ?? "$identifier${response.fileExtension}";
+        // :Old Method:
+        // var file = await saveFileAsByteStream(
+        //     p.join(_cacheDirectory, fileName), response.stream,
+        //     encoding: response.encoding);
+        // :New Method:
+        var file = await saveFileAsBytes(
+            p.join(_cacheDirectory, fileName), response.bodyBytes);
+        result = CacheFile(
+          identifier,
+          source,
+          file.path,
+          response.contentType,
+          downloadOn: DateTime.now().toUtc(),
+          headers: headers,
+        );
+      }
+    } on SocketException catch (e, st) {
+      throw _formattedException(e, stackTrace: st);
+    } on HttpException catch (e, st) {
+      throw _formattedException(
+        e,
+        stackTrace: st,
+        messageParams: {"method": "get", "host": e.uri.host},
       );
+    } on FormatException catch (e, st) {
+      throw _formattedException(e, stackTrace: st);
+    } finally {
+      _client.close();
     }
-    _client.close();
     return result;
   }
 
-  Future<String> getRemoteText(String source,
-      {String identifier, Map<String, String> headers = const {}}) async {
+  Future<CacheFile> _ensureFileExists(
+    String source, {
+    String identifier,
+    Map<String, String> headers = const {},
+  }) async {
     var id = identifier ?? source;
-    if (!_fileCache.containsKey(id)) {
-      _fileCache[id] = await _getRemoteFileAndCache(source,
-          identifier: identifier, headers: headers);
+    if (!(_fileCache.containsKey(id) && null != _fileCache[id].downloadOn)) {
+      var cacheFile = await _getRemoteFileAndCache(source,
+          identifier: id, headers: headers);
+      if (null != cacheFile)
+        _fileCache[id] = cacheFile;
+      else
+        return null;
     }
-    var filePath = _fileCache[id];
-    filePath.lastAccessedOn = DateTime.now().toUtc();
-    return getFileText(filePath.path, isAbsolute: true);
+    return _fileCache[id];
+  }
+
+  Future<String> getRemoteText(
+    String source, {
+    String identifier,
+    Map<String, String> headers = const {},
+  }) async {
+    var filePath = await _ensureFileExists(source,
+        identifier: identifier, headers: headers);
+    if (null != filePath) {
+      filePath.lastAccessedOn = DateTime.now().toUtc();
+      return getFileText(filePath.path, isAbsolute: true);
+    }
+    return null;
   }
 
   Future<Uint8List> getRemoteContent(
@@ -355,14 +406,13 @@ class RemoteFileCache {
     String identifier,
     Map<String, String> headers = const {},
   }) async {
-    var id = identifier ?? source;
-    if (!_fileCache.containsKey(id)) {
-      _fileCache[id] = await _getRemoteFileAndCache(source,
-          identifier: identifier, headers: headers);
+    var filePath = await _ensureFileExists(source,
+        identifier: identifier, headers: headers);
+    if (null != filePath) {
+      filePath.lastAccessedOn = DateTime.now().toUtc();
+      return getFileContent(filePath.path, isAbsolute: true);
     }
-    var filePath = _fileCache[id];
-    filePath.lastAccessedOn = DateTime.now().toUtc();
-    return getFileContent(filePath.path, isAbsolute: true);
+    return null;
   }
 
   Future<T> getRemoteTextAs<T>(
@@ -384,24 +434,35 @@ class RemoteFileCache {
           identifier: identifier, headers: headers));
 
   Future<bool> _cleanFileCache() async {
-    if (_fileCache.isNotEmpty) {
-      Map<String, CacheFile> tempFileCache = {};
-      for (var fc in _fileCache.entries) {
-        if (fc.value.lastAccessedOn
-            .add(Duration(minutes: maxCachedRetentionMins))
-            .isBefore(DateTime.now().toUtc())) {
-          await deleteFile(fc.value.path, isAbsolute: true);
-        } else
+    var result;
+    try {
+      if (_fileCache.isNotEmpty) {
+        Map<String, CacheFile> tempFileCache = {};
+        for (var fc in _fileCache.entries) {
+          // Files, which are never been accessed or not accessed
+          // for last [maxCachedRetentionMins] minutes
+          if (fc.value.lastAccessedOn
+                  ?.add(Duration(minutes: maxCachedRetentionMins))
+                  ?.isBefore(DateTime.now().toUtc()) ??
+              true) {
+            await deleteFile(fc.value.path, isAbsolute: true);
+            fc.value.downloadOn = null;
+            fc.value.lastAccessedOn = null;
+          }
           tempFileCache[fc.key] = fc.value;
+        }
+        _fileCache
+          ..clear()
+          ..addAll(tempFileCache);
       }
-      _fileCache
-        ..clear()
-        ..addAll(tempFileCache);
+      result = true;
+    } finally {
+      result = false;
     }
-    return true;
+    return result;
   }
 
-  Future<void> cleanUp() async {
+  Future<bool> cleanUp() async {
     if (initialized && !_working) {
       _working = true;
       return _cleanFileCache().whenComplete(() =>
@@ -410,6 +471,7 @@ class RemoteFileCache {
             _working = false;
           }));
     }
+    return false;
   }
 
   /// to be called before application ends,

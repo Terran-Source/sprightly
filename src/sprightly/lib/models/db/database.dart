@@ -362,7 +362,7 @@ class AppSettings extends Table {
   TextColumn get name => text().named('name').withLength(max: 50)();
   TextColumn get value => text().named('value')();
   TextColumn get type => text().named('type').nullable().customConstraint(
-      "CHECK (type IN ('String','Number','Bool','List','AppInfo')) NOT NULL  DEFAULT 'String'")();
+      "CHECK (type IN ('String','Number','Bool','List','AppInfo','ThemeMode')) NOT NULL  DEFAULT 'String'")();
   DateTimeColumn get createdOn => dateTime()
       .named('createdOn')
       .clientDefault(() => DateTime.now().toUtc())();
@@ -379,13 +379,11 @@ class AppSettings extends Table {
 
 //#region Custom query & classes
 /// asset path for custom sql files
-Future<String> _getSqlQueryFromAsset(String fileName) => getAssetText(fileName,
-    assetDirectory: sqlAssetDirectory, extension: '.sql');
+Future<String> _getSqlQueryFromAsset(String fileName) =>
+    getAssetText(fileName, assetDirectory: sqlAssetDirectory);
 Future<String> _getSqlQueryFromRemote(CustomQuery customQuery) =>
-    RemoteFileCache.current.getRemoteText(customQuery.source,
+    RemoteFileCache.universal.getRemoteText(customQuery.source,
         identifier: customQuery.identifier, headers: customQuery.headers);
-
-enum SourceFrom { Asset, Web }
 
 /// Used to get complex queries from outside.
 ///
@@ -420,7 +418,7 @@ class CustomQuery {
   /// ```
   final String source;
   final String identifier;
-  final SourceFrom _from;
+  final ResourceFrom _from;
   final Map<String, String> headers;
 
   String _query;
@@ -430,20 +428,21 @@ class CustomQuery {
 
   factory CustomQuery.fromAsset(String fileNameWithoutExtension,
           {String identifier}) =>
-      CustomQuery._(fileNameWithoutExtension, SourceFrom.Asset,
+      CustomQuery._(fileNameWithoutExtension, ResourceFrom.Asset,
           identifier ?? fileNameWithoutExtension);
 
   factory CustomQuery.fromWeb(String identifier, String address,
       {Map<String, String> headers = const {}}) {
     Uri.parse(address);
-    return CustomQuery._(address, SourceFrom.Web, identifier, headers: headers);
+    return CustomQuery._(address, ResourceFrom.Web, identifier,
+        headers: headers);
   }
 
   Future<String> _load() {
     switch (_from) {
-      case SourceFrom.Asset:
+      case ResourceFrom.Asset:
         return compute(_getSqlQueryFromAsset, source);
-      case SourceFrom.Web:
+      case ResourceFrom.Web:
         return compute(_getSqlQueryFromRemote, this);
       default:
         return null;
@@ -455,32 +454,35 @@ class CustomQuery {
 
   /// the actual sql statements after the [load] is called at least once
   String get query => _query;
+
+  bool get isLoaded => (_query ?? '').isNotEmpty;
 }
 
 class SprightlyQueries {
-  static SprightlyQueries _cache = SprightlyQueries();
-  factory SprightlyQueries() => _cache;
+  static SprightlyQueries universal = SprightlyQueries();
+  factory SprightlyQueries() => universal;
 
   bool initialized = false;
   bool _working = false;
 
   // startup queries
   CustomQuery get defaultStartupStatement =>
-      CustomQuery.fromAsset("defaultStartupStatement");
+      CustomQuery.fromAsset("defaultStartupStatement.sql");
 
   // custom queries
   CustomQuery get selectGroupAccountMembers =>
-      CustomQuery.fromAsset("selectGroupAccountMembers");
+      CustomQuery.fromAsset("selectGroupAccountMembers.sql");
   CustomQuery get selectGroupOnlyMembers =>
-      CustomQuery.fromAsset("selectGroupOnlyMembers");
+      CustomQuery.fromAsset("selectGroupOnlyMembers.sql");
   CustomQuery get selectGroupSettlements =>
-      CustomQuery.fromAsset("selectGroupSettlements");
+      CustomQuery.fromAsset("selectGroupSettlements.sql");
   CustomQuery get selectGroupTransactions =>
-      CustomQuery.fromAsset("selectGroupTransactions");
+      CustomQuery.fromAsset("selectGroupTransactions.sql");
 
   // beforeOpen queries
-  CustomQuery get dataInitiation => CustomQuery.fromAsset("dataInitiation");
-  CustomQuery get setupInitiation => CustomQuery.fromAsset("setupInitiation");
+  CustomQuery get dataInitiation => CustomQuery.fromAsset("dataInitiation.sql");
+  CustomQuery get setupInitiation =>
+      CustomQuery.fromAsset("setupInitiation.sql");
 
   // Migration queries
   Map<int, CustomQuery> dataMigrations = {
@@ -497,7 +499,7 @@ class SprightlyQueries {
       _working = true;
       try {
         // Required for fetching file from web
-        await RemoteFileCache.current.init();
+        await RemoteFileCache.universal.init();
 
         // custom queries
         await selectGroupAccountMembers.load();
@@ -514,7 +516,7 @@ class SprightlyQueries {
 }
 
 mixin _GenericDaoMixin<T extends GeneratedDatabase> on DatabaseAccessor<T> {
-  SprightlyQueries _queries = SprightlyQueries();
+  SprightlyQueries _queries = SprightlyQueries.universal;
 
   bool get ready => _queries.initialized;
 

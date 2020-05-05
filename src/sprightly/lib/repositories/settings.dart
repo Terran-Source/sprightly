@@ -2,89 +2,97 @@ library sprightly.repositories;
 
 import 'package:sprightly/extensions/enum_extensions.dart';
 import 'package:sprightly/models/constants/enums.dart';
+import 'package:sprightly/models/constants/values.dart';
 import 'package:sprightly/models/dao.dart';
 import 'package:sprightly/models/db/database.dart';
+import 'package:sprightly/utils/app_parameter.dart';
 // import 'package:sprightly/models/entities.dart';
 
-abstract class BaseData {
-  final SettingsDao _dao;
-
-  BaseData(this._dao);
+mixin _BaseData {
+  SettingsDao _dao;
 }
 
-class Setting<T> {
-  final String name;
-  final T value;
-
-  Setting(this.name, this.value);
-
-  static Setting _ofType<Tp>(String name, Tp value) => Setting<Tp>(name, value);
-
+class Setting<T> extends Parameter<T> {
   factory Setting.from(AppSetting appSetting, AppSettingType type) {
     switch (type) {
       case AppSettingType.AppInfo:
       case AppSettingType.String:
-        return Setting._ofType(appSetting.name, appSetting.value);
+        return Parameter.ofType(appSetting.name, appSetting.value);
       case AppSettingType.Number:
-        return Setting._ofType(
+        return Parameter.ofType(
             appSetting.name, double.tryParse(appSetting.value));
       case AppSettingType.Bool:
-        return Setting._ofType(appSetting.name, appSetting.value == 'true');
+        return Parameter.ofType(appSetting.name, appSetting.value == 'true');
       case AppSettingType.List:
-        return Setting._ofType(appSetting.name, appSetting.value.split(','));
+        return Parameter.ofType(appSetting.name, appSetting.value.split(','));
+      case AppSettingType.ThemeMode:
+        return Parameter.ofType(
+            appSetting.name, ThemeMode.values.find(appSetting.value));
       default:
         return null;
     }
   }
 }
 
-class AppSettings extends BaseData {
+class AppSettings extends AppParameter<Setting> with _BaseData {
   static AppSettings _cache;
-  final Map<String, Setting> _settings;
-  final SettingNames _setting = SettingNames();
 
-  AppSettings._(SettingsDao _dao)
-      : _settings = {},
-        super(_dao) {
+  AppSettings._(SettingsDao _dao) {
+    super._dao = _dao;
     _dao.allAppSettings.forEach((appSetting) {
-      _settings.putIfAbsent(
+      super.updateParameter(
           appSetting.name,
-          () => Setting.from(
+          Setting.from(
               appSetting, AppSettingType.values.find(appSetting.type)));
     });
   }
 
   factory AppSettings(SettingsDao dao) => _cache ??= AppSettings._(dao);
 
+  AppSettingNames get _settingNames => AppSettingNames.universal;
+
   List<AppFont> get _appFonts => _dao.allAppFonts;
   List<FontCombo> get _fontCombos => _dao.allFontCombos;
   List<ColorCombo> get _colorCombos => _dao.allColorCombos;
 
-  T _getSettings<T>(String name) => (_settings[name] as Setting<T>).value;
-  void _setSettings<T>(String name, T value) {
-    updateAppSetting(name, T.toString()).then((success) {
-      if (success) _settings[name] = Setting._ofType(name, T.toString());
+  T _getSettings<T>(String name) => super.getValue<T>(name);
+  void _setSettings<T>(String name, T value, {bool isEnum = false}) {
+    updateAppSetting(name, isEnum ? T.toEnumString() : T.toString())
+        .then((success) {
+      if (success) super.setValue<T>(name, value);
     });
   }
 
+  Stream<T> _getStream<T>(String name) =>
+      (super.parameters[name] as Setting<T>).stream;
+
   // AppInfo details
-  // todo: set it during MigrationStrategy initiation
   String get appName => _dao.appInformation.appName;
   String get packageName => _dao.appInformation.packageName;
   String get version => _dao.appInformation.version;
   String get buildNumber => _dao.appInformation.buildNumber;
-  int get dbVersion => _getSettings<double>(_setting.dbVersion).round();
+  int get dbVersion => _getSettings<double>(_settingNames.dbVersion).round();
 
-  // Other settings
-  bool get primarySetupComplete => _getSettings(_setting.primarySetupComplete);
+  // Debug related
+  String get environment => _getSettings(_settingNames.environment);
+
+  bool get debug => _getSettings(_settingNames.debug);
+  set debug(bool value) => _setSettings(_settingNames.debug, value);
+  Stream<bool> get debugStream => _getStream(_settingNames.debug);
+
+  // database AppSettings
+  bool get primarySetupComplete =>
+      _getSettings(_settingNames.primarySetupComplete);
   set primarySetupComplete(bool value) =>
-      _setSettings(_setting.primarySetupComplete, value);
+      _setSettings(_settingNames.primarySetupComplete, value);
+  Stream<bool> get primarySetupCompleteStream =>
+      _getStream(_settingNames.primarySetupComplete);
 
   // Themes
-  ThemeMode get themeMode =>
-      ThemeMode.values.find(_getSettings<String>(_setting.themeMode));
+  ThemeMode get themeMode => _getSettings(_settingNames.themeMode);
   set themeMode(ThemeMode mode) =>
-      _setSettings(_setting.themeMode, mode.toEnumString());
+      _setSettings(_settingNames.themeMode, mode, isEnum: true);
+  Stream<ThemeMode> get themeModeStream => _getStream(_settingNames.themeMode);
 
   Future<bool> updateAppSetting(String name, String value) =>
       _dao.updateAppSetting(name, value);
