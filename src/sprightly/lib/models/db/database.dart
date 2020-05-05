@@ -643,7 +643,7 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
   Future<void> beforeOpen(OpeningDetails details, Migrator m) async {
     await getReady();
     if (details.wasCreated) {
-      // todo: do first time activity
+      // TODO: do first time activity
       // creating default Group & Accounts
       var defaultGroup = await createGroup('Sprightly Default',
           type: GroupType.Personal, isHidden: true);
@@ -1139,7 +1139,7 @@ class SprightlySetupDao extends DatabaseAccessor<SprightlySetupDatabase>
   Future<void> beforeOpen(OpeningDetails details, Migrator m) async {
     await getReady();
     if (details.wasCreated) {
-      // todo: do first time activity
+      // TODO: do first time activity
       // already done through _queries.setupInitiation
       // await updateAppSetting('primarySetupComplete', false.toString());
     }

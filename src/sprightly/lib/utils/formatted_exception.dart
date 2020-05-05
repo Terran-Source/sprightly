@@ -22,9 +22,9 @@ class FormattedException<T extends Exception> {
   final String moduleName;
 
   static String appName;
-  // todo: set debug flag
+  // TODO: set debug flag
   static bool _debug = false;
-  // todo: set Logger
+  // TODO: set Logger
   //static ILogger _logger;
 
   FormattedException(
@@ -34,7 +34,7 @@ class FormattedException<T extends Exception> {
     this.moduleName,
   }) {
     if (_debug) {
-      //// todo: write structured log
+      //// TODO: write structured log
       // _logger
       //   ..withContext(contextMap: {name: logSource, error: _exception, stackTrace: stackTrace})
       //   ..log(message);

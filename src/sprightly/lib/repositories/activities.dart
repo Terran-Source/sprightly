@@ -238,7 +238,7 @@ class GroupActivity with _BaseData {
     var settlement = await _dao.getSettlement(settlementId);
     // only existing calculated settlement & the receiving member can settle
     if (null != settlement && settlement.toMemberId != memberId) {
-      // todo: sign the settlement
+      // TODO: sign the settlement
       String signature;
       result = await _dao.finalizeSettlement(
         groupId,
