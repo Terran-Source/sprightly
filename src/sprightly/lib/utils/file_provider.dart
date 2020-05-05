@@ -14,7 +14,7 @@ import 'package:sprightly/extensions/file_system_entity_extensions.dart';
 import 'package:sprightly/extensions/http_response_extensions.dart';
 import 'package:sprightly/utils/formatted_exception.dart';
 
-String get moduleName => 'file_provider';
+String get _moduleName => 'file_provider';
 int get maxCachedRetentionMins => 7 * 24 * 60; // 7 days
 
 Future<String> getAbsolutePath(
@@ -271,7 +271,7 @@ FormattedException<T> _formattedException<T extends Exception>(
       exception,
       stackTrace: stackTrace,
       messageParams: messageParams,
-      moduleName: moduleName,
+      moduleName: _moduleName,
     );
 
 class RemoteFileCache {

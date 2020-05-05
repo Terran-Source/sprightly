@@ -379,8 +379,8 @@ class AppSettings extends Table {
 
 //#region Custom query & classes
 /// asset path for custom sql files
-Future<String> _getSqlQueryFromAsset(String fileName) => getAssetText(fileName,
-    assetDirectory: sqlAssetDirectory, extension: '.sql');
+Future<String> _getSqlQueryFromAsset(String fileName) =>
+    getAssetText(fileName, assetDirectory: sqlAssetDirectory);
 Future<String> _getSqlQueryFromRemote(CustomQuery customQuery) =>
     RemoteFileCache.universal.getRemoteText(customQuery.source,
         identifier: customQuery.identifier, headers: customQuery.headers);
@@ -454,6 +454,8 @@ class CustomQuery {
 
   /// the actual sql statements after the [load] is called at least once
   String get query => _query;
+
+  bool get isLoaded => (_query ?? '').isNotEmpty;
 }
 
 class SprightlyQueries {
@@ -465,21 +467,22 @@ class SprightlyQueries {
 
   // startup queries
   CustomQuery get defaultStartupStatement =>
-      CustomQuery.fromAsset("defaultStartupStatement");
+      CustomQuery.fromAsset("defaultStartupStatement.sql");
 
   // custom queries
   CustomQuery get selectGroupAccountMembers =>
-      CustomQuery.fromAsset("selectGroupAccountMembers");
+      CustomQuery.fromAsset("selectGroupAccountMembers.sql");
   CustomQuery get selectGroupOnlyMembers =>
-      CustomQuery.fromAsset("selectGroupOnlyMembers");
+      CustomQuery.fromAsset("selectGroupOnlyMembers.sql");
   CustomQuery get selectGroupSettlements =>
-      CustomQuery.fromAsset("selectGroupSettlements");
+      CustomQuery.fromAsset("selectGroupSettlements.sql");
   CustomQuery get selectGroupTransactions =>
-      CustomQuery.fromAsset("selectGroupTransactions");
+      CustomQuery.fromAsset("selectGroupTransactions.sql");
 
   // beforeOpen queries
-  CustomQuery get dataInitiation => CustomQuery.fromAsset("dataInitiation");
-  CustomQuery get setupInitiation => CustomQuery.fromAsset("setupInitiation");
+  CustomQuery get dataInitiation => CustomQuery.fromAsset("dataInitiation.sql");
+  CustomQuery get setupInitiation =>
+      CustomQuery.fromAsset("setupInitiation.sql");
 
   // Migration queries
   Map<int, CustomQuery> dataMigrations = {
