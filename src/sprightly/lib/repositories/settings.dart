@@ -56,12 +56,12 @@ class AppSettings extends AppParameter<Setting> with _BaseData {
   List<ColorCombo> get _colorCombos => _dao.allColorCombos;
 
   T _getSettings<T>(String name) => super.getValue<T>(name);
-  void _setSettings<T>(String name, T value, {bool isEnum = false}) {
-    updateAppSetting(name, isEnum ? T.toEnumString() : T.toString())
-        .then((success) {
-      if (success) super.setValue<T>(name, value);
-    });
-  }
+  Future<bool> _setSettings<T>(String name, T value, {bool isEnum = false}) =>
+      updateAppSetting(name, isEnum ? T.toEnumString() : T.toString())
+          .then((success) {
+        if (success) super.setValue<T>(name, value);
+        return success;
+      });
 
   Stream<T> _getStream<T>(String name) =>
       (super.parameters[name] as Setting<T>).stream;
