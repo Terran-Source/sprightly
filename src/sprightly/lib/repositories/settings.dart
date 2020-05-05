@@ -39,7 +39,16 @@ class AppSettings extends AppParameter<Setting> with _BaseData {
 
   AppSettings._(SettingsDao _dao, String environment) {
     super._dao = _dao;
-    super.setValue(_settingNames.environment, environment);
+    // set environment
+    super.setParameterValue(_settingNames.environment, environment);
+    // set App Information
+    super.setParameterValue(_settingNames.appName, _dao.appInformation.appName);
+    super.setParameterValue(
+        _settingNames.packageName, _dao.appInformation.packageName);
+    super.setParameterValue(_settingNames.version, _dao.appInformation.version);
+    super.setParameterValue(
+        _settingNames.buildNumber, _dao.appInformation.buildNumber);
+    // get & set all settings from AppSettings table
     _dao.allAppSettings.forEach((appSetting) {
       super.updateParameter(
           appSetting.name,
@@ -69,10 +78,10 @@ class AppSettings extends AppParameter<Setting> with _BaseData {
       (super.parameters[name] as Setting<T>).stream;
 
   // AppInfo details
-  String get appName => _dao.appInformation.appName;
-  String get packageName => _dao.appInformation.packageName;
-  String get version => _dao.appInformation.version;
-  String get buildNumber => _dao.appInformation.buildNumber;
+  String get appName => _getSettings(_settingNames.appName);
+  String get packageName => _getSettings(_settingNames.packageName);
+  String get version => _getSettings(_settingNames.version);
+  String get buildNumber => _getSettings(_settingNames.buildNumber);
   int get dbVersion => _getSettings<double>(_settingNames.dbVersion).round();
 
   // Debug related

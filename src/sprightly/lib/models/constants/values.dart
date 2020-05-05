@@ -2,6 +2,13 @@ class AppSettingNames {
   static AppSettingNames universal = AppSettingNames();
   factory AppSettingNames() => universal;
 
+  // App Information
+  String get appName => 'appName';
+  String get packageName => 'packageName';
+  String get version => 'version';
+  String get buildNumber => 'buildNumber';
+  // Debug related
+
   // Debug related
   String get environment => 'environment';
   String get debug => 'debug';
