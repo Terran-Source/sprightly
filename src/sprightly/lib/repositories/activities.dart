@@ -227,7 +227,8 @@ class GroupActivity with _BaseData {
       );
 
   Future<bool> finalizeSettlement(
-    String settlementId, {
+    String settlementId,
+    String signature, {
     double settledAmount,
     String notes,
     List<String> attachments,
@@ -237,9 +238,9 @@ class GroupActivity with _BaseData {
     var result = false;
     var settlement = await _dao.getSettlement(settlementId);
     // only existing calculated settlement & the receiving member can settle
-    if (null != settlement && settlement.toMemberId != memberId) {
-      // TODO: sign the settlement
-      String signature;
+    if (null != settlement &&
+        null != signature &&
+        settlement.toMemberId != memberId) {
       result = await _dao.finalizeSettlement(
         groupId,
         settlementId,
