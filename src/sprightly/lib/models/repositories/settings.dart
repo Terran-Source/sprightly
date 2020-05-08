@@ -56,8 +56,8 @@ class AppSettings extends AppParameter<Setting> with _BaseData {
     });
   }
 
-  factory AppSettings(SettingsDao dao, {String environment = 'Prod'}) =>
-      _cache ??= AppSettings._(dao, environment);
+  factory AppSettings(SettingsDao dao, {String environment}) =>
+      _cache ??= AppSettings._(dao, environment ?? 'Prod');
 
   AppSettingNames get _settingNames => AppSettingNames.universal;
 
