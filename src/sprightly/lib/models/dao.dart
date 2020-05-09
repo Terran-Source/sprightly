@@ -14,31 +14,25 @@ abstract class AppDao {
 class AppInformation extends AppDao {
   bool _initialized = false;
   bool _working = false;
+  Future<PackageInfo> _worker;
+  PackageInfo packageInfo;
   @override
   bool get ready => _initialized;
   @override
   Future getReady() async {
     if (!_initialized && !_working) {
       _working = true;
-      var packageInfo = await PackageInfo.fromPlatform();
-      _appName = packageInfo.appName;
-      _packageName = packageInfo.packageName;
-      _version = packageInfo.version;
-      _buildNumber = packageInfo.buildNumber;
+      _worker = PackageInfo.fromPlatform();
+      packageInfo = await _worker;
       _initialized = true;
       _working = false;
-    }
+    } else if (_working) await _worker;
   }
 
-  String _appName;
-  String _packageName;
-  String _version;
-  String _buildNumber;
-
-  String get appName => _appName;
-  String get packageName => _packageName;
-  String get version => _version;
-  String get buildNumber => _buildNumber;
+  String get appName => packageInfo.appName;
+  String get packageName => packageInfo.packageName;
+  String get version => packageInfo.version;
+  String get buildNumber => packageInfo.buildNumber;
 }
 
 abstract class SystemDao extends AppDao {
