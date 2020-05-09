@@ -13,6 +13,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sprightly/extensions/file_system_entity_extensions.dart';
 import 'package:sprightly/extensions/http_response_extensions.dart';
 import 'package:sprightly/utils/formatted_exception.dart';
+import 'package:sprightly/utils/ready_or_not.dart';
 
 String get _moduleName => 'file_provider';
 int get maxCachedRetentionMins => 7 * 24 * 60; // 7 days
@@ -274,8 +275,11 @@ FormattedException<T> _formattedException<T extends Exception>(
       moduleName: _moduleName,
     );
 
-class RemoteFileCache {
-  static RemoteFileCache universal = RemoteFileCache();
+class RemoteFileCache with ReadyOrNotMixin {
+  static RemoteFileCache universal = RemoteFileCache._();
+  RemoteFileCache._() {
+    getReadyWorker = _getReady;
+  }
   factory RemoteFileCache() => universal;
 
   final String _cacheDirectory = '__fileCache';
@@ -286,35 +290,28 @@ class RemoteFileCache {
   DirectoryInfo _directoryInfo;
   DirectoryInfo get directoryInfo => _directoryInfo;
 
-  bool initialized = false;
+  @override
+  bool get ready => _ready && super.ready;
+  bool _ready = false;
   bool _working = false;
 
-  Future<void> init() async {
-    if (!initialized && !_working) {
-      _working = true;
-      try {
-        var cacheDirectory = await getDirectory(_cacheDirectory);
-        if (await cacheDirectory.exists()) {
-          var oldFileCache =
-              await getFileText(p.join(_cacheDirectory, _cacheFile));
-          if (null != oldFileCache)
-            _fileCache
-              ..clear()
-              ..addAll(json.decode(oldFileCache));
-        } else
-          await cacheDirectory.create(recursive: true);
+  Future _getReady() async {
+    var cacheDirectory = await getDirectory(_cacheDirectory);
+    if (await cacheDirectory.exists()) {
+      var oldFileCache = await getFileText(p.join(_cacheDirectory, _cacheFile));
+      if (null != oldFileCache)
+        _fileCache
+          ..clear()
+          ..addAll(json.decode(oldFileCache));
+    } else
+      await cacheDirectory.create(recursive: true);
 
-        // non-essential for startup. let it be on its own.
-        // i.e. not await(ing)
-        compute(DirectoryInfo.readDirectory, cacheDirectory).then((info) {
-          _directoryInfo = info;
-          initialized = true;
-        }).whenComplete(() => _working = false);
-      } catch (error) {
-        _working = false;
-        rethrow;
-      }
-    }
+    // non-essential for startup. let it be on its own.
+    // i.e. not await(ing)
+    compute(DirectoryInfo.readDirectory, cacheDirectory).then((info) {
+      _directoryInfo = info;
+      _ready = true;
+    });
   }
 
   /// Fetch the file from the [source] url and store in a the local [_cacheDirectory].
@@ -463,7 +460,7 @@ class RemoteFileCache {
   }
 
   Future<bool> cleanUp() async {
-    if (initialized && !_working) {
+    if (ready && !_working) {
       _working = true;
       return _cleanFileCache().whenComplete(() =>
           DirectoryInfo.cleanUp(_DirectoryCleanUp(_directoryInfo, _fileCache))

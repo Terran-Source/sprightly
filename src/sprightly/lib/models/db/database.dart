@@ -10,6 +10,7 @@ import 'package:sprightly/models/constants/enums.dart';
 import 'package:sprightly/models/dao.dart';
 import 'package:sprightly/utils/file_provider.dart';
 import 'package:sprightly/utils/happy_hash.dart';
+import 'package:sprightly/utils/ready_or_not.dart';
 
 part 'database.g.dart';
 
@@ -458,12 +459,12 @@ class CustomQuery {
   bool get isLoaded => (_query ?? '').isNotEmpty;
 }
 
-class SprightlyQueries {
-  static SprightlyQueries universal = SprightlyQueries();
+class SprightlyQueries with ReadyOrNotMixin {
+  static SprightlyQueries universal = SprightlyQueries._();
+  SprightlyQueries._() {
+    getReadyWorker = _getReady;
+  }
   factory SprightlyQueries() => universal;
-
-  bool initialized = false;
-  bool _working = false;
 
   // startup queries
   CustomQuery get defaultStartupStatement =>
@@ -494,34 +495,25 @@ class SprightlyQueries {
     //     'https://example.com/some/source/setupMigrationFrom1.sql'),
   };
 
-  Future _init() async {
-    if (!initialized && !_working) {
-      _working = true;
-      try {
-        // Required for fetching file from web
-        await RemoteFileCache.universal.init();
+  Future _getReady() async {
+    // Required for fetching file from web
+    await RemoteFileCache.universal.getReady();
 
-        // custom queries
-        await selectGroupAccountMembers.load();
-        await selectGroupOnlyMembers.load();
-        await selectGroupSettlements.load();
-        await selectGroupTransactions.load();
-
-        initialized = true;
-      } finally {
-        _working = false;
-      }
-    }
+    // custom queries
+    await selectGroupAccountMembers.load();
+    await selectGroupOnlyMembers.load();
+    await selectGroupSettlements.load();
+    await selectGroupTransactions.load();
   }
 }
 
 mixin _GenericDaoMixin<T extends GeneratedDatabase> on DatabaseAccessor<T> {
   SprightlyQueries _queries = SprightlyQueries.universal;
 
-  bool get ready => _queries.initialized;
+  bool get _daoMixinReady => _queries.ready;
 
-  Future getReady() async {
-    await _queries._init();
+  Future _getDaoMixinReady() async {
+    await _queries.getReady();
     await customStatement(await _queries.defaultStartupStatement.load());
   }
 
@@ -605,26 +597,18 @@ mixin _GenericDaoMixin<T extends GeneratedDatabase> on DatabaseAccessor<T> {
   ],
 )
 class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
-    with _$SprightlyDaoMixin, _GenericDaoMixin
+    with _$SprightlyDaoMixin, _GenericDaoMixin, ReadyOrNotMixin
     implements SystemDao {
-  SprightlyDao(SprightlyDatabase _db) : super(_db);
+  SprightlyDao(SprightlyDatabase _db) : super(_db) {
+    getReadyWorker = _getReady;
+  }
 
-  bool _initialized = false;
-  bool _working = false;
   @override
-  bool get ready => super.ready && _initialized;
-  @override
-  Future getReady() async {
-    if (!_initialized && !_working) {
-      _working = true;
-      try {
-        await super.getReady();
-        _sharedGroupList = await getGroups(GroupType.Shared);
-        _initialized = true;
-      } finally {
-        _working = false;
-      }
-    }
+  bool get ready => super._daoMixinReady && super.ready;
+
+  Future _getReady() async {
+    await super._getDaoMixinReady();
+    _sharedGroupList = await getGroups(GroupType.Shared);
   }
 
   @override
@@ -1097,30 +1081,23 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
   ],
 )
 class SprightlySetupDao extends DatabaseAccessor<SprightlySetupDatabase>
-    with _$SprightlySetupDaoMixin, _GenericDaoMixin
+    with _$SprightlySetupDaoMixin, _GenericDaoMixin, ReadyOrNotMixin
     implements SettingsDao {
-  SprightlySetupDao(SprightlySetupDatabase _db) : super(_db);
+  SprightlySetupDao(SprightlySetupDatabase _db) : super(_db) {
+    getReadyWorker = _getReady;
+  }
 
-  bool _initialized = false;
-  bool _working = false;
   @override
-  bool get ready => super.ready && _appInformation.ready && _initialized;
-  @override
-  Future getReady() async {
-    if (!_initialized && !_working) {
-      _working = true;
-      try {
-        await super.getReady();
-        await _appInformation.getReady();
-        _allAppSettings = await getAppSettings();
-        _allAppFonts = await getAppFonts();
-        _allFontCombos = await getFontCombos();
-        _allColorCombos = await getColorCombos();
-        _initialized = true;
-      } finally {
-        _working = false;
-      }
-    }
+  bool get ready =>
+      super._daoMixinReady && _appInformation.ready && super.ready;
+
+  Future _getReady() async {
+    await super._getDaoMixinReady();
+    await _appInformation.getReady();
+    _allAppSettings = await getAppSettings();
+    _allAppFonts = await getAppFonts();
+    _allFontCombos = await getFontCombos();
+    _allColorCombos = await getColorCombos();
   }
 
   @override

@@ -1,32 +1,24 @@
 library sprightly.dao;
 
+import 'dart:async';
+
 import 'package:package_info/package_info.dart';
 import 'package:sprightly/models/constants/enums.dart';
 import 'package:sprightly/models/db/database.dart';
+import 'package:sprightly/utils/ready_or_not.dart';
 
 String get groupAccountPrefix => 'GroupAccount';
 
 abstract class AppDao {
   bool get ready;
-  Future getReady();
+  FutureOr getReady();
 }
 
-class AppInformation extends AppDao {
-  bool _initialized = false;
-  bool _working = false;
-  Future<PackageInfo> _worker;
+class AppInformation with ReadyOrNotMixin<PackageInfo> {
   PackageInfo packageInfo;
-  @override
-  bool get ready => _initialized;
-  @override
-  Future getReady() async {
-    if (!_initialized && !_working) {
-      _working = true;
-      _worker = PackageInfo.fromPlatform();
-      packageInfo = await _worker;
-      _initialized = true;
-      _working = false;
-    } else if (_working) await _worker;
+
+  AppInformation() {
+    getReadyWorker = PackageInfo.fromPlatform;
   }
 
   String get appName => packageInfo.appName;
