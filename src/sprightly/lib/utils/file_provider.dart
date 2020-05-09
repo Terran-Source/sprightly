@@ -279,6 +279,7 @@ class RemoteFileCache with ReadyOrNotMixin {
   static RemoteFileCache universal = RemoteFileCache._();
   RemoteFileCache._() {
     getReadyWorker = _getReady;
+    additionalSingleJobs[_cleanUpJob] = _cleanUp;
   }
   factory RemoteFileCache() => universal;
 
@@ -289,11 +290,11 @@ class RemoteFileCache with ReadyOrNotMixin {
 
   DirectoryInfo _directoryInfo;
   DirectoryInfo get directoryInfo => _directoryInfo;
+  String get _cleanUpJob => 'cleanUp';
 
   @override
   bool get ready => _ready && super.ready;
   bool _ready = false;
-  bool _working = false;
 
   Future _getReady() async {
     var cacheDirectory = await getDirectory(_cacheDirectory);
@@ -459,17 +460,12 @@ class RemoteFileCache with ReadyOrNotMixin {
     return result;
   }
 
-  Future<bool> cleanUp() async {
-    if (ready && !_working) {
-      _working = true;
-      return _cleanFileCache().whenComplete(() =>
-          DirectoryInfo.cleanUp(_DirectoryCleanUp(_directoryInfo, _fileCache))
-              .whenComplete(() {
-            _working = false;
-          }));
-    }
-    return false;
+  Future<bool> _cleanUp() async {
+    return _cleanFileCache().whenComplete(() =>
+        DirectoryInfo.cleanUp(_DirectoryCleanUp(_directoryInfo, _fileCache)));
   }
+
+  Future<bool> cleanUp() => triggerJob(_cleanUpJob);
 
   /// to be called before application ends,
   /// or else, any changes after last [dump] will be lost
