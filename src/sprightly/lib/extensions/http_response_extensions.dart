@@ -35,7 +35,6 @@ Map<String, String> mimeTypes = {
   'application/ld+json': '.jsonld',
   'audio/midi': '.midi',
   'audio/x-midi': '.midi',
-  'text/javascript': '.mjs',
   'audio/mpeg': '.mp3',
   'video/mpeg': '.mpeg',
   'application/vnd.apple.installer+xml': '.mpkg',
