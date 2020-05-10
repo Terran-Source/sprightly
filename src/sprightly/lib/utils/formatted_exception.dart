@@ -36,7 +36,12 @@ class FormattedException<T extends Exception> {
     if (_debug) {
       //// TODO: write structured log
       // _logger
-      //   ..withContext(contextMap: {name: logSource, error: _exception, stackTrace: stackTrace})
+      //   ..withContext(contextMap: {
+      //     name: logSource,
+      //     error: _exception,
+      //     messageParams: messageParams,
+      //     stackTrace: stackTrace,
+      //   })
       //   ..log(message);
       log(message, name: logSource, error: _exception, stackTrace: stackTrace);
     }
