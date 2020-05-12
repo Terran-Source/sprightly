@@ -1,12 +1,17 @@
+import 'package:equatable/equatable.dart';
 import 'package:sprightly/models/constants/enums.dart';
 import 'package:sprightly/models/repositories/settings.dart' as db;
 
-class AppDetails {
+class AppDetails extends Equatable {
   final String appName;
   final String packageName;
   final String version;
   final String buildNumber;
   final int dbVersion;
+
+  @override
+  List<Object> get props =>
+      [appName, packageName, version, buildNumber, dbVersion];
 
   AppDetails._(
     this.appName,
