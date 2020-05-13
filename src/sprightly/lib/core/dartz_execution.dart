@@ -6,33 +6,31 @@ import 'package:dartz/dartz.dart';
 import 'package:sprightly/core/formatted_exception.dart';
 
 class DartzExecution {
-  static Future<Either<Left, Right>>
-      callEither<Left extends FormattedException, Right>(
+  static Future<Either<FormattedException, Right>> callEither<Right>(
     FutureOr<Right> Function() caller, {
     StackTrace stackTrace,
     Map<String, dynamic> messageParams,
     String moduleName,
   }) =>
-          Task(() => caller())
-              .attempt()
-              .mapException(
-                stackTrace: stackTrace,
-                messageParams: messageParams,
-                moduleName: moduleName,
-              )
-              .run();
+      Task(() => caller())
+          .attempt()
+          .mapException(
+            stackTrace: stackTrace,
+            messageParams: messageParams,
+            moduleName: moduleName,
+          )
+          .run();
 
-  static Future<Either<Left, Right>>
-      call<Left extends FormattedException, Right>(
+  static Future<Either<FormattedException, Right>> call<Right>(
     FutureOr<Right> Function() caller, {
     Map<String, dynamic> messageParams,
     String moduleName,
   }) =>
-          callEither(() => execute(
-                caller,
-                messageParams: messageParams,
-                moduleName: moduleName,
-              ));
+      callEither(() => execute(
+            caller,
+            messageParams: messageParams,
+            moduleName: moduleName,
+          ));
 
   static Future<Right> execute<Right>(
     FutureOr<Right> Function() caller, {
