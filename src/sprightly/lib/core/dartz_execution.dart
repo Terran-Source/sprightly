@@ -12,9 +12,9 @@ class DartzExecution {
     Map<String, dynamic> messageParams,
     String moduleName,
   }) =>
-      Task(() => caller())
+      Task<Right>(() => Future.sync(caller))
           .attempt()
-          .mapException(
+          .mapException<Right>(
             stackTrace: stackTrace,
             messageParams: messageParams,
             moduleName: moduleName,
@@ -26,13 +26,13 @@ class DartzExecution {
     Map<String, dynamic> messageParams,
     String moduleName,
   }) =>
-      callEither(() => execute(
+      callEither<Right>(() => execute(
             caller,
             messageParams: messageParams,
             moduleName: moduleName,
           ));
 
-  static Future<Right> execute<Right>(
+  static FutureOr<Right> execute<Right>(
     FutureOr<Right> Function() caller, {
     Map<String, dynamic> messageParams,
     String moduleName,
@@ -50,22 +50,25 @@ class DartzExecution {
   }
 }
 
-extension TaskException<E extends Either<Object, Right>, Right> on Task<E> {
-  Task<Either<FormattedException, Right>> mapException({
+extension _TaskException<E extends Either<Object, R>, R> on Task<E> {
+  Task<Either<FormattedException, Rt>> mapException<Rt>({
     StackTrace stackTrace,
     Map<String, dynamic> messageParams,
     String moduleName,
   }) =>
       this.map(
-        (either) => either.leftMap((obj) {
-          if (obj is FormattedException) return obj;
-          // else
-          return FormattedException(
-            obj,
-            stackTrace: stackTrace,
-            messageParams: messageParams,
-            moduleName: moduleName,
-          );
-        }),
+        (either) => either.fold((obj) {
+          FormattedException result;
+          if (null == obj || obj is FormattedException)
+            result = (obj as FormattedException);
+          else
+            result = FormattedException(
+              obj,
+              stackTrace: stackTrace,
+              messageParams: messageParams,
+              moduleName: moduleName,
+            );
+          return Left(result);
+        }, (_) => Right(_ as Rt)),
       );
 }
