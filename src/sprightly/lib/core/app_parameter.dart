@@ -4,7 +4,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-import 'package:sprightly/utils/file_provider.dart';
+import 'package:sprightly/core/file_provider.dart';
 
 class Parameter<T> {
   final String name;
@@ -55,7 +55,6 @@ class AppParameter<T extends Parameter> {
   Tp getValue<Tp>(String name) => (_parameters[name] as Parameter<Tp>).value;
   void setValue<Tp>(String name, Tp value) => _parameters[name].value = value;
 
-  @protected
   static List<T> getParamList<T extends Parameter>(
     String jsonText, {
     List<TypeConverter> typeConverters,

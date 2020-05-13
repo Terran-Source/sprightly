@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:crypto/crypto.dart';
 import 'package:convert/convert.dart';
-import 'package:sprightly/extensions/enum_extensions.dart';
 
 enum HashLibrary {
   // md5,
@@ -80,7 +79,7 @@ String hashedAll(
   }
   byteChunks.forEach((bt) => chunks.add(bt));
   chunks.close();
-  var result = "${library.toEnumString().replaceAll("_", "")}"
+  var result = "${library.toString().split(".").last.replaceAll("_", "")}"
       ":${sink.events.single}";
   if (result.length < hashLength) {
     result +=
