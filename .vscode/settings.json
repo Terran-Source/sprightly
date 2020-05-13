@@ -12,6 +12,8 @@
         "endregion",
         "hmac",
         "interps",
+        "marganam",
+        "mockito",
         "mrjc",
         "mrjf"
     ]
