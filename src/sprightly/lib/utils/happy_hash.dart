@@ -6,7 +6,7 @@ import 'package:crypto/crypto.dart';
 import 'package:convert/convert.dart';
 
 enum HashLibrary {
-  // md5,
+  md5,
   sha1,
   sha224,
   sha256,
@@ -33,9 +33,9 @@ String hashedAll(
   var byteChunks = items.map((str) => utf8.encode(str));
   ByteConversionSink chunks;
   switch (library) {
-    // case HashLibrary.md5:
-    //   chunks = md5.startChunkedConversion(sink);
-    //   break;
+    case HashLibrary.md5:
+      chunks = md5.startChunkedConversion(sink);
+      break;
     case HashLibrary.sha224:
       chunks = sha224.startChunkedConversion(sink);
       break;
@@ -81,9 +81,10 @@ String hashedAll(
   chunks.close();
   var result = "${library.toString().split(".").last.replaceAll("_", "")}"
       ":${sink.events.single}";
+  if (null == hashLength) return result;
   if (result.length < hashLength) {
-    result +=
-        hashed(key, hashLength: hashLength - result.length, library: library);
+    var repeater = hashed(result + key, hashLength: null, library: library);
+    while (result.length < hashLength) result += repeater;
   }
   return result.substring(0, hashLength);
 }
