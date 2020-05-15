@@ -87,7 +87,7 @@ mixin ReadyOrNotMixin<T> {
   }
 
   /// The singleton executor of [additionalSingleJobs]
-  FutureOr<R> triggerJob<R>(String jobName, {bool onReady = true}) async {
+  FutureOr<R> triggerJob<R>(String jobName, {bool onReady = false}) async {
     var shouldProceed = additionalSingleJobs.containsKey(jobName);
     if (shouldProceed) {
       var alreadyWorking = _workingJobs.contains(jobName);
