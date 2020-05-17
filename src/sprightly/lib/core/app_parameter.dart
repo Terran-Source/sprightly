@@ -64,7 +64,7 @@ class AppParameter<T extends Parameter> {
       if (null != typeConverters) {
         return jsonValue.entries.map((j) {
           var val = j.value;
-          var converter =
+          final converter =
               typeConverters.firstWhere((tc) => tc.parameterName == j.key);
           if (null != converter) val = converter.convert(val);
           return Parameter.ofType(j.key, val);
@@ -83,7 +83,7 @@ class AppParameter<T extends Parameter> {
     List<TypeConverter> typeConverters,
   }) async {
     Uri.parse(source);
-    var jsonText = await RemoteFileCache.universal
+    final jsonText = await RemoteFileCache.universal
         .getRemoteText(source, identifier: identifier, headers: headers);
     return getParamList(jsonText, typeConverters: typeConverters);
   }
@@ -93,7 +93,7 @@ class AppParameter<T extends Parameter> {
     String assetDirectory,
     List<TypeConverter> typeConverters,
   }) async {
-    var jsonText = await getAssetText(source, assetDirectory: assetDirectory);
+    final jsonText = await getAssetText(source, assetDirectory: assetDirectory);
 
     return getParamList(jsonText, typeConverters: typeConverters);
   }
