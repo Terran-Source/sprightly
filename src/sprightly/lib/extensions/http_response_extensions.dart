@@ -5,7 +5,7 @@ import 'package:sprightly/extensions/string_extensions.dart';
 
 /// Updated from https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types
 /// till 28th April, 2020 AC (After Corona) :P
-Map<String, String> mimeTypes = {
+final Map<String, String> mimeTypes = {
   'audio/aac': '.aac',
   'application/x-abiword': '.abw',
   'application/x-freearc': '.arc',
@@ -90,11 +90,11 @@ extension HttpHeaderParser on String {
       {String fieldSeparator = ";",
       String valueSeparator = "=",
       List<String> valueTrimmer = const ["'", '"']}) {
-    var fields = this.split(fieldSeparator).map((c) => c.trim());
-    var result = const {};
+    final fields = this.split(fieldSeparator).map((c) => c.trim());
+    final result = const {};
     fields.forEach((field) {
       if (field.indexOf(valueSeparator) >= 0) {
-        var parts = field.split(valueSeparator);
+        final parts = field.split(valueSeparator);
         result[parts[0].trim()] = parts[1].trimmed(valueTrimmer);
       } else
         result[field] = true;
@@ -115,7 +115,7 @@ extension HttpResponseExtension on BaseResponse {
   }
 
   String headerValue(String name) {
-    var header = this
+    final header = this
         .headers
         .keys
         .firstWhere((header) => header.toLowerCase() == name.toLowerCase());
@@ -123,7 +123,7 @@ extension HttpResponseExtension on BaseResponse {
   }
 
   ContentType get contentType {
-    var currentContentType = headerValue(HttpHeaders.contentTypeHeader);
+    final currentContentType = headerValue(HttpHeaders.contentTypeHeader);
     if (currentContentType != null)
       return ContentType.parse(currentContentType);
     return null;
@@ -132,9 +132,9 @@ extension HttpResponseExtension on BaseResponse {
   Encoding get encoding => Encoding.getByName(contentType?.charset ?? "utf-8");
 
   String get fileName {
-    var contentHeader = headerValue('Content-Disposition');
+    final contentHeader = headerValue('Content-Disposition');
     if (null != contentHeader) {
-      var parts = contentHeader.parseHeaderValue();
+      final parts = contentHeader.parseHeaderValue();
       if (parts.containsKey('filename*')) return parts['filename*'];
       if (parts.containsKey('filename')) return parts['filename'];
     }
@@ -142,7 +142,7 @@ extension HttpResponseExtension on BaseResponse {
   }
 
   String get fileExtension {
-    var currentContentType = contentType;
+    final currentContentType = contentType;
     if (null != currentContentType) {
       return (mimeTypes.containsKey(currentContentType.mimeType))
           ? mimeTypes[currentContentType.mimeType]
