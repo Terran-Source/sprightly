@@ -35,8 +35,8 @@ class Tracing {
       new RegExp(r'^#(\d+) +(.+) +\(package:([^/]+)/(.+\.\w):(\d+):(\d+)\)$');
 
   Tracing(this.stackTrace) {
-    var frames = stackTrace.toString().split("\n");
-    var matches = _regExp.allMatches(frames[1]);
+    final frames = stackTrace.toString().split("\n");
+    final matches = _regExp.allMatches(frames[1]);
     _match = matches.elementAt(0);
   }
 

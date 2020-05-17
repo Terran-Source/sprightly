@@ -28,9 +28,9 @@ String hashedAll(
 }) {
   key ??= (Random().nextInt(1000000000) + DateTime.now().millisecondsSinceEpoch)
       .toString();
-  var utf8Key = utf8.encode(key);
-  var sink = AccumulatorSink<Digest>();
-  var byteChunks = items.map((str) => utf8.encode(str));
+  final utf8Key = utf8.encode(key);
+  final sink = AccumulatorSink<Digest>();
+  final byteChunks = items.map((str) => utf8.encode(str));
   ByteConversionSink chunks;
   switch (library) {
     case HashLibrary.md5:
@@ -49,27 +49,27 @@ String hashedAll(
       chunks = sha512.startChunkedConversion(sink);
       break;
     case HashLibrary.hmac_md5:
-      var hmac = Hmac(md5, utf8Key);
+      final hmac = Hmac(md5, utf8Key);
       chunks = hmac.startChunkedConversion(sink);
       break;
     case HashLibrary.hmac_sha1:
-      var hmac = Hmac(sha1, utf8Key);
+      final hmac = Hmac(sha1, utf8Key);
       chunks = hmac.startChunkedConversion(sink);
       break;
     case HashLibrary.hmac_sha224:
-      var hmac = Hmac(sha224, utf8Key);
+      final hmac = Hmac(sha224, utf8Key);
       chunks = hmac.startChunkedConversion(sink);
       break;
     case HashLibrary.hmac_sha256:
-      var hmac = Hmac(sha256, utf8Key);
+      final hmac = Hmac(sha256, utf8Key);
       chunks = hmac.startChunkedConversion(sink);
       break;
     case HashLibrary.hmac_sha384:
-      var hmac = Hmac(sha384, utf8Key);
+      final hmac = Hmac(sha384, utf8Key);
       chunks = hmac.startChunkedConversion(sink);
       break;
     case HashLibrary.hmac_sha512:
-      var hmac = Hmac(sha512, utf8Key);
+      final hmac = Hmac(sha512, utf8Key);
       chunks = hmac.startChunkedConversion(sink);
       break;
     case HashLibrary.sha1:
@@ -83,7 +83,7 @@ String hashedAll(
       ":${sink.events.single}";
   if (null == hashLength) return result;
   if (result.length < hashLength) {
-    var repeater = hashed(result + key, hashLength: null, library: library);
+    final repeater = hashed(result + key, hashLength: null, library: library);
     while (result.length < hashLength) result += repeater;
   }
   return result.substring(0, hashLength);
