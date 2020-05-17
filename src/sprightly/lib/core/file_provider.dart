@@ -12,6 +12,7 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:sprightly/extensions/file_system_entity_extensions.dart';
 import 'package:sprightly/extensions/http_response_extensions.dart';
+import 'package:sprightly/extensions/string_extensions.dart';
 import 'package:sprightly/core/formatted_exception.dart';
 import 'package:sprightly/utils/ready_or_not.dart';
 
@@ -23,7 +24,7 @@ Future<String> getAbsolutePath(
   bool isSupportDirectory = false,
   bool isAbsolute = false,
 }) async {
-  var targetDirectory = isAbsolute
+  final targetDirectory = isAbsolute
       ? ''
       : (isSupportDirectory
               ? await getApplicationSupportDirectory()
@@ -46,7 +47,7 @@ Future<File> getFile(
   bool recreateFile = false,
   bool isAbsolute = false,
 }) async {
-  var file = File(await getAbsolutePath(filePath,
+  final file = File(await getAbsolutePath(filePath,
       isSupportDirectory: isSupportFile, isAbsolute: isAbsolute));
   if (recreateFile && await file.exists()) await file.delete();
   return file;
@@ -58,7 +59,7 @@ Future<String> getFileText(
   bool isSupportFile = false,
   bool isAbsolute = false,
 }) async {
-  var file = await getFile(filePath,
+  final file = await getFile(filePath,
       isSupportFile: isSupportFile, isAbsolute: isAbsolute);
   if (await file.exists()) return file.readAsString(encoding: encoding);
   return null;
@@ -69,7 +70,7 @@ Future<Uint8List> getFileContent(
   bool isSupportFile = false,
   bool isAbsolute = false,
 }) async {
-  var file = await getFile(filePath,
+  final file = await getFile(filePath,
       isSupportFile: isSupportFile, isAbsolute: isAbsolute);
   if (await file.exists()) return file.readAsBytes();
   return null;
@@ -83,7 +84,7 @@ Future<File> saveTextFile(
   bool isSupportFile = false,
   bool isAbsolute = false,
 }) async {
-  var file = await getFile(filePath,
+  final file = await getFile(filePath,
       isSupportFile: isSupportFile, isAbsolute: isAbsolute);
   return file.writeAsString(text, mode: mode, encoding: encoding, flush: true);
 }
@@ -108,7 +109,7 @@ Future<File> saveFileAsBytes(
   bool isSupportFile = false,
   bool isAbsolute = false,
 }) async {
-  var file = await getFile(filePath,
+  final file = await getFile(filePath,
       isSupportFile: isSupportFile, isAbsolute: isAbsolute);
   return file.writeAsBytes(fileContent, mode: mode, flush: true);
 }
@@ -132,9 +133,9 @@ Future<File> saveFileAsByteStream(
   bool isSupportFile = false,
   bool isAbsolute = false,
 }) async {
-  var file = await getFile(filePath,
+  final file = await getFile(filePath,
       isSupportFile: isSupportFile, isAbsolute: isAbsolute);
-  var sink = file.openWrite(mode: mode, encoding: encoding);
+  final sink = file.openWrite(mode: mode, encoding: encoding);
   await fileContent.pipe(sink);
   await sink.flush();
   await sink.close();
@@ -159,7 +160,7 @@ Future<File> deleteFile(
   bool isSupportFile = false,
   bool isAbsolute = false,
 }) async {
-  var file = await getFile(filePath,
+  final file = await getFile(filePath,
       isSupportFile: isSupportFile, isAbsolute: isAbsolute);
   if (await file.exists()) return file.delete();
   return file;
@@ -197,9 +198,9 @@ class DirectoryInfo {
   List<File> files = [];
 
   static Future<DirectoryInfo> readDirectory(Directory directory) async {
-    var directoryInfo = DirectoryInfo(directory);
+    final directoryInfo = DirectoryInfo(directory);
     directoryInfo.contents = directory.list();
-    await for (var content in directoryInfo.contents) {
+    await for (final content in directoryInfo.contents) {
       if (content is File)
         directoryInfo.files.add(content);
       else if (content is Directory)
@@ -211,7 +212,7 @@ class DirectoryInfo {
   static Future<void> cleanUp(_DirectoryCleanUp target) async {
     if (null != target.directoryInfo) {
       List<File> remainingFiles = [];
-      for (var file in target.directoryInfo.files) {
+      for (final file in target.directoryInfo.files) {
         if (target.cache.values.any(
             (cache) => file.path == cache.path && null != cache.downloadOn))
           remainingFiles.add(file);
@@ -221,7 +222,7 @@ class DirectoryInfo {
       if (null != remainingFiles) target.directoryInfo.files = remainingFiles;
 
       List<DirectoryInfo> remainingDirs = [];
-      for (var dir in target.directoryInfo.directories) {
+      for (final dir in target.directoryInfo.directories) {
         if (dir.isEmpty)
           await dir.current.delete();
         else {
@@ -297,9 +298,10 @@ class RemoteFileCache with ReadyOrNotMixin {
   bool _ready = false;
 
   Future _getReady() async {
-    var cacheDirectory = await getDirectory(_cacheDirectory);
+    final cacheDirectory = await getDirectory(_cacheDirectory);
     if (await cacheDirectory.exists()) {
-      var oldFileCache = await getFileText(p.join(_cacheDirectory, _cacheFile));
+      final oldFileCache =
+          await getFileText(p.join(_cacheDirectory, _cacheFile));
       if (null != oldFileCache)
         _fileCache
           ..clear()
@@ -334,14 +336,14 @@ class RemoteFileCache with ReadyOrNotMixin {
       // :New Method:
       final response = await _client.get(Uri.parse(source), headers: headers);
       if (response.isSuccessStatusCode) {
-        var fileName =
-            response.fileName ?? "$identifier${response.fileExtension}";
+        final fileName = response.fileName ??
+            "${identifier ?? source.escapeMessy()}${response.fileExtension}";
         // :Old Method:
         // var file = await saveFileAsByteStream(
         //     p.join(_cacheDirectory, fileName), response.stream,
         //     encoding: response.encoding);
         // :New Method:
-        var file = await saveFileAsBytes(
+        final file = await saveFileAsBytes(
             p.join(_cacheDirectory, fileName), response.bodyBytes);
         result = CacheFile(
           identifier,
@@ -373,9 +375,9 @@ class RemoteFileCache with ReadyOrNotMixin {
     String identifier,
     Map<String, String> headers = const {},
   }) async {
-    var id = identifier ?? source;
+    final id = identifier ?? source;
     if (!(_fileCache.containsKey(id) && null != _fileCache[id].downloadOn)) {
-      var cacheFile = await _getRemoteFileAndCache(source,
+      final cacheFile = await _getRemoteFileAndCache(source,
           identifier: id, headers: headers);
       if (null != cacheFile)
         _fileCache[id] = cacheFile;
@@ -390,7 +392,7 @@ class RemoteFileCache with ReadyOrNotMixin {
     String identifier,
     Map<String, String> headers = const {},
   }) async {
-    var filePath = await _ensureFileExists(source,
+    final filePath = await _ensureFileExists(source,
         identifier: identifier, headers: headers);
     if (null != filePath) {
       filePath.lastAccessedOn = DateTime.now().toUtc();
@@ -404,7 +406,7 @@ class RemoteFileCache with ReadyOrNotMixin {
     String identifier,
     Map<String, String> headers = const {},
   }) async {
-    var filePath = await _ensureFileExists(source,
+    final filePath = await _ensureFileExists(source,
         identifier: identifier, headers: headers);
     if (null != filePath) {
       filePath.lastAccessedOn = DateTime.now().toUtc();
@@ -436,7 +438,7 @@ class RemoteFileCache with ReadyOrNotMixin {
     try {
       if (_fileCache.isNotEmpty) {
         Map<String, CacheFile> tempFileCache = {};
-        for (var fc in _fileCache.entries) {
+        for (final fc in _fileCache.entries) {
           // Files, which are never been accessed or not accessed
           // for last [maxCachedRetentionMins] minutes
           if (fc.value.lastAccessedOn
