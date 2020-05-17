@@ -21,6 +21,7 @@ void main() {
       expect(readyMade.dummy, isNull);
       expect(readyMade.timeRange, isNull);
       expect(readyMade.ready, isFalse);
+      expect(readyMade.working, isFalse);
     });
     test('getReady() test', () async {
       // assert at begin
@@ -28,26 +29,30 @@ void main() {
       expect(readyMade.dummy, isNull);
       expect(readyMade.timeRange, isNull);
       expect(readyMade.ready, isFalse);
+      expect(readyMade.working, isFalse);
 
       // act
-      var result = readyMade.getReady();
+      final result = readyMade.getReady();
 
       // assert after
       expect(result, isInstanceOf<Future<dynamic>>());
       expect(readyMade.dummy, isNull);
       expect(readyMade.timeRange, 0);
       expect(readyMade.ready, isFalse);
+      expect(readyMade.working, isTrue);
       // 1 second elapsed & still working
       await Future.delayed(Duration(seconds: 1)).then((_) {
         expect(readyMade.dummy, isNull);
         expect(readyMade.timeRange, 0);
         expect(readyMade.ready, isFalse);
+        expect(readyMade.working, isTrue);
       });
       // another 1 second & it's finished
       await Future.delayed(Duration(seconds: 1)).then((_) {
         expect(readyMade.dummy, 'dummy');
         expect(readyMade.timeRange.toDouble(), moreOrLessEquals(2.0));
         expect(readyMade.ready, isTrue);
+        expect(readyMade.working, isFalse);
       });
     });
     test('concurrent getReady() test', () async {
@@ -61,8 +66,8 @@ void main() {
       // triggered once
       readyMade.getReady();
       // triggered again & again
-      var result1 = readyMade.getReady();
-      var result2 = readyMade.getReady();
+      final result1 = readyMade.getReady();
+      final result2 = readyMade.getReady();
 
       // assert after
       expect(result1, isInstanceOf<Future<dynamic>>());
@@ -96,6 +101,7 @@ void main() {
       expect(readyMade.timeRange1, isNull);
       expect(readyMade.timeRange2, isNull);
       expect(readyMade.ready, isFalse);
+      expect(readyMade.working, isFalse);
     });
     test('triggerJob() test', () async {
       // assert at begin
@@ -107,10 +113,11 @@ void main() {
       expect(readyMade.timeRange1, isNull);
       expect(readyMade.timeRange2, isNull);
       expect(readyMade.ready, isFalse);
+      expect(readyMade.working, isFalse);
 
       // act
-      var result1 = readyMade.triggerJob('job1');
-      var result2 = readyMade.triggerJob('job2');
+      final result1 = readyMade.triggerJob('job1');
+      final result2 = readyMade.triggerJob('job2');
 
       // assert after
       expect(result1, isInstanceOf<FutureOr<dynamic>>());
@@ -122,6 +129,7 @@ void main() {
       expect(readyMade.timeRange1, 0);
       expect(readyMade.timeRange2, 0);
       expect(readyMade.ready, isFalse);
+      expect(readyMade.working, isTrue);
       // 1 second elapsed & still working
       await Future.delayed(Duration(seconds: 1)).then((_) {
         expect(readyMade.dummy, isNull);
@@ -131,6 +139,7 @@ void main() {
         expect(readyMade.timeRange1, 0);
         expect(readyMade.timeRange2, 0);
         expect(readyMade.ready, isFalse);
+        expect(readyMade.working, isTrue);
       });
       // another 1 second & job1's finished
       await Future.delayed(Duration(seconds: 1)).then((_) {
@@ -141,6 +150,7 @@ void main() {
         expect(readyMade.timeRange1.toDouble(), moreOrLessEquals(2.0));
         expect(readyMade.timeRange2, 0);
         expect(readyMade.ready, isFalse);
+        expect(readyMade.working, isTrue);
       });
       // another 1 second & both job1 and job2 are finished
       await Future.delayed(Duration(seconds: 1)).then((_) {
@@ -151,6 +161,7 @@ void main() {
         expect(readyMade.timeRange1.toDouble(), moreOrLessEquals(2.0));
         expect(readyMade.timeRange2.toDouble(), moreOrLessEquals(3.0));
         expect(readyMade.ready, isFalse);
+        expect(readyMade.working, isFalse);
       });
     });
     test('triggerJob(), with getReady() test', () async {
@@ -163,11 +174,12 @@ void main() {
       expect(readyMade.timeRange1, isNull);
       expect(readyMade.timeRange2, isNull);
       expect(readyMade.ready, isFalse);
+      expect(readyMade.working, isFalse);
 
       // act
-      var result = readyMade.getReady();
-      var result1 = readyMade.triggerJob('job1');
-      var result2 = readyMade.triggerJob('job2');
+      final result = readyMade.getReady();
+      final result1 = readyMade.triggerJob('job1');
+      final result2 = readyMade.triggerJob('job2');
 
       // assert after
       expect(result, isInstanceOf<FutureOr<dynamic>>());
@@ -180,6 +192,7 @@ void main() {
       expect(readyMade.timeRange1, 0);
       expect(readyMade.timeRange2, 0);
       expect(readyMade.ready, isFalse);
+      expect(readyMade.working, isTrue);
       // 1 second elapsed & still working
       await Future.delayed(Duration(seconds: 1)).then((_) {
         expect(readyMade.dummy, isNull);
@@ -189,6 +202,7 @@ void main() {
         expect(readyMade.timeRange1, 0);
         expect(readyMade.timeRange2, 0);
         expect(readyMade.ready, isFalse);
+        expect(readyMade.working, isTrue);
       });
       // another 1 second & getReady and job1 are finished
       await Future.delayed(Duration(seconds: 1)).then((_) {
@@ -199,6 +213,7 @@ void main() {
         expect(readyMade.timeRange1.toDouble(), moreOrLessEquals(2.0));
         expect(readyMade.timeRange2, 0);
         expect(readyMade.ready, isTrue);
+        expect(readyMade.working, isTrue);
       });
       // another 1 second & both getReady and job1 and job2 are finished
       await Future.delayed(Duration(seconds: 1)).then((_) {
@@ -209,6 +224,7 @@ void main() {
         expect(readyMade.timeRange1.toDouble(), moreOrLessEquals(2.0));
         expect(readyMade.timeRange2.toDouble(), moreOrLessEquals(3.0));
         expect(readyMade.ready, isTrue);
+        expect(readyMade.working, isFalse);
       });
     });
     test('triggerJob(), onReady: false test', () async {
@@ -221,10 +237,11 @@ void main() {
       expect(readyMade.timeRange1, isNull);
       expect(readyMade.timeRange2, isNull);
       expect(readyMade.ready, isFalse);
+      expect(readyMade.working, isFalse);
 
       // act
-      var result1 = readyMade.triggerJob('job1', onReady: false);
-      var result2 = readyMade.triggerJob('job2', onReady: false);
+      final result1 = readyMade.triggerJob('job1', onReady: false);
+      final result2 = readyMade.triggerJob('job2', onReady: false);
 
       // assert after
       expect(result1, isInstanceOf<FutureOr<dynamic>>());
@@ -236,6 +253,7 @@ void main() {
       expect(readyMade.timeRange1, 0);
       expect(readyMade.timeRange2, 0);
       expect(readyMade.ready, isFalse);
+      expect(readyMade.working, isTrue);
       // 1 second elapsed & still working
       await Future.delayed(Duration(seconds: 1)).then((_) {
         expect(readyMade.dummy, isNull);
@@ -245,6 +263,7 @@ void main() {
         expect(readyMade.timeRange1, 0);
         expect(readyMade.timeRange2, 0);
         expect(readyMade.ready, isFalse);
+        expect(readyMade.working, isTrue);
       });
       // another 1 second & job1's finished
       await Future.delayed(Duration(seconds: 1)).then((_) {
@@ -255,6 +274,7 @@ void main() {
         expect(readyMade.timeRange1.toDouble(), moreOrLessEquals(2.0));
         expect(readyMade.timeRange2, 0);
         expect(readyMade.ready, isFalse);
+        expect(readyMade.working, isTrue);
       });
       // another 1 second & both job1 and job2 are finished
       await Future.delayed(Duration(seconds: 1)).then((_) {
@@ -265,6 +285,7 @@ void main() {
         expect(readyMade.timeRange1.toDouble(), moreOrLessEquals(2.0));
         expect(readyMade.timeRange2.toDouble(), moreOrLessEquals(3.0));
         expect(readyMade.ready, isFalse);
+        expect(readyMade.working, isFalse);
       });
     });
     test('triggerJob(), onReady: false with getReady() test', () async {
@@ -277,11 +298,12 @@ void main() {
       expect(readyMade.timeRange1, isNull);
       expect(readyMade.timeRange2, isNull);
       expect(readyMade.ready, isFalse);
+      expect(readyMade.working, isFalse);
 
       // act
-      var result = readyMade.getReady();
-      var result1 = readyMade.triggerJob('job1', onReady: false);
-      var result2 = readyMade.triggerJob('job2', onReady: false);
+      final result = readyMade.getReady();
+      final result1 = readyMade.triggerJob('job1', onReady: false);
+      final result2 = readyMade.triggerJob('job2', onReady: false);
 
       // assert after
       expect(result, isInstanceOf<FutureOr<dynamic>>());
@@ -294,6 +316,7 @@ void main() {
       expect(readyMade.timeRange1, 0);
       expect(readyMade.timeRange2, 0);
       expect(readyMade.ready, isFalse);
+      expect(readyMade.working, isTrue);
       // 1 second elapsed & still working
       await Future.delayed(Duration(seconds: 1)).then((_) {
         expect(readyMade.dummy, isNull);
@@ -303,6 +326,7 @@ void main() {
         expect(readyMade.timeRange1, 0);
         expect(readyMade.timeRange2, 0);
         expect(readyMade.ready, isFalse);
+        expect(readyMade.working, isTrue);
       });
       // another 1 second & getReady and job1 are finished
       await Future.delayed(Duration(seconds: 1)).then((_) {
@@ -313,6 +337,7 @@ void main() {
         expect(readyMade.timeRange1.toDouble(), moreOrLessEquals(2.0));
         expect(readyMade.timeRange2, 0);
         expect(readyMade.ready, isTrue);
+        expect(readyMade.working, isTrue);
       });
       // another 1 second & both getReady and job1 and job2 are finished
       await Future.delayed(Duration(seconds: 1)).then((_) {
@@ -323,6 +348,7 @@ void main() {
         expect(readyMade.timeRange1.toDouble(), moreOrLessEquals(2.0));
         expect(readyMade.timeRange2.toDouble(), moreOrLessEquals(3.0));
         expect(readyMade.ready, isTrue);
+        expect(readyMade.working, isFalse);
       });
     });
     test('concurrent triggerJob() test', () async {
@@ -335,14 +361,15 @@ void main() {
       expect(readyMade.timeRange1, isNull);
       expect(readyMade.timeRange2, isNull);
       expect(readyMade.ready, isFalse);
+      expect(readyMade.working, isFalse);
 
       // act
       readyMade.triggerJob('job1');
-      var result1_1 = readyMade.triggerJob('job1');
-      var result1_2 = readyMade.triggerJob('job1');
+      final result1_1 = readyMade.triggerJob('job1');
+      final result1_2 = readyMade.triggerJob('job1');
       readyMade.triggerJob('job2');
-      var result2_1 = readyMade.triggerJob('job2');
-      var result2_2 = readyMade.triggerJob('job2');
+      final result2_1 = readyMade.triggerJob('job2');
+      final result2_2 = readyMade.triggerJob('job2');
 
       // assert after
       expect(result1_1, isInstanceOf<FutureOr<dynamic>>());
@@ -356,6 +383,7 @@ void main() {
       expect(readyMade.timeRange1, 0);
       expect(readyMade.timeRange2, 0);
       expect(readyMade.ready, isFalse);
+      expect(readyMade.working, isTrue);
       // 1 second elapsed & still working
       await Future.delayed(Duration(seconds: 1)).then((_) {
         expect(readyMade.dummy, isNull);
@@ -365,6 +393,7 @@ void main() {
         expect(readyMade.timeRange1, 0);
         expect(readyMade.timeRange2, 0);
         expect(readyMade.ready, isFalse);
+        expect(readyMade.working, isTrue);
       });
       // another 1 second & job1's finished
       await Future.delayed(Duration(seconds: 1)).then((_) {
@@ -375,6 +404,7 @@ void main() {
         expect(readyMade.timeRange1.toDouble(), moreOrLessEquals(2.0));
         expect(readyMade.timeRange2, 0);
         expect(readyMade.ready, isFalse);
+        expect(readyMade.working, isTrue);
       });
       // another 1 second & both job1 and job2 are finished
       await Future.delayed(Duration(seconds: 1)).then((_) {
@@ -385,6 +415,7 @@ void main() {
         expect(readyMade.timeRange1.toDouble(), moreOrLessEquals(2.0));
         expect(readyMade.timeRange2.toDouble(), moreOrLessEquals(3.0));
         expect(readyMade.ready, isFalse);
+        expect(readyMade.working, isFalse);
       });
     });
     test('concurrent triggerJob(), onReady: false test', () async {
@@ -397,14 +428,15 @@ void main() {
       expect(readyMade.timeRange1, isNull);
       expect(readyMade.timeRange2, isNull);
       expect(readyMade.ready, isFalse);
+      expect(readyMade.working, isFalse);
 
       // act
       readyMade.triggerJob('job1', onReady: false);
-      var result1_1 = readyMade.triggerJob('job1', onReady: false);
-      var result1_2 = readyMade.triggerJob('job1', onReady: false);
+      final result1_1 = readyMade.triggerJob('job1', onReady: false);
+      final result1_2 = readyMade.triggerJob('job1', onReady: false);
       readyMade.triggerJob('job2');
-      var result2_1 = readyMade.triggerJob('job2', onReady: false);
-      var result2_2 = readyMade.triggerJob('job2', onReady: false);
+      final result2_1 = readyMade.triggerJob('job2', onReady: false);
+      final result2_2 = readyMade.triggerJob('job2', onReady: false);
 
       // assert after
       expect(result1_1, isInstanceOf<FutureOr<dynamic>>());
@@ -418,6 +450,7 @@ void main() {
       expect(readyMade.timeRange1, 0);
       expect(readyMade.timeRange2, 0);
       expect(readyMade.ready, isFalse);
+      expect(readyMade.working, isTrue);
       // 1 second elapsed & still working
       await Future.delayed(Duration(seconds: 1)).then((_) {
         expect(readyMade.dummy, isNull);
@@ -427,6 +460,7 @@ void main() {
         expect(readyMade.timeRange1, 0);
         expect(readyMade.timeRange2, 0);
         expect(readyMade.ready, isFalse);
+        expect(readyMade.working, isTrue);
       });
       // another 1 second & job1's finished
       await Future.delayed(Duration(seconds: 1)).then((_) {
@@ -437,6 +471,7 @@ void main() {
         expect(readyMade.timeRange1.toDouble(), moreOrLessEquals(2.0));
         expect(readyMade.timeRange2, 0);
         expect(readyMade.ready, isFalse);
+        expect(readyMade.working, isTrue);
       });
       // another 1 second & both job1 and job2 are finished
       await Future.delayed(Duration(seconds: 1)).then((_) {
@@ -447,6 +482,7 @@ void main() {
         expect(readyMade.timeRange1.toDouble(), moreOrLessEquals(2.0));
         expect(readyMade.timeRange2.toDouble(), moreOrLessEquals(3.0));
         expect(readyMade.ready, isFalse);
+        expect(readyMade.working, isFalse);
       });
     });
     test('triggerJob(), onReady: true, immediate run test', () async {
@@ -459,11 +495,12 @@ void main() {
       expect(readyMade.timeRange1, isNull);
       expect(readyMade.timeRange2, isNull);
       expect(readyMade.ready, isFalse);
+      expect(readyMade.working, isFalse);
 
       // act
       readyMade.getReady();
-      var result1 = readyMade.triggerJob('job1', onReady: true);
-      var result2 = readyMade.triggerJob('job2', onReady: true);
+      final result1 = readyMade.triggerJob('job1', onReady: true);
+      final result2 = readyMade.triggerJob('job2', onReady: true);
 
       // assert after
       expect(result1, isInstanceOf<FutureOr<dynamic>>());
@@ -475,6 +512,7 @@ void main() {
       expect(readyMade.timeRange1, isNull);
       expect(readyMade.timeRange2, isNull);
       expect(readyMade.ready, isFalse);
+      expect(readyMade.working, isTrue);
       // 1 second elapsed & getReady working
       await Future.delayed(Duration(seconds: 1)).then((_) {
         expect(readyMade.dummy, isNull);
@@ -484,6 +522,7 @@ void main() {
         expect(readyMade.timeRange1, isNull);
         expect(readyMade.timeRange2, isNull);
         expect(readyMade.ready, isFalse);
+        expect(readyMade.working, isTrue);
       });
       // another 1 second & getReady's finished
       await Future.delayed(Duration(seconds: 1)).then((_) {
@@ -494,11 +533,12 @@ void main() {
         expect(readyMade.timeRange1, isNull);
         expect(readyMade.timeRange2, isNull);
         expect(readyMade.ready, isTrue);
+        expect(readyMade.working, isFalse);
       });
 
       // act again
-      var result1_2 = readyMade.triggerJob('job1', onReady: true);
-      var result2_2 = readyMade.triggerJob('job2', onReady: true);
+      final result1_2 = readyMade.triggerJob('job1', onReady: true);
+      final result2_2 = readyMade.triggerJob('job2', onReady: true);
 
       // assert after 2nd run
       expect(result1_2, isInstanceOf<FutureOr<dynamic>>());
@@ -510,12 +550,14 @@ void main() {
       expect(readyMade.timeRange1, 0); // started
       expect(readyMade.timeRange2, 0); // started
       expect(readyMade.ready, isTrue);
+      expect(readyMade.working, isTrue);
       // 1 second elapsed & still working
       await Future.delayed(Duration(seconds: 1)).then((_) {
         expect(readyMade.dummy1, isNull);
         expect(readyMade.dummy2, isNull);
         expect(readyMade.timeRange1, 0);
         expect(readyMade.timeRange2, 0);
+        expect(readyMade.working, isTrue);
       });
       // another 1 second & job1's finished
       await Future.delayed(Duration(seconds: 1)).then((_) {
@@ -523,6 +565,7 @@ void main() {
         expect(readyMade.dummy2, isNull);
         expect(readyMade.timeRange1.toDouble(), moreOrLessEquals(2.0));
         expect(readyMade.timeRange2, 0);
+        expect(readyMade.working, isTrue);
       });
       // another 1 second & both job1 and job2 are finished
       await Future.delayed(Duration(seconds: 1)).then((_) {
@@ -530,6 +573,7 @@ void main() {
         expect(readyMade.dummy2, 'dummy2');
         expect(readyMade.timeRange1.toDouble(), moreOrLessEquals(2.0));
         expect(readyMade.timeRange2.toDouble(), moreOrLessEquals(3.0));
+        expect(readyMade.working, isFalse);
       });
     });
     test('triggerJob(), onReady: true, run after ready test', () async {
@@ -542,11 +586,12 @@ void main() {
       expect(readyMade.timeRange1, isNull);
       expect(readyMade.timeRange2, isNull);
       expect(readyMade.ready, isFalse);
+      expect(readyMade.working, isFalse);
 
       // act
       await readyMade.getReady();
-      var result1 = readyMade.triggerJob('job1', onReady: true);
-      var result2 = readyMade.triggerJob('job2', onReady: true);
+      final result1 = readyMade.triggerJob('job1', onReady: true);
+      final result2 = readyMade.triggerJob('job2', onReady: true);
 
       // assert after
       expect(result1, isInstanceOf<FutureOr<dynamic>>());
@@ -558,12 +603,14 @@ void main() {
       expect(readyMade.timeRange1, 0);
       expect(readyMade.timeRange2, 0);
       expect(readyMade.ready, isTrue);
+      expect(readyMade.working, isTrue);
       // 1 second elapsed & still working
       await Future.delayed(Duration(seconds: 1)).then((_) {
         expect(readyMade.dummy1, isNull);
         expect(readyMade.dummy2, isNull);
         expect(readyMade.timeRange1, 0);
         expect(readyMade.timeRange2, 0);
+        expect(readyMade.working, isTrue);
       });
       // another 1 second & job1's finished
       await Future.delayed(Duration(seconds: 1)).then((_) {
@@ -571,6 +618,7 @@ void main() {
         expect(readyMade.dummy2, isNull);
         expect(readyMade.timeRange1.toDouble(), moreOrLessEquals(2.0));
         expect(readyMade.timeRange2, 0);
+        expect(readyMade.working, isTrue);
       });
       // another 1 second & both job1 and job2 are finished
       await Future.delayed(Duration(seconds: 1)).then((_) {
@@ -578,6 +626,7 @@ void main() {
         expect(readyMade.dummy2, 'dummy2');
         expect(readyMade.timeRange1.toDouble(), moreOrLessEquals(2.0));
         expect(readyMade.timeRange2.toDouble(), moreOrLessEquals(3.0));
+        expect(readyMade.working, isFalse);
       });
     });
     test('concurrent triggerJob(), onReady: true, run after ready test',
@@ -591,15 +640,16 @@ void main() {
       expect(readyMade.timeRange1, isNull);
       expect(readyMade.timeRange2, isNull);
       expect(readyMade.ready, isFalse);
+      expect(readyMade.working, isFalse);
 
       // act
       await readyMade.getReady();
       readyMade.triggerJob('job1', onReady: true);
-      var result1_1 = readyMade.triggerJob('job1', onReady: true);
-      var result1_2 = readyMade.triggerJob('job1', onReady: true);
+      final result1_1 = readyMade.triggerJob('job1', onReady: true);
+      final result1_2 = readyMade.triggerJob('job1', onReady: true);
       readyMade.triggerJob('job2', onReady: true);
-      var result2_1 = readyMade.triggerJob('job2', onReady: true);
-      var result2_2 = readyMade.triggerJob('job2', onReady: true);
+      final result2_1 = readyMade.triggerJob('job2', onReady: true);
+      final result2_2 = readyMade.triggerJob('job2', onReady: true);
 
       // assert after
       expect(result1_1, isInstanceOf<FutureOr<dynamic>>());
@@ -613,12 +663,14 @@ void main() {
       expect(readyMade.timeRange1, 0);
       expect(readyMade.timeRange2, 0);
       expect(readyMade.ready, isTrue);
+      expect(readyMade.working, isTrue);
       // 1 second elapsed & still working
       await Future.delayed(Duration(seconds: 1)).then((_) {
         expect(readyMade.dummy1, isNull);
         expect(readyMade.dummy2, isNull);
         expect(readyMade.timeRange1, 0);
         expect(readyMade.timeRange2, 0);
+        expect(readyMade.working, isTrue);
       });
       // another 1 second & job1's finished
       await Future.delayed(Duration(seconds: 1)).then((_) {
@@ -626,6 +678,7 @@ void main() {
         expect(readyMade.dummy2, isNull);
         expect(readyMade.timeRange1.toDouble(), moreOrLessEquals(2.0));
         expect(readyMade.timeRange2, 0);
+        expect(readyMade.working, isTrue);
       });
       // another 1 second & both job1 and job2 are finished
       await Future.delayed(Duration(seconds: 1)).then((_) {
@@ -633,6 +686,7 @@ void main() {
         expect(readyMade.dummy2, 'dummy2');
         expect(readyMade.timeRange1.toDouble(), moreOrLessEquals(2.0));
         expect(readyMade.timeRange2.toDouble(), moreOrLessEquals(3.0));
+        expect(readyMade.working, isFalse);
       });
     });
   });
@@ -655,7 +709,7 @@ class ReadyMade with ReadyOrNotMixin {
 
   Future _getReady() {
     timeRange = 0;
-    var timeNow = DateTime.now();
+    final timeNow = DateTime.now();
     return Future.delayed(Duration(seconds: 2)).then((_) {
       dummy = 'dummy';
       timeRange = DateTime.now().difference(timeNow).inSeconds;
@@ -664,7 +718,7 @@ class ReadyMade with ReadyOrNotMixin {
 
   Future _additionalJob1() {
     timeRange1 = 0;
-    var timeNow = DateTime.now();
+    final timeNow = DateTime.now();
     return Future.delayed(Duration(seconds: 2)).then((_) {
       dummy1 = 'dummy1';
       timeRange1 = DateTime.now().difference(timeNow).inSeconds;
@@ -673,7 +727,7 @@ class ReadyMade with ReadyOrNotMixin {
 
   Future _additionalJob2() {
     timeRange2 = 0;
-    var timeNow = DateTime.now();
+    final timeNow = DateTime.now();
     return Future.delayed(Duration(seconds: 3)).then((_) {
       dummy2 = 'dummy2';
       timeRange2 = DateTime.now().difference(timeNow).inSeconds;

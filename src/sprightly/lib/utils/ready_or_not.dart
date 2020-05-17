@@ -86,11 +86,14 @@ mixin ReadyOrNotMixin<T> {
     }
   }
 
+  /// Whether the [getReady] has been executed ***once*** successfully or not
+  bool get working => _working || (_workingJobs.length > 0);
+
   /// The singleton executor of [additionalSingleJobs]
   FutureOr<R> triggerJob<R>(String jobName, {bool onReady = false}) async {
     var shouldProceed = additionalSingleJobs.containsKey(jobName);
     if (shouldProceed) {
-      var alreadyWorking = _workingJobs.contains(jobName);
+      final alreadyWorking = _workingJobs.contains(jobName);
       if (onReady) {
         shouldProceed = ready;
       }
