@@ -7,9 +7,9 @@ import 'package:sprightly/core/formatted_exception.dart';
 
 final _interpolation = Interpolation();
 final Map<Type, String> _backUp = {};
+final newExceptionMessage = 'This is a dummy exception message';
 
 void main() {
-  final newExceptionMessage = 'This is a dummy exception message';
   cloneMap(exceptionDisplay, _backUp);
 
   tearDown(() {
@@ -67,10 +67,19 @@ void main() {
       exception, appName, moduleName, messageParams,
       runtimeType:
           exception.runtimeType.toString().startsWith('_') ? Exception : null));
+
+  // check with a custom exception with added details to exceptionDisplay
   final customException =
       _CustomException(newExceptionMessage, 'My Custom Exception Message');
   formattedExceptionGroupTest(
       customException, appName, moduleName, messageParams,
+      doSetup: true);
+
+  // check with a existing exception with changed details to exceptionDisplay
+  final customHttpException = HttpException(newExceptionMessage,
+      uri: Uri.parse('https://www.example.com'));
+  formattedExceptionGroupTest(
+      customHttpException, appName, moduleName, messageParams,
       doSetup: true);
 }
 
@@ -95,19 +104,26 @@ void formattedExceptionGroupTest<T extends Exception>(
     setUp(() {
       if (doSetup) {
         exceptionDisplay[_CustomException] =
-            '${exception.toString()}. {message}';
+            'CustomException: $newExceptionMessage. {message}';
+        exceptionDisplay[HttpException] =
+            'The HttpException message has been changed. {message}';
         print(
             'New Message set: (_CustomException): ${exceptionDisplay[_CustomException]}');
+        print(
+            'New Message set: (HttpException): ${exceptionDisplay[HttpException]}');
       }
     });
     test('create new instance', () {
       // act
       final result = FormattedException(exception);
+      print('result Type: ${result.runtimeType}');
+      print('inner Exception Type: ${result.exceptionType}');
 
       // assert
       expect(result, isInstanceOf<FormattedException<Exception>>());
       expect(
           result, isNot(isInstanceOf<FormattedException<FormatException>>()));
+      expect(result.exception, isInstanceOf<T>());
       expect(result.exception, exception);
       expect(result.message, exception.toString());
       expect(result.exceptionType, actualRuntimeType);
@@ -126,6 +142,7 @@ void formattedExceptionGroupTest<T extends Exception>(
       expect(result, isInstanceOf<FormattedException<Exception>>());
       expect(
           result, isNot(isInstanceOf<FormattedException<FormatException>>()));
+      expect(result.exception, isInstanceOf<T>());
       expect(result.exception, exception);
       expect(result.message, exception.toString());
       expect(result.exceptionType, actualRuntimeType);
@@ -141,6 +158,7 @@ void formattedExceptionGroupTest<T extends Exception>(
       expect(result, isInstanceOf<FormattedException<Exception>>());
       expect(
           result, isNot(isInstanceOf<FormattedException<FormatException>>()));
+      expect(result.exception, isInstanceOf<T>());
       expect(result.exception, exception);
       expect(result.message, exception.toString());
       expect(result.exceptionType, actualRuntimeType);
@@ -159,6 +177,7 @@ void formattedExceptionGroupTest<T extends Exception>(
       expect(result, isInstanceOf<FormattedException<Exception>>());
       expect(
           result, isNot(isInstanceOf<FormattedException<FormatException>>()));
+      expect(result.exception, isInstanceOf<T>());
       expect(result.exception, exception);
       expect(result.message, exception.toString());
       expect(result.exceptionType, actualRuntimeType);
@@ -175,6 +194,7 @@ void formattedExceptionGroupTest<T extends Exception>(
       expect(result, isInstanceOf<FormattedException<Exception>>());
       expect(
           result, isNot(isInstanceOf<FormattedException<FormatException>>()));
+      expect(result.exception, isInstanceOf<T>());
       expect(result.exception, exception);
       expect(result.message, exception.toString());
       expect(result.exceptionType, actualRuntimeType);
@@ -201,6 +221,7 @@ void formattedExceptionGroupTest<T extends Exception>(
       expect(result, isInstanceOf<FormattedException<Exception>>());
       expect(
           result, isNot(isInstanceOf<FormattedException<FormatException>>()));
+      expect(result.exception, isInstanceOf<T>());
       expect(result.exception, exception);
       expect(result.message, exception.toString());
       expect(result.exceptionType, actualRuntimeType);
