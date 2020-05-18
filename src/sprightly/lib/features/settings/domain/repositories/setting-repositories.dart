@@ -9,8 +9,8 @@ class SettingsRepo {
   // SettingsRepo(dao.SettingsDao dao, {String environment})
   //     : _appSettings = db.AppSettings(dao, environment: environment);
 
-  AppDetails get appDetails => AppDetails.fromDB(_appSettings);
-  AppSettings get appSettings => AppSettings.fromDB(_appSettings);
+  AppDetails appDetails() => AppDetails.fromDB(_appSettings);
+  AppSettings appSettings() => AppSettings.fromDB(_appSettings);
 }
 // abstract class SettingsRepo {
 //   final db.AppSettings _appSettings;

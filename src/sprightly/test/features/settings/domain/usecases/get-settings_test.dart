@@ -42,7 +42,7 @@ void testGetAppDetails() {
       when(_mockAppDetails.buildNumber).thenReturn('100');
       when(_mockAppDetails.dbVersion).thenReturn(1);
 
-      when(mockRepo.appDetails).thenReturn(_mockAppDetails);
+      when(mockRepo.appDetails()).thenReturn(_mockAppDetails);
 
       // act
       var result = await useCase(NoParams());
@@ -51,7 +51,7 @@ void testGetAppDetails() {
       // UseCase should simply return whatever was returned from the Repository
       expect(result, Right(_mockAppDetails));
       // Verify that the method has been called on the Repository
-      verify(mockRepo.appDetails);
+      verify(mockRepo.appDetails());
       // Only the above method should be called and nothing more.
       verifyNoMoreInteractions(mockRepo);
     });
@@ -79,14 +79,14 @@ void testGetAppSettings() {
       when(_mockAppSettings.primarySetupComplete).thenReturn(true);
       when(_mockAppSettings.themeMode).thenReturn(ThemeMode.Dark);
 
-      when(mockRepo.appSettings).thenReturn(_mockAppSettings);
+      when(mockRepo.appSettings()).thenReturn(_mockAppSettings);
 
       // act
       var result = await useCase(NoParams());
 
       // assert
       expect(result, Right(_mockAppSettings));
-      verify(mockRepo.appSettings);
+      verify(mockRepo.appSettings());
       verifyNoMoreInteractions(mockRepo);
     });
   });

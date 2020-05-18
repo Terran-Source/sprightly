@@ -9,10 +9,6 @@ class AppDetails extends Equatable {
   final String buildNumber;
   final int dbVersion;
 
-  @override
-  List<Object> get props =>
-      [appName, packageName, version, buildNumber, dbVersion];
-
   AppDetails._(
     this.appName,
     this.packageName,
@@ -30,9 +26,13 @@ class AppDetails extends Equatable {
         appSettings.buildNumber,
         appSettings.dbVersion,
       );
+
+  @override
+  List<Object> get props =>
+      [appName, packageName, version, buildNumber, dbVersion];
 }
 
-class AppSettings {
+class AppSettings extends Equatable {
   final db.AppSettings _appSettings;
 
   AppSettings._(this._appSettings);
@@ -40,6 +40,10 @@ class AppSettings {
   static AppSettings _cache;
   factory AppSettings.fromDB(db.AppSettings appSettings) =>
       _cache ??= AppSettings._(appSettings);
+
+  @override
+  List<Object> get props =>
+      [environment, debug, primarySetupComplete, themeMode];
 
   String get environment => _appSettings.environment;
   bool get debug => _appSettings.debug;

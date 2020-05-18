@@ -12,7 +12,7 @@ class GetAppDetails extends UseCase<AppDetails, NoParams> {
 
   @override
   Future<Either<FormattedException, AppDetails>> call(NoParams noParams) =>
-      DartzExecution.call<AppDetails>(() => _repo.appDetails,
+      DartzExecution.call<AppDetails>(_repo.appDetails,
           moduleName: 'GetAppDetails');
 }
 
@@ -22,6 +22,6 @@ class GetAppSettings extends UseCase<AppSettings, NoParams> {
 
   @override
   Future<Either<FormattedException, AppSettings>> call(NoParams noParams) =>
-      DartzExecution.call<AppSettings>(() => _repo.appSettings,
+      DartzExecution.call<AppSettings>(_repo.appSettings,
           moduleName: 'GetAppSettings');
 }
