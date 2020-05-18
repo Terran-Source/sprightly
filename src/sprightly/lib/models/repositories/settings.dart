@@ -1,5 +1,6 @@
 library sprightly.repositories;
 
+import 'package:sprightly/core/exceptions.dart';
 import 'package:sprightly/extensions/enum_extensions.dart';
 import 'package:sprightly/models/constants/enums.dart';
 import 'package:sprightly/models/constants/values.dart';
@@ -37,6 +38,9 @@ class AppSettings extends AppParameter<Setting> with _BaseData {
   static AppSettings _cache;
 
   AppSettings._(SettingsDao _dao, String environment) {
+    if (!_dao.ready)
+      throw PreConditionFailedException(
+          'SettingsDao has not completed loading yet');
     super._dao = _dao;
     // set environment
     super.setParameterValue(_settingNames.environment, environment);
