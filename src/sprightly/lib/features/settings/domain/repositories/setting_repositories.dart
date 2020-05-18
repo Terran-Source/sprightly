@@ -1,4 +1,4 @@
-import 'package:sprightly/features/settings/domain/entities/setting-entities.dart';
+import 'package:sprightly/features/settings/domain/entities/setting_entities.dart';
 
 import 'package:sprightly/models/repositories/settings.dart' as db;
 

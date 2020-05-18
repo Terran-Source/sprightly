@@ -2,8 +2,8 @@ import 'package:dartz/dartz.dart';
 import 'package:sprightly/core/dartz_execution.dart';
 import 'package:sprightly/core/formatted_exception.dart';
 import 'package:sprightly/core/usecase.dart';
-import 'package:sprightly/features/settings/domain/entities/setting-entities.dart';
-import 'package:sprightly/features/settings/domain/repositories/setting-repositories.dart';
+import 'package:sprightly/features/settings/domain/entities/setting_entities.dart';
+import 'package:sprightly/features/settings/domain/repositories/setting_repositories.dart';
 
 class GetAppDetails extends UseCase<AppDetails, NoParams> {
   final SettingsRepo _repo;

@@ -2,9 +2,9 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:sprightly/core/usecase.dart';
-import 'package:sprightly/features/settings/domain/entities/setting-entities.dart';
-import 'package:sprightly/features/settings/domain/repositories/setting-repositories.dart';
-import 'package:sprightly/features/settings/domain/usecases/get-settings.dart';
+import 'package:sprightly/features/settings/domain/entities/setting_entities.dart';
+import 'package:sprightly/features/settings/domain/repositories/setting_repositories.dart';
+import 'package:sprightly/features/settings/domain/usecases/get_settings.dart';
 import 'package:sprightly/models/constants/enums.dart';
 
 class MockAppDetails extends Mock implements AppDetails {}
