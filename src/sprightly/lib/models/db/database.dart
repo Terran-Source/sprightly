@@ -525,16 +525,21 @@ mixin _GenericDaoMixin<T extends GeneratedDatabase> on DatabaseAccessor<T> {
   Future<void> beforeOpen(OpeningDetails details, Migrator m);
 
   Future<String> _uniqueId(String tableName, List<String> items,
-      {HashLibrary hashLibrary}) async {
+      {HashLibrary hashLibrary, String key}) async {
     var result = '';
     var foundUnique = false;
     var attempts = 0;
+    var hashLength = hashedIdMinLength;
+    var _hashLibrary = hashLibrary;
     do {
-      if (null == hashLibrary) hashLibrary = HashLibrary.values.random;
-      result =
-          hashedAll(items, hashLength: hashedIdMinLength, library: hashLibrary);
+      if (null == hashLibrary) _hashLibrary = HashLibrary.values.random;
+      result = hashedAll(items,
+          hashLength: hashLength, library: _hashLibrary, key: key);
       foundUnique = !await recordWithIdExists(tableName, result);
+      if (foundUnique) return result;
       attempts++;
+      // If a unique Id is not found in every 3 attempts, increase the hashLength
+      if (attempts % 3 == 0) hashLength++;
     } while (attempts < uniqueRetry && !foundUnique);
     throw TimeoutException(
         'Can not found a suitable unique Id for $tableName after $attempts attempts');
