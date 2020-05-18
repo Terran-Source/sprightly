@@ -6,7 +6,7 @@ import 'package:sprightly/models/repositories/settings.dart' as db;
 
 class MockDbAppSettings extends Mock implements db.AppSettings {}
 
-MockDbAppSettings mockSettings;
+MockDbAppSettings mockSettings = MockDbAppSettings();
 
 void main() {
   testAppDetails();
@@ -17,7 +17,7 @@ void testAppDetails() {
   AppDetails entity;
   group('test AppDetails', () {
     setUp(() {
-      mockSettings = MockDbAppSettings();
+      //mockSettings = MockDbAppSettings();
       // arrange
       when(mockSettings.appName).thenReturn('Sprightly');
       when(mockSettings.packageName).thenReturn('com.marganam.sprightly');
@@ -39,6 +39,11 @@ void testAppDetails() {
       expect(entity.version, '1.0.0');
       expect(entity.buildNumber, '100');
       expect(entity.dbVersion, 1);
+      verify(mockSettings.appName);
+      verify(mockSettings.packageName);
+      verify(mockSettings.version);
+      verify(mockSettings.buildNumber);
+      verify(mockSettings.dbVersion);
     });
     test('singleton instance', () {
       // re-arrange
@@ -47,6 +52,11 @@ void testAppDetails() {
 
       // assert
       expect(entity, anotherEntity);
+      verifyNever(mockSettings.appName);
+      verifyNever(mockSettings.packageName);
+      verifyNever(mockSettings.version);
+      verifyNever(mockSettings.buildNumber);
+      verifyNever(mockSettings.dbVersion);
     });
   });
 }
@@ -55,7 +65,6 @@ void testAppSettings() {
   AppSettings entity;
   group('test AppSettings', () {
     setUp(() {
-      mockSettings = MockDbAppSettings();
       entity = AppSettings.fromDB(mockSettings);
     });
     tearDown(() {
@@ -74,6 +83,10 @@ void testAppSettings() {
       expect(entity.debug, false);
       expect(entity.primarySetupComplete, false);
       expect(entity.themeMode, ThemeMode.Dark);
+      verify(mockSettings.environment);
+      verify(mockSettings.debug);
+      verify(mockSettings.primarySetupComplete);
+      verify(mockSettings.themeMode);
     });
     test('singleton instance', () {
       // act
@@ -81,6 +94,42 @@ void testAppSettings() {
 
       // assert
       expect(entity, anotherEntity);
+      verifyNever(mockSettings.environment);
+      verifyNever(mockSettings.debug);
+      verifyNever(mockSettings.primarySetupComplete);
+      verifyNever(mockSettings.themeMode);
+    });
+    group('setter test', () {
+      test('set debug', () {
+        // act
+        entity.debug = true;
+
+        // assert
+        verify(mockSettings.debug = true);
+        verifyNever(mockSettings.environment);
+        verifyNever(mockSettings.primarySetupComplete = any);
+        verifyNever(mockSettings.themeMode = any);
+      });
+      test('set primarySetupComplete', () {
+        // act
+        entity.primarySetupComplete = true;
+
+        // assert
+        verify(mockSettings.primarySetupComplete = true);
+        verifyNever(mockSettings.environment);
+        verifyNever(mockSettings.debug = any);
+        verifyNever(mockSettings.themeMode = any);
+      });
+      test('set themeMode', () {
+        // act
+        entity.themeMode = ThemeMode.Bright;
+
+        // assert
+        verify(mockSettings.themeMode = ThemeMode.Bright);
+        verifyNever(mockSettings.environment);
+        verifyNever(mockSettings.debug = any);
+        verifyNever(mockSettings.primarySetupComplete = any);
+      });
     });
   });
 }
