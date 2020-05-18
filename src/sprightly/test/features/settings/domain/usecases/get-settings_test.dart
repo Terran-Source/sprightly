@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+import 'package:sprightly/core/usecase.dart';
 import 'package:sprightly/features/settings/domain/entities/setting-entities.dart';
 import 'package:sprightly/features/settings/domain/repositories/setting-repositories.dart';
 import 'package:sprightly/features/settings/domain/usecases/get-settings.dart';
@@ -12,21 +13,27 @@ class MockAppSettings extends Mock implements AppSettings {}
 
 class MockSettingsRepo extends Mock implements SettingsRepo {}
 
+MockSettingsRepo mockRepo;
+
 void main() {
-  MockSettingsRepo mockRepo;
-  GetSettings useCase;
+  testGetAppDetails();
+  testGetAppSettings();
+}
 
-  setUp(() {
-    mockRepo = MockSettingsRepo();
-    useCase = GetSettings(mockRepo);
-  });
+void testGetAppDetails() {
+  GetAppDetails useCase;
 
-  tearDown(() {
-    reset(mockRepo);
-  });
+  group('GetAppDetails check', () {
+    setUp(() {
+      mockRepo = MockSettingsRepo();
+      useCase = GetAppDetails(mockRepo);
+    });
 
-  group('GetSettings Success', () {
-    test('GetSettings returns correct AppDetails', () async {
+    tearDown(() {
+      reset(mockRepo);
+    });
+
+    test('GetAppDetails returns correct AppDetails', () async {
       // arrange
       MockAppDetails _mockAppDetails = MockAppDetails();
       when(_mockAppDetails.appName).thenReturn('Sprightly');
@@ -38,7 +45,7 @@ void main() {
       when(mockRepo.appDetails).thenReturn(_mockAppDetails);
 
       // act
-      var result = await useCase.getAppDetails();
+      var result = await useCase(NoParams());
 
       // assert
       // UseCase should simply return whatever was returned from the Repository
@@ -48,7 +55,23 @@ void main() {
       // Only the above method should be called and nothing more.
       verifyNoMoreInteractions(mockRepo);
     });
-    test('GetSettings returns correct AppSettings', () async {
+  });
+}
+
+void testGetAppSettings() {
+  GetAppSettings useCase;
+
+  group('GetAppSettings check', () {
+    setUp(() {
+      mockRepo = MockSettingsRepo();
+      useCase = GetAppSettings(mockRepo);
+    });
+
+    tearDown(() {
+      reset(mockRepo);
+    });
+
+    test('GetAppSettings returns correct AppSettings', () async {
       // arrange
       MockAppSettings _mockAppSettings = MockAppSettings();
       when(_mockAppSettings.environment).thenReturn('Prod');
@@ -59,7 +82,7 @@ void main() {
       when(mockRepo.appSettings).thenReturn(_mockAppSettings);
 
       // act
-      var result = await useCase.getAppSettings();
+      var result = await useCase(NoParams());
 
       // assert
       expect(result, Right(_mockAppSettings));

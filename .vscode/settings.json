@@ -15,6 +15,7 @@
         "marganam",
         "mockito",
         "mrjc",
-        "mrjf"
+        "mrjf",
+        "usecase"
     ]
 }
