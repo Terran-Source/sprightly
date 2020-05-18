@@ -20,15 +20,19 @@ enum HashLibrary {
   hmac_sha512
 }
 
+final Random _random = Random.secure();
+
 String hashedAll(
   List<String> items, {
   int hashLength = 16,
   HashLibrary library = HashLibrary.sha1,
   String key,
+  bool prefixLibrary = true,
 }) {
-  key ??= (Random().nextInt(1000000000) + DateTime.now().millisecondsSinceEpoch)
-      .toString();
-  final utf8Key = utf8.encode(key);
+  final keyLength =
+      null == hashLength ? 256 : hashLength < 4096 ? hashLength : 4096;
+  final _key = key ?? randomString(keyLength);
+  final utf8Key = utf8.encode(_key);
   final sink = AccumulatorSink<Digest>();
   final byteChunks = items.map((str) => utf8.encode(str));
   ByteConversionSink chunks;
@@ -79,12 +83,14 @@ String hashedAll(
   }
   byteChunks.forEach((bt) => chunks.add(bt));
   chunks.close();
-  var result = "${library.toString().split(".").last.replaceAll("_", "")}"
-      ":${sink.events.single}";
+  var result =
+      "${prefixLibrary ? library.toString().split(".").last.replaceAll("_", "") + ':' : ''}"
+      "${sink.events.single}";
   if (null == hashLength) return result;
   if (result.length < hashLength) {
-    final repeater = hashed(result + key, hashLength: null, library: library);
-    while (result.length < hashLength) result += repeater;
+    result += _key;
+    if (result.length < hashLength)
+      result += randomString(hashLength - result.length);
   }
   return result.substring(0, hashLength);
 }
@@ -94,10 +100,18 @@ String hashed(
   int hashLength = 16,
   HashLibrary library = HashLibrary.sha1,
   String key,
+  bool prefixLibrary = true,
 }) =>
     hashedAll(
       [item],
       hashLength: hashLength,
       library: library,
       key: key,
+      prefixLibrary: prefixLibrary,
     );
+
+String randomString([int length = 16]) {
+  final unicodeIntegers =
+      List<int>.generate(length, (index) => _random.nextInt(256));
+  return base64Encode(unicodeIntegers).substring(0, length);
+}
