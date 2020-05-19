@@ -580,9 +580,8 @@ mixin _GenericDaoMixin<T extends GeneratedDatabase> on DatabaseAccessor<T> {
           .data;
 
   Future<bool> updateRecord<Tbl extends Table, R extends DataClass>(
-          TableInfo<Tbl, R> table, Insertable<R> record,
-          {bool dontExecute = false}) =>
-      update(table).replace(record, dontExecute: dontExecute);
+          TableInfo<Tbl, R> table, Insertable<R> record) =>
+      update(table).replace(record);
 
   Future<int> deleteRecord<Tbl extends Table, R extends DataClass>(
           TableInfo<Tbl, R> table, Insertable<R> record) =>
