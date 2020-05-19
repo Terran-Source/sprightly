@@ -50,9 +50,24 @@ void testGetAppDetails() {
       // assert
       // UseCase should simply return whatever was returned from the Repository
       expect(result, Right(_mockAppDetails));
+      expect(result.isRight(), isTrue);
+      expect(result.isLeft(), isFalse);
       // Verify that the method has been called on the Repository
       verify(mockRepo.appDetails());
       // Only the above method should be called and nothing more.
+      verifyNoMoreInteractions(mockRepo);
+    });
+    test('GetAppDetails throws Exception', () async {
+      // arrange
+      when(mockRepo.appDetails()).thenThrow(Exception('dummy exception'));
+
+      // act
+      var result = await useCase(NoParams());
+
+      // assert
+      expect(result.isRight(), isFalse);
+      expect(result.isLeft(), isTrue);
+      verify(mockRepo.appDetails());
       verifyNoMoreInteractions(mockRepo);
     });
   });
@@ -86,6 +101,19 @@ void testGetAppSettings() {
 
       // assert
       expect(result, Right(_mockAppSettings));
+      verify(mockRepo.appSettings());
+      verifyNoMoreInteractions(mockRepo);
+    });
+    test('GetAppSettings throws Exception', () async {
+      // arrange
+      when(mockRepo.appSettings()).thenThrow(Exception('dummy exception'));
+
+      // act
+      var result = await useCase(NoParams());
+
+      // assert
+      expect(result.isRight(), isFalse);
+      expect(result.isLeft(), isTrue);
       verify(mockRepo.appSettings());
       verifyNoMoreInteractions(mockRepo);
     });

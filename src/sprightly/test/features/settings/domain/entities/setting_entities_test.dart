@@ -125,7 +125,7 @@ void testAppSettings() {
         entity.themeMode = ThemeMode.Bright;
 
         // assert
-        verify(mockSettings.themeMode = ThemeMode.Bright);
+        verify(mockSettings.themeMode = any);
         verifyNever(mockSettings.environment);
         verifyNever(mockSettings.debug = any);
         verifyNever(mockSettings.primarySetupComplete = any);
