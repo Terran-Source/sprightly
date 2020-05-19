@@ -1,5 +1,5 @@
 Already handled by 
 
 ```dart
-import 'package:sprightly/models/dao.dart';
+import 'package:sprightly/data/dao.dart';
 ```

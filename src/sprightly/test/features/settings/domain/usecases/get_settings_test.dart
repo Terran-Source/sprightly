@@ -5,7 +5,7 @@ import 'package:sprightly/core/usecase.dart';
 import 'package:sprightly/features/settings/domain/entities/setting_entities.dart';
 import 'package:sprightly/features/settings/domain/repositories/setting_repositories.dart';
 import 'package:sprightly/features/settings/domain/usecases/get_settings.dart';
-import 'package:sprightly/models/constants/enums.dart';
+import 'package:sprightly/data/constants/enums.dart';
 
 class MockAppDetails extends Mock implements AppDetails {}
 

@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
-import 'package:sprightly/models/constants/enums.dart';
-import 'package:sprightly/models/repositories/settings.dart' as db;
+import 'package:sprightly/data/constants/enums.dart';
+import 'package:sprightly/data/repositories/settings.dart' as db;
 
 class AppDetails extends Equatable {
   final String appName;

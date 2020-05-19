@@ -1,6 +1,6 @@
 import 'package:sprightly/features/settings/domain/entities/setting_entities.dart';
 
-import 'package:sprightly/models/repositories/settings.dart' as db;
+import 'package:sprightly/data/repositories/settings.dart' as db;
 
 class SettingsRepo {
   final db.AppSettings _appSettings;

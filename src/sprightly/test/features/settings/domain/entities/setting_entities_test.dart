@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:sprightly/features/settings/domain/entities/setting_entities.dart';
-import 'package:sprightly/models/constants/enums.dart';
-import 'package:sprightly/models/repositories/settings.dart' as db;
+import 'package:sprightly/data/constants/enums.dart';
+import 'package:sprightly/data/repositories/settings.dart' as db;
 
 class MockDbAppSettings extends Mock implements db.AppSettings {}
 
