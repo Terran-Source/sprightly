@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
-import 'package:sprightly/core/formatted_exception.dart';
+import 'package:sprightly/utils/formatted_exception.dart';
 
 abstract class UseCase<T, Params> {
   Future<Either<FormattedException, T>> call(Params params);

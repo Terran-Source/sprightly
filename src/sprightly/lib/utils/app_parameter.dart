@@ -1,10 +1,10 @@
-library sprightly.app_settings;
+library marganam.app_settings;
 
 import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-import 'package:sprightly/core/file_provider.dart';
+import 'package:sprightly/utils/file_provider.dart';
 
 class Parameter<T> {
   final String name;

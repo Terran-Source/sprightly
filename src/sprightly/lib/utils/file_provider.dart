@@ -1,4 +1,4 @@
-library sprightly.file_provider;
+library marganam.file_provider;
 
 import 'dart:async';
 import 'dart:convert';
@@ -13,7 +13,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sprightly/extensions/file_system_entity_extensions.dart';
 import 'package:sprightly/extensions/http_response_extensions.dart';
 import 'package:sprightly/extensions/string_extensions.dart';
-import 'package:sprightly/core/formatted_exception.dart';
+import 'package:sprightly/utils/formatted_exception.dart';
 import 'package:sprightly/utils/ready_or_not.dart';
 
 String get _moduleName => 'file_provider';

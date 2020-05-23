@@ -8,7 +8,7 @@ import 'package:moor_ffi/moor_ffi.dart';
 import 'package:sprightly/extensions/enum_extensions.dart';
 import 'package:sprightly/data/constants/enums.dart';
 import 'package:sprightly/data/dao.dart';
-import 'package:sprightly/core/file_provider.dart';
+import 'package:sprightly/utils/file_provider.dart';
 import 'package:sprightly/utils/happy_hash.dart';
 import 'package:sprightly/utils/ready_or_not.dart';
 

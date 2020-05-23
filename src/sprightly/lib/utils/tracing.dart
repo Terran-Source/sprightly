@@ -1,3 +1,5 @@
+library marganam.tracing;
+
 /// Get the parsed StackTrace
 ///
 /// As described in https://stackoverflow.com/a/60022328

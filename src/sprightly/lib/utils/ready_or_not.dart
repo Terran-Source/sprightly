@@ -1,3 +1,5 @@
+library marganam.worker;
+
 import 'dart:async';
 
 /// SIngleton async (or not) function type

@@ -1,4 +1,4 @@
-library sprightly.functional_exception;
+library marganam.functional_exception;
 
 import 'dart:developer';
 import 'dart:io';
@@ -44,7 +44,7 @@ class FormattedException<T extends Exception> {
     if (debug) {
       //// TODO: write structured log
       // _logger
-      //   ..withContext(contextMap: {
+      //   ..withContext({
       //     name: logSource,
       //     error: _exception,
       //     messageParams: messageParams,

@@ -1,4 +1,4 @@
-library sprightly.crypto;
+library marganam.crypto;
 
 import 'dart:convert';
 import 'dart:math';

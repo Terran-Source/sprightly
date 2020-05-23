@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:english_words/english_words.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:interpolation/interpolation.dart';
-import 'package:sprightly/core/formatted_exception.dart';
+import 'package:sprightly/utils/formatted_exception.dart';
 
 final _interpolation = Interpolation();
 final Map<Type, String> _backUp = {};
