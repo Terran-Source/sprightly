@@ -45,8 +45,9 @@ class FormattedException<T extends Exception> {
       //// TODO: write structured log
       // _logger
       //   ..withContext({
-      //     name: logSource,
+      //     title: displayedMessage,
       //     error: _exception,
+      //     source: logSource,
       //     messageParams: messageParams,
       //     stackTrace: stackTrace,
       //   })
@@ -58,7 +59,7 @@ class FormattedException<T extends Exception> {
   Interpolation _interpolation = Interpolation();
 
   T get exception => _exception;
-  String get message => _exception.toString();
+  String get message => messageParams['message'] ?? _exception.toString();
   Type get exceptionType => _exception.runtimeType;
 
   Type get _displayExceptionType =>
