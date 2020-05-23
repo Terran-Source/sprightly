@@ -99,6 +99,38 @@ class Member extends DataClass implements Insertable<Member> {
     return map;
   }
 
+  MembersCompanion toCompanion(bool nullToAbsent) {
+    return MembersCompanion(
+      id: id == null && nullToAbsent ? const Value.absent() : Value(id),
+      name: name == null && nullToAbsent ? const Value.absent() : Value(name),
+      nickName: nickName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(nickName),
+      avatar:
+          avatar == null && nullToAbsent ? const Value.absent() : Value(avatar),
+      idType:
+          idType == null && nullToAbsent ? const Value.absent() : Value(idType),
+      idValue: idValue == null && nullToAbsent
+          ? const Value.absent()
+          : Value(idValue),
+      secondaryIdValue: secondaryIdValue == null && nullToAbsent
+          ? const Value.absent()
+          : Value(secondaryIdValue),
+      isGroupExpense: isGroupExpense == null && nullToAbsent
+          ? const Value.absent()
+          : Value(isGroupExpense),
+      signature: signature == null && nullToAbsent
+          ? const Value.absent()
+          : Value(signature),
+      createdOn: createdOn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdOn),
+      updatedOn: updatedOn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedOn),
+    );
+  }
+
   factory Member.fromJson(Map<String, dynamic> json,
       {ValueSerializer serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
@@ -617,6 +649,23 @@ class Group extends DataClass implements Insertable<Group> {
     return map;
   }
 
+  GroupsCompanion toCompanion(bool nullToAbsent) {
+    return GroupsCompanion(
+      id: id == null && nullToAbsent ? const Value.absent() : Value(id),
+      name: name == null && nullToAbsent ? const Value.absent() : Value(name),
+      type: type == null && nullToAbsent ? const Value.absent() : Value(type),
+      isHidden: isHidden == null && nullToAbsent
+          ? const Value.absent()
+          : Value(isHidden),
+      createdOn: createdOn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdOn),
+      updatedOn: updatedOn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedOn),
+    );
+  }
+
   factory Group.fromJson(Map<String, dynamic> json,
       {ValueSerializer serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
@@ -945,6 +994,24 @@ class GroupMember extends DataClass implements Insertable<GroupMember> {
       map['updatedOn'] = Variable<DateTime>(updatedOn);
     }
     return map;
+  }
+
+  GroupMembersCompanion toCompanion(bool nullToAbsent) {
+    return GroupMembersCompanion(
+      id: id == null && nullToAbsent ? const Value.absent() : Value(id),
+      groupId: groupId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(groupId),
+      memberId: memberId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(memberId),
+      createdOn: createdOn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdOn),
+      updatedOn: updatedOn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedOn),
+    );
   }
 
   factory GroupMember.fromJson(Map<String, dynamic> json,
@@ -1276,6 +1343,32 @@ class Account extends DataClass implements Insertable<Account> {
       map['updatedOn'] = Variable<DateTime>(updatedOn);
     }
     return map;
+  }
+
+  AccountsCompanion toCompanion(bool nullToAbsent) {
+    return AccountsCompanion(
+      id: id == null && nullToAbsent ? const Value.absent() : Value(id),
+      name: name == null && nullToAbsent ? const Value.absent() : Value(name),
+      groupId: groupId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(groupId),
+      parentId: parentId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(parentId),
+      type: type == null && nullToAbsent ? const Value.absent() : Value(type),
+      memberId: memberId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(memberId),
+      balance: balance == null && nullToAbsent
+          ? const Value.absent()
+          : Value(balance),
+      createdOn: createdOn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdOn),
+      updatedOn: updatedOn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedOn),
+    );
   }
 
   factory Account.fromJson(Map<String, dynamic> json,
@@ -1720,6 +1813,23 @@ class Category extends DataClass implements Insertable<Category> {
     return map;
   }
 
+  CategoriesCompanion toCompanion(bool nullToAbsent) {
+    return CategoriesCompanion(
+      id: id == null && nullToAbsent ? const Value.absent() : Value(id),
+      name: name == null && nullToAbsent ? const Value.absent() : Value(name),
+      parentId: parentId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(parentId),
+      type: type == null && nullToAbsent ? const Value.absent() : Value(type),
+      createdOn: createdOn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdOn),
+      updatedOn: updatedOn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedOn),
+    );
+  }
+
   factory Category.fromJson(Map<String, dynamic> json,
       {ValueSerializer serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
@@ -2090,6 +2200,41 @@ class Settlement extends DataClass implements Insertable<Settlement> {
       map['updatedOn'] = Variable<DateTime>(updatedOn);
     }
     return map;
+  }
+
+  SettlementsCompanion toCompanion(bool nullToAbsent) {
+    return SettlementsCompanion(
+      id: id == null && nullToAbsent ? const Value.absent() : Value(id),
+      groupId: groupId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(groupId),
+      fromMemberId: fromMemberId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fromMemberId),
+      toMemberId: toMemberId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(toMemberId),
+      amount:
+          amount == null && nullToAbsent ? const Value.absent() : Value(amount),
+      settledAmount: settledAmount == null && nullToAbsent
+          ? const Value.absent()
+          : Value(settledAmount),
+      isTemporary: isTemporary == null && nullToAbsent
+          ? const Value.absent()
+          : Value(isTemporary),
+      transactionId: transactionId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(transactionId),
+      signature: signature == null && nullToAbsent
+          ? const Value.absent()
+          : Value(signature),
+      createdOn: createdOn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdOn),
+      updatedOn: updatedOn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedOn),
+    );
   }
 
   factory Settlement.fromJson(Map<String, dynamic> json,
@@ -2702,6 +2847,49 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       map['updatedOn'] = Variable<DateTime>(updatedOn);
     }
     return map;
+  }
+
+  TransactionsCompanion toCompanion(bool nullToAbsent) {
+    return TransactionsCompanion(
+      id: id == null && nullToAbsent ? const Value.absent() : Value(id),
+      memberId: memberId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(memberId),
+      amount:
+          amount == null && nullToAbsent ? const Value.absent() : Value(amount),
+      groupId: groupId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(groupId),
+      groupMemberIds: groupMemberIds == null && nullToAbsent
+          ? const Value.absent()
+          : Value(groupMemberIds),
+      fromAccountId: fromAccountId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fromAccountId),
+      toAccountId: toAccountId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(toAccountId),
+      categoryId: categoryId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(categoryId),
+      settlementId: settlementId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(settlementId),
+      notes:
+          notes == null && nullToAbsent ? const Value.absent() : Value(notes),
+      attachments: attachments == null && nullToAbsent
+          ? const Value.absent()
+          : Value(attachments),
+      tags: tags == null && nullToAbsent ? const Value.absent() : Value(tags),
+      doneOn:
+          doneOn == null && nullToAbsent ? const Value.absent() : Value(doneOn),
+      createdOn: createdOn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdOn),
+      updatedOn: updatedOn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedOn),
+    );
   }
 
   factory Transaction.fromJson(Map<String, dynamic> json,
@@ -3437,6 +3625,26 @@ class AppFont extends DataClass implements Insertable<AppFont> {
     return map;
   }
 
+  AppFontsCompanion toCompanion(bool nullToAbsent) {
+    return AppFontsCompanion(
+      id: id == null && nullToAbsent ? const Value.absent() : Value(id),
+      name: name == null && nullToAbsent ? const Value.absent() : Value(name),
+      family:
+          family == null && nullToAbsent ? const Value.absent() : Value(family),
+      type: type == null && nullToAbsent ? const Value.absent() : Value(type),
+      style:
+          style == null && nullToAbsent ? const Value.absent() : Value(style),
+      weight:
+          weight == null && nullToAbsent ? const Value.absent() : Value(weight),
+      createdOn: createdOn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdOn),
+      updatedOn: updatedOn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedOn),
+    );
+  }
+
   factory AppFont.fromJson(Map<String, dynamic> json,
       {ValueSerializer serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
@@ -3902,6 +4110,52 @@ class FontCombo extends DataClass implements Insertable<FontCombo> {
       map['updatedOn'] = Variable<DateTime>(updatedOn);
     }
     return map;
+  }
+
+  FontCombosCompanion toCompanion(bool nullToAbsent) {
+    return FontCombosCompanion(
+      id: id == null && nullToAbsent ? const Value.absent() : Value(id),
+      name: name == null && nullToAbsent ? const Value.absent() : Value(name),
+      headerFont: headerFont == null && nullToAbsent
+          ? const Value.absent()
+          : Value(headerFont),
+      bodyFont: bodyFont == null && nullToAbsent
+          ? const Value.absent()
+          : Value(bodyFont),
+      bodyFontBig: bodyFontBig == null && nullToAbsent
+          ? const Value.absent()
+          : Value(bodyFontBig),
+      bodyFontMedium: bodyFontMedium == null && nullToAbsent
+          ? const Value.absent()
+          : Value(bodyFontMedium),
+      bodyFontSmall: bodyFontSmall == null && nullToAbsent
+          ? const Value.absent()
+          : Value(bodyFontSmall),
+      bodyFontTiny: bodyFontTiny == null && nullToAbsent
+          ? const Value.absent()
+          : Value(bodyFontTiny),
+      valueFont: valueFont == null && nullToAbsent
+          ? const Value.absent()
+          : Value(valueFont),
+      valueFontBig: valueFontBig == null && nullToAbsent
+          ? const Value.absent()
+          : Value(valueFontBig),
+      valueFontMedium: valueFontMedium == null && nullToAbsent
+          ? const Value.absent()
+          : Value(valueFontMedium),
+      valueFontSmall: valueFontSmall == null && nullToAbsent
+          ? const Value.absent()
+          : Value(valueFontSmall),
+      valueFontTiny: valueFontTiny == null && nullToAbsent
+          ? const Value.absent()
+          : Value(valueFontTiny),
+      createdOn: createdOn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdOn),
+      updatedOn: updatedOn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedOn),
+    );
   }
 
   factory FontCombo.fromJson(Map<String, dynamic> json,
@@ -4588,6 +4842,26 @@ class ColorCombo extends DataClass implements Insertable<ColorCombo> {
     return map;
   }
 
+  ColorCombosCompanion toCompanion(bool nullToAbsent) {
+    return ColorCombosCompanion(
+      id: id == null && nullToAbsent ? const Value.absent() : Value(id),
+      name: name == null && nullToAbsent ? const Value.absent() : Value(name),
+      mode: mode == null && nullToAbsent ? const Value.absent() : Value(mode),
+      backColor: backColor == null && nullToAbsent
+          ? const Value.absent()
+          : Value(backColor),
+      foreColor: foreColor == null && nullToAbsent
+          ? const Value.absent()
+          : Value(foreColor),
+      createdOn: createdOn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdOn),
+      updatedOn: updatedOn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedOn),
+    );
+  }
+
   factory ColorCombo.fromJson(Map<String, dynamic> json,
       {ValueSerializer serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
@@ -4952,6 +5226,21 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       map['updatedOn'] = Variable<DateTime>(updatedOn);
     }
     return map;
+  }
+
+  AppSettingsCompanion toCompanion(bool nullToAbsent) {
+    return AppSettingsCompanion(
+      name: name == null && nullToAbsent ? const Value.absent() : Value(name),
+      value:
+          value == null && nullToAbsent ? const Value.absent() : Value(value),
+      type: type == null && nullToAbsent ? const Value.absent() : Value(type),
+      createdOn: createdOn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdOn),
+      updatedOn: updatedOn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedOn),
+    );
   }
 
   factory AppSetting.fromJson(Map<String, dynamic> json,
