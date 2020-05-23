@@ -12,7 +12,7 @@ class Member extends DataClass implements Insertable<Member> {
   final String name;
   final String nickName;
   final String avatar;
-  final String idType;
+  final MemberIdType idType;
   final String idValue;
   final String secondaryIdValue;
   final bool isGroupExpense;
@@ -44,8 +44,8 @@ class Member extends DataClass implements Insertable<Member> {
           .mapFromDatabaseResponse(data['${effectivePrefix}nickName']),
       avatar:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}avatar']),
-      idType:
-          stringType.mapFromDatabaseResponse(data['${effectivePrefix}idType']),
+      idType: $MembersTable.$converter0.mapToDart(
+          stringType.mapFromDatabaseResponse(data['${effectivePrefix}idType'])),
       idValue:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}idValue']),
       secondaryIdValue: stringType
@@ -76,7 +76,8 @@ class Member extends DataClass implements Insertable<Member> {
       map['avatar'] = Variable<String>(avatar);
     }
     if (!nullToAbsent || idType != null) {
-      map['idType'] = Variable<String>(idType);
+      final converter = $MembersTable.$converter0;
+      map['idType'] = Variable<String>(converter.mapToSql(idType));
     }
     if (!nullToAbsent || idValue != null) {
       map['idValue'] = Variable<String>(idValue);
@@ -139,7 +140,7 @@ class Member extends DataClass implements Insertable<Member> {
       name: serializer.fromJson<String>(json['name']),
       nickName: serializer.fromJson<String>(json['nickName']),
       avatar: serializer.fromJson<String>(json['avatar']),
-      idType: serializer.fromJson<String>(json['idType']),
+      idType: serializer.fromJson<MemberIdType>(json['idType']),
       idValue: serializer.fromJson<String>(json['idValue']),
       secondaryIdValue: serializer.fromJson<String>(json['secondaryIdValue']),
       isGroupExpense: serializer.fromJson<bool>(json['isGroupExpense']),
@@ -156,7 +157,7 @@ class Member extends DataClass implements Insertable<Member> {
       'name': serializer.toJson<String>(name),
       'nickName': serializer.toJson<String>(nickName),
       'avatar': serializer.toJson<String>(avatar),
-      'idType': serializer.toJson<String>(idType),
+      'idType': serializer.toJson<MemberIdType>(idType),
       'idValue': serializer.toJson<String>(idValue),
       'secondaryIdValue': serializer.toJson<String>(secondaryIdValue),
       'isGroupExpense': serializer.toJson<bool>(isGroupExpense),
@@ -171,7 +172,7 @@ class Member extends DataClass implements Insertable<Member> {
           String name,
           String nickName,
           String avatar,
-          String idType,
+          MemberIdType idType,
           String idValue,
           String secondaryIdValue,
           bool isGroupExpense,
@@ -252,7 +253,7 @@ class MembersCompanion extends UpdateCompanion<Member> {
   final Value<String> name;
   final Value<String> nickName;
   final Value<String> avatar;
-  final Value<String> idType;
+  final Value<MemberIdType> idType;
   final Value<String> idValue;
   final Value<String> secondaryIdValue;
   final Value<bool> isGroupExpense;
@@ -277,7 +278,7 @@ class MembersCompanion extends UpdateCompanion<Member> {
     this.name = const Value.absent(),
     this.nickName = const Value.absent(),
     this.avatar = const Value.absent(),
-    @required String idType,
+    @required MemberIdType idType,
     @required String idValue,
     this.secondaryIdValue = const Value.absent(),
     this.isGroupExpense = const Value.absent(),
@@ -320,7 +321,7 @@ class MembersCompanion extends UpdateCompanion<Member> {
       Value<String> name,
       Value<String> nickName,
       Value<String> avatar,
-      Value<String> idType,
+      Value<MemberIdType> idType,
       Value<String> idValue,
       Value<String> secondaryIdValue,
       Value<bool> isGroupExpense,
@@ -358,7 +359,8 @@ class MembersCompanion extends UpdateCompanion<Member> {
       map['avatar'] = Variable<String>(avatar.value);
     }
     if (idType.present) {
-      map['idType'] = Variable<String>(idType.value);
+      final converter = $MembersTable.$converter0;
+      map['idType'] = Variable<String>(converter.mapToSql(idType.value));
     }
     if (idValue.present) {
       map['idValue'] = Variable<String>(idValue.value);
@@ -427,9 +429,11 @@ class $MembersTable extends Members with TableInfo<$MembersTable, Member> {
   @override
   GeneratedTextColumn get idType => _idType ??= _constructIdType();
   GeneratedTextColumn _constructIdType() {
-    return GeneratedTextColumn('idType', $tableName, false,
-        $customConstraints:
-            'CHECK (idType IN (\'Phone\',\'Email\',\'NickName\',\'Group\',\'GroupMember\')) NOT NULL');
+    return GeneratedTextColumn(
+      'idType',
+      $tableName,
+      false,
+    );
   }
 
   final VerificationMeta _idValueMeta = const VerificationMeta('idValue');
@@ -540,12 +544,7 @@ class $MembersTable extends Members with TableInfo<$MembersTable, Member> {
       context.handle(_avatarMeta,
           avatar.isAcceptableOrUnknown(data['avatar'], _avatarMeta));
     }
-    if (data.containsKey('idType')) {
-      context.handle(_idTypeMeta,
-          idType.isAcceptableOrUnknown(data['idType'], _idTypeMeta));
-    } else if (isInserting) {
-      context.missing(_idTypeMeta);
-    }
+    context.handle(_idTypeMeta, const VerificationResult.success());
     if (data.containsKey('idValue')) {
       context.handle(_idValueMeta,
           idValue.isAcceptableOrUnknown(data['idValue'], _idValueMeta));
@@ -591,12 +590,15 @@ class $MembersTable extends Members with TableInfo<$MembersTable, Member> {
   $MembersTable createAlias(String alias) {
     return $MembersTable(_db, alias);
   }
+
+  static TypeConverter<MemberIdType, String> $converter0 =
+      const EnumTypeConverter<MemberIdType>(MemberIdType.values);
 }
 
 class Group extends DataClass implements Insertable<Group> {
   final String id;
   final String name;
-  final String type;
+  final GroupType type;
   final bool isHidden;
   final DateTime createdOn;
   final DateTime updatedOn;
@@ -616,7 +618,8 @@ class Group extends DataClass implements Insertable<Group> {
     return Group(
       id: stringType.mapFromDatabaseResponse(data['${effectivePrefix}id']),
       name: stringType.mapFromDatabaseResponse(data['${effectivePrefix}name']),
-      type: stringType.mapFromDatabaseResponse(data['${effectivePrefix}type']),
+      type: $GroupsTable.$converter0.mapToDart(
+          stringType.mapFromDatabaseResponse(data['${effectivePrefix}type'])),
       isHidden:
           boolType.mapFromDatabaseResponse(data['${effectivePrefix}isHidden']),
       createdOn: dateTimeType
@@ -635,7 +638,8 @@ class Group extends DataClass implements Insertable<Group> {
       map['name'] = Variable<String>(name);
     }
     if (!nullToAbsent || type != null) {
-      map['type'] = Variable<String>(type);
+      final converter = $GroupsTable.$converter0;
+      map['type'] = Variable<String>(converter.mapToSql(type));
     }
     if (!nullToAbsent || isHidden != null) {
       map['isHidden'] = Variable<bool>(isHidden);
@@ -672,7 +676,7 @@ class Group extends DataClass implements Insertable<Group> {
     return Group(
       id: serializer.fromJson<String>(json['id']),
       name: serializer.fromJson<String>(json['name']),
-      type: serializer.fromJson<String>(json['type']),
+      type: serializer.fromJson<GroupType>(json['type']),
       isHidden: serializer.fromJson<bool>(json['isHidden']),
       createdOn: serializer.fromJson<DateTime>(json['createdOn']),
       updatedOn: serializer.fromJson<DateTime>(json['updatedOn']),
@@ -684,7 +688,7 @@ class Group extends DataClass implements Insertable<Group> {
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'name': serializer.toJson<String>(name),
-      'type': serializer.toJson<String>(type),
+      'type': serializer.toJson<GroupType>(type),
       'isHidden': serializer.toJson<bool>(isHidden),
       'createdOn': serializer.toJson<DateTime>(createdOn),
       'updatedOn': serializer.toJson<DateTime>(updatedOn),
@@ -694,7 +698,7 @@ class Group extends DataClass implements Insertable<Group> {
   Group copyWith(
           {String id,
           String name,
-          String type,
+          GroupType type,
           bool isHidden,
           DateTime createdOn,
           DateTime updatedOn}) =>
@@ -743,7 +747,7 @@ class Group extends DataClass implements Insertable<Group> {
 class GroupsCompanion extends UpdateCompanion<Group> {
   final Value<String> id;
   final Value<String> name;
-  final Value<String> type;
+  final Value<GroupType> type;
   final Value<bool> isHidden;
   final Value<DateTime> createdOn;
   final Value<DateTime> updatedOn;
@@ -785,7 +789,7 @@ class GroupsCompanion extends UpdateCompanion<Group> {
   GroupsCompanion copyWith(
       {Value<String> id,
       Value<String> name,
-      Value<String> type,
+      Value<GroupType> type,
       Value<bool> isHidden,
       Value<DateTime> createdOn,
       Value<DateTime> updatedOn}) {
@@ -809,7 +813,8 @@ class GroupsCompanion extends UpdateCompanion<Group> {
       map['name'] = Variable<String>(name.value);
     }
     if (type.present) {
-      map['type'] = Variable<String>(type.value);
+      final converter = $GroupsTable.$converter0;
+      map['type'] = Variable<String>(converter.mapToSql(type.value));
     }
     if (isHidden.present) {
       map['isHidden'] = Variable<bool>(isHidden.value);
@@ -849,9 +854,11 @@ class $GroupsTable extends Groups with TableInfo<$GroupsTable, Group> {
   @override
   GeneratedTextColumn get type => _type ??= _constructType();
   GeneratedTextColumn _constructType() {
-    return GeneratedTextColumn('type', $tableName, true,
-        $customConstraints:
-            'CHECK (type IN (\'Personal\',\'Budget\',\'Shared\')) NOT NULL DEFAULT \'Shared\'');
+    return GeneratedTextColumn(
+      'type',
+      $tableName,
+      true,
+    );
   }
 
   final VerificationMeta _isHiddenMeta = const VerificationMeta('isHidden');
@@ -912,10 +919,7 @@ class $GroupsTable extends Groups with TableInfo<$GroupsTable, Group> {
     } else if (isInserting) {
       context.missing(_nameMeta);
     }
-    if (data.containsKey('type')) {
-      context.handle(
-          _typeMeta, type.isAcceptableOrUnknown(data['type'], _typeMeta));
-    }
+    context.handle(_typeMeta, const VerificationResult.success());
     if (data.containsKey('isHidden')) {
       context.handle(_isHiddenMeta,
           isHidden.isAcceptableOrUnknown(data['isHidden'], _isHiddenMeta));
@@ -943,6 +947,9 @@ class $GroupsTable extends Groups with TableInfo<$GroupsTable, Group> {
   $GroupsTable createAlias(String alias) {
     return $GroupsTable(_db, alias);
   }
+
+  static TypeConverter<GroupType, String> $converter0 =
+      const EnumTypeConverter<GroupType>(GroupType.values, GroupType.Shared);
 }
 
 class GroupMember extends DataClass implements Insertable<GroupMember> {
@@ -1272,7 +1279,7 @@ class Account extends DataClass implements Insertable<Account> {
   final String name;
   final String groupId;
   final int parentId;
-  final String type;
+  final AccountType type;
   final String memberId;
   final double balance;
   final DateTime createdOn;
@@ -1301,7 +1308,8 @@ class Account extends DataClass implements Insertable<Account> {
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}groupId']),
       parentId:
           intType.mapFromDatabaseResponse(data['${effectivePrefix}parentId']),
-      type: stringType.mapFromDatabaseResponse(data['${effectivePrefix}type']),
+      type: $AccountsTable.$converter0.mapToDart(
+          stringType.mapFromDatabaseResponse(data['${effectivePrefix}type'])),
       memberId: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}memberId']),
       balance:
@@ -1328,7 +1336,8 @@ class Account extends DataClass implements Insertable<Account> {
       map['parentId'] = Variable<int>(parentId);
     }
     if (!nullToAbsent || type != null) {
-      map['type'] = Variable<String>(type);
+      final converter = $AccountsTable.$converter0;
+      map['type'] = Variable<String>(converter.mapToSql(type));
     }
     if (!nullToAbsent || memberId != null) {
       map['memberId'] = Variable<String>(memberId);
@@ -1379,7 +1388,7 @@ class Account extends DataClass implements Insertable<Account> {
       name: serializer.fromJson<String>(json['name']),
       groupId: serializer.fromJson<String>(json['groupId']),
       parentId: serializer.fromJson<int>(json['parentId']),
-      type: serializer.fromJson<String>(json['type']),
+      type: serializer.fromJson<AccountType>(json['type']),
       memberId: serializer.fromJson<String>(json['memberId']),
       balance: serializer.fromJson<double>(json['balance']),
       createdOn: serializer.fromJson<DateTime>(json['createdOn']),
@@ -1394,7 +1403,7 @@ class Account extends DataClass implements Insertable<Account> {
       'name': serializer.toJson<String>(name),
       'groupId': serializer.toJson<String>(groupId),
       'parentId': serializer.toJson<int>(parentId),
-      'type': serializer.toJson<String>(type),
+      'type': serializer.toJson<AccountType>(type),
       'memberId': serializer.toJson<String>(memberId),
       'balance': serializer.toJson<double>(balance),
       'createdOn': serializer.toJson<DateTime>(createdOn),
@@ -1407,7 +1416,7 @@ class Account extends DataClass implements Insertable<Account> {
           String name,
           String groupId,
           int parentId,
-          String type,
+          AccountType type,
           String memberId,
           double balance,
           DateTime createdOn,
@@ -1476,7 +1485,7 @@ class AccountsCompanion extends UpdateCompanion<Account> {
   final Value<String> name;
   final Value<String> groupId;
   final Value<int> parentId;
-  final Value<String> type;
+  final Value<AccountType> type;
   final Value<String> memberId;
   final Value<double> balance;
   final Value<DateTime> createdOn;
@@ -1533,7 +1542,7 @@ class AccountsCompanion extends UpdateCompanion<Account> {
       Value<String> name,
       Value<String> groupId,
       Value<int> parentId,
-      Value<String> type,
+      Value<AccountType> type,
       Value<String> memberId,
       Value<double> balance,
       Value<DateTime> createdOn,
@@ -1567,7 +1576,8 @@ class AccountsCompanion extends UpdateCompanion<Account> {
       map['parentId'] = Variable<int>(parentId.value);
     }
     if (type.present) {
-      map['type'] = Variable<String>(type.value);
+      final converter = $AccountsTable.$converter0;
+      map['type'] = Variable<String>(converter.mapToSql(type.value));
     }
     if (memberId.present) {
       map['memberId'] = Variable<String>(memberId.value);
@@ -1630,9 +1640,11 @@ class $AccountsTable extends Accounts with TableInfo<$AccountsTable, Account> {
   @override
   GeneratedTextColumn get type => _type ??= _constructType();
   GeneratedTextColumn _constructType() {
-    return GeneratedTextColumn('type', $tableName, true,
-        $customConstraints:
-            'CHECK (type IN (\'Group\',\'Cash\',\'Credit\',\'Bank\',\'Investment\')) NULL');
+    return GeneratedTextColumn(
+      'type',
+      $tableName,
+      true,
+    );
   }
 
   final VerificationMeta _memberIdMeta = const VerificationMeta('memberId');
@@ -1720,10 +1732,7 @@ class $AccountsTable extends Accounts with TableInfo<$AccountsTable, Account> {
       context.handle(_parentIdMeta,
           parentId.isAcceptableOrUnknown(data['parentId'], _parentIdMeta));
     }
-    if (data.containsKey('type')) {
-      context.handle(
-          _typeMeta, type.isAcceptableOrUnknown(data['type'], _typeMeta));
-    }
+    context.handle(_typeMeta, const VerificationResult.success());
     if (data.containsKey('memberId')) {
       context.handle(_memberIdMeta,
           memberId.isAcceptableOrUnknown(data['memberId'], _memberIdMeta));
@@ -1755,13 +1764,16 @@ class $AccountsTable extends Accounts with TableInfo<$AccountsTable, Account> {
   $AccountsTable createAlias(String alias) {
     return $AccountsTable(_db, alias);
   }
+
+  static TypeConverter<AccountType, String> $converter0 =
+      const EnumTypeConverter<AccountType>(AccountType.values);
 }
 
 class Category extends DataClass implements Insertable<Category> {
   final int id;
   final String name;
   final int parentId;
-  final String type;
+  final CategoryType type;
   final DateTime createdOn;
   final DateTime updatedOn;
   Category(
@@ -1782,7 +1794,8 @@ class Category extends DataClass implements Insertable<Category> {
       name: stringType.mapFromDatabaseResponse(data['${effectivePrefix}name']),
       parentId:
           intType.mapFromDatabaseResponse(data['${effectivePrefix}parentId']),
-      type: stringType.mapFromDatabaseResponse(data['${effectivePrefix}type']),
+      type: $CategoriesTable.$converter0.mapToDart(
+          stringType.mapFromDatabaseResponse(data['${effectivePrefix}type'])),
       createdOn: dateTimeType
           .mapFromDatabaseResponse(data['${effectivePrefix}createdOn']),
       updatedOn: dateTimeType
@@ -1802,7 +1815,8 @@ class Category extends DataClass implements Insertable<Category> {
       map['parentId'] = Variable<int>(parentId);
     }
     if (!nullToAbsent || type != null) {
-      map['type'] = Variable<String>(type);
+      final converter = $CategoriesTable.$converter0;
+      map['type'] = Variable<String>(converter.mapToSql(type));
     }
     if (!nullToAbsent || createdOn != null) {
       map['createdOn'] = Variable<DateTime>(createdOn);
@@ -1837,7 +1851,7 @@ class Category extends DataClass implements Insertable<Category> {
       id: serializer.fromJson<int>(json['id']),
       name: serializer.fromJson<String>(json['name']),
       parentId: serializer.fromJson<int>(json['parentId']),
-      type: serializer.fromJson<String>(json['type']),
+      type: serializer.fromJson<CategoryType>(json['type']),
       createdOn: serializer.fromJson<DateTime>(json['createdOn']),
       updatedOn: serializer.fromJson<DateTime>(json['updatedOn']),
     );
@@ -1849,7 +1863,7 @@ class Category extends DataClass implements Insertable<Category> {
       'id': serializer.toJson<int>(id),
       'name': serializer.toJson<String>(name),
       'parentId': serializer.toJson<int>(parentId),
-      'type': serializer.toJson<String>(type),
+      'type': serializer.toJson<CategoryType>(type),
       'createdOn': serializer.toJson<DateTime>(createdOn),
       'updatedOn': serializer.toJson<DateTime>(updatedOn),
     };
@@ -1859,7 +1873,7 @@ class Category extends DataClass implements Insertable<Category> {
           {int id,
           String name,
           int parentId,
-          String type,
+          CategoryType type,
           DateTime createdOn,
           DateTime updatedOn}) =>
       Category(
@@ -1908,7 +1922,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
   final Value<int> id;
   final Value<String> name;
   final Value<int> parentId;
-  final Value<String> type;
+  final Value<CategoryType> type;
   final Value<DateTime> createdOn;
   final Value<DateTime> updatedOn;
   const CategoriesCompanion({
@@ -1949,7 +1963,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
       {Value<int> id,
       Value<String> name,
       Value<int> parentId,
-      Value<String> type,
+      Value<CategoryType> type,
       Value<DateTime> createdOn,
       Value<DateTime> updatedOn}) {
     return CategoriesCompanion(
@@ -1975,7 +1989,8 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
       map['parentId'] = Variable<int>(parentId.value);
     }
     if (type.present) {
-      map['type'] = Variable<String>(type.value);
+      final converter = $CategoriesTable.$converter0;
+      map['type'] = Variable<String>(converter.mapToSql(type.value));
     }
     if (createdOn.present) {
       map['createdOn'] = Variable<DateTime>(createdOn.value);
@@ -2023,9 +2038,11 @@ class $CategoriesTable extends Categories
   @override
   GeneratedTextColumn get type => _type ??= _constructType();
   GeneratedTextColumn _constructType() {
-    return GeneratedTextColumn('type', $tableName, true,
-        $customConstraints:
-            'CHECK (type IN (\'Expense\',\'Liability\',\'Income\',\'Investment\',\'Misc\')) NOT NULL DEFAULT \'Misc\'');
+    return GeneratedTextColumn(
+      'type',
+      $tableName,
+      true,
+    );
   }
 
   final VerificationMeta _createdOnMeta = const VerificationMeta('createdOn');
@@ -2079,10 +2096,7 @@ class $CategoriesTable extends Categories
       context.handle(_parentIdMeta,
           parentId.isAcceptableOrUnknown(data['parentId'], _parentIdMeta));
     }
-    if (data.containsKey('type')) {
-      context.handle(
-          _typeMeta, type.isAcceptableOrUnknown(data['type'], _typeMeta));
-    }
+    context.handle(_typeMeta, const VerificationResult.success());
     if (data.containsKey('createdOn')) {
       context.handle(_createdOnMeta,
           createdOn.isAcceptableOrUnknown(data['createdOn'], _createdOnMeta));
@@ -2106,6 +2120,10 @@ class $CategoriesTable extends Categories
   $CategoriesTable createAlias(String alias) {
     return $CategoriesTable(_db, alias);
   }
+
+  static TypeConverter<CategoryType, String> $converter0 =
+      const EnumTypeConverter<CategoryType>(
+          CategoryType.values, CategoryType.Misc);
 }
 
 class Settlement extends DataClass implements Insertable<Settlement> {
@@ -3560,8 +3578,8 @@ class AppFont extends DataClass implements Insertable<AppFont> {
   final int id;
   final String name;
   final String family;
-  final String type;
-  final String style;
+  final FontType type;
+  final FontStyle style;
   final int weight;
   final DateTime createdOn;
   final DateTime updatedOn;
@@ -3585,9 +3603,10 @@ class AppFont extends DataClass implements Insertable<AppFont> {
       name: stringType.mapFromDatabaseResponse(data['${effectivePrefix}name']),
       family:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}family']),
-      type: stringType.mapFromDatabaseResponse(data['${effectivePrefix}type']),
-      style:
-          stringType.mapFromDatabaseResponse(data['${effectivePrefix}style']),
+      type: $AppFontsTable.$converter0.mapToDart(
+          stringType.mapFromDatabaseResponse(data['${effectivePrefix}type'])),
+      style: $AppFontsTable.$converter1.mapToDart(
+          stringType.mapFromDatabaseResponse(data['${effectivePrefix}style'])),
       weight: intType.mapFromDatabaseResponse(data['${effectivePrefix}weight']),
       createdOn: dateTimeType
           .mapFromDatabaseResponse(data['${effectivePrefix}createdOn']),
@@ -3608,10 +3627,12 @@ class AppFont extends DataClass implements Insertable<AppFont> {
       map['family'] = Variable<String>(family);
     }
     if (!nullToAbsent || type != null) {
-      map['type'] = Variable<String>(type);
+      final converter = $AppFontsTable.$converter0;
+      map['type'] = Variable<String>(converter.mapToSql(type));
     }
     if (!nullToAbsent || style != null) {
-      map['style'] = Variable<String>(style);
+      final converter = $AppFontsTable.$converter1;
+      map['style'] = Variable<String>(converter.mapToSql(style));
     }
     if (!nullToAbsent || weight != null) {
       map['weight'] = Variable<int>(weight);
@@ -3652,8 +3673,8 @@ class AppFont extends DataClass implements Insertable<AppFont> {
       id: serializer.fromJson<int>(json['id']),
       name: serializer.fromJson<String>(json['name']),
       family: serializer.fromJson<String>(json['family']),
-      type: serializer.fromJson<String>(json['type']),
-      style: serializer.fromJson<String>(json['style']),
+      type: serializer.fromJson<FontType>(json['type']),
+      style: serializer.fromJson<FontStyle>(json['style']),
       weight: serializer.fromJson<int>(json['weight']),
       createdOn: serializer.fromJson<DateTime>(json['createdOn']),
       updatedOn: serializer.fromJson<DateTime>(json['updatedOn']),
@@ -3666,8 +3687,8 @@ class AppFont extends DataClass implements Insertable<AppFont> {
       'id': serializer.toJson<int>(id),
       'name': serializer.toJson<String>(name),
       'family': serializer.toJson<String>(family),
-      'type': serializer.toJson<String>(type),
-      'style': serializer.toJson<String>(style),
+      'type': serializer.toJson<FontType>(type),
+      'style': serializer.toJson<FontStyle>(style),
       'weight': serializer.toJson<int>(weight),
       'createdOn': serializer.toJson<DateTime>(createdOn),
       'updatedOn': serializer.toJson<DateTime>(updatedOn),
@@ -3678,8 +3699,8 @@ class AppFont extends DataClass implements Insertable<AppFont> {
           {int id,
           String name,
           String family,
-          String type,
-          String style,
+          FontType type,
+          FontStyle style,
           int weight,
           DateTime createdOn,
           DateTime updatedOn}) =>
@@ -3739,8 +3760,8 @@ class AppFontsCompanion extends UpdateCompanion<AppFont> {
   final Value<int> id;
   final Value<String> name;
   final Value<String> family;
-  final Value<String> type;
-  final Value<String> style;
+  final Value<FontType> type;
+  final Value<FontStyle> style;
   final Value<int> weight;
   final Value<DateTime> createdOn;
   final Value<DateTime> updatedOn;
@@ -3758,8 +3779,8 @@ class AppFontsCompanion extends UpdateCompanion<AppFont> {
     this.id = const Value.absent(),
     @required String name,
     @required String family,
-    @required String type,
-    @required String style,
+    @required FontType type,
+    @required FontStyle style,
     this.weight = const Value.absent(),
     this.createdOn = const Value.absent(),
     this.updatedOn = const Value.absent(),
@@ -3793,8 +3814,8 @@ class AppFontsCompanion extends UpdateCompanion<AppFont> {
       {Value<int> id,
       Value<String> name,
       Value<String> family,
-      Value<String> type,
-      Value<String> style,
+      Value<FontType> type,
+      Value<FontStyle> style,
       Value<int> weight,
       Value<DateTime> createdOn,
       Value<DateTime> updatedOn}) {
@@ -3823,10 +3844,12 @@ class AppFontsCompanion extends UpdateCompanion<AppFont> {
       map['family'] = Variable<String>(family.value);
     }
     if (type.present) {
-      map['type'] = Variable<String>(type.value);
+      final converter = $AppFontsTable.$converter0;
+      map['type'] = Variable<String>(converter.mapToSql(type.value));
     }
     if (style.present) {
-      map['style'] = Variable<String>(style.value);
+      final converter = $AppFontsTable.$converter1;
+      map['style'] = Variable<String>(converter.mapToSql(style.value));
     }
     if (weight.present) {
       map['weight'] = Variable<int>(weight.value);
@@ -3875,8 +3898,11 @@ class $AppFontsTable extends AppFonts with TableInfo<$AppFontsTable, AppFont> {
   @override
   GeneratedTextColumn get type => _type ??= _constructType();
   GeneratedTextColumn _constructType() {
-    return GeneratedTextColumn('type', $tableName, false,
-        $customConstraints: 'CHECK (type IN (\'Regular\',\'Mono\')) NOT NULL');
+    return GeneratedTextColumn(
+      'type',
+      $tableName,
+      false,
+    );
   }
 
   final VerificationMeta _styleMeta = const VerificationMeta('style');
@@ -3884,9 +3910,11 @@ class $AppFontsTable extends AppFonts with TableInfo<$AppFontsTable, AppFont> {
   @override
   GeneratedTextColumn get style => _style ??= _constructStyle();
   GeneratedTextColumn _constructStyle() {
-    return GeneratedTextColumn('style', $tableName, false,
-        $customConstraints:
-            'CHECK (style IN (\'Regular\',\'Italic\',\'Bold\',\'BoldItalic\')) NOT NULL');
+    return GeneratedTextColumn(
+      'style',
+      $tableName,
+      false,
+    );
   }
 
   final VerificationMeta _weightMeta = const VerificationMeta('weight');
@@ -3951,18 +3979,8 @@ class $AppFontsTable extends AppFonts with TableInfo<$AppFontsTable, AppFont> {
     } else if (isInserting) {
       context.missing(_familyMeta);
     }
-    if (data.containsKey('type')) {
-      context.handle(
-          _typeMeta, type.isAcceptableOrUnknown(data['type'], _typeMeta));
-    } else if (isInserting) {
-      context.missing(_typeMeta);
-    }
-    if (data.containsKey('style')) {
-      context.handle(
-          _styleMeta, style.isAcceptableOrUnknown(data['style'], _styleMeta));
-    } else if (isInserting) {
-      context.missing(_styleMeta);
-    }
+    context.handle(_typeMeta, const VerificationResult.success());
+    context.handle(_styleMeta, const VerificationResult.success());
     if (data.containsKey('weight')) {
       context.handle(_weightMeta,
           weight.isAcceptableOrUnknown(data['weight'], _weightMeta));
@@ -3990,6 +4008,11 @@ class $AppFontsTable extends AppFonts with TableInfo<$AppFontsTable, AppFont> {
   $AppFontsTable createAlias(String alias) {
     return $AppFontsTable(_db, alias);
   }
+
+  static TypeConverter<FontType, String> $converter0 =
+      const EnumTypeConverter<FontType>(FontType.values);
+  static TypeConverter<FontStyle, String> $converter1 =
+      const EnumTypeConverter<FontStyle>(FontStyle.values);
 }
 
 class FontCombo extends DataClass implements Insertable<FontCombo> {
@@ -4782,7 +4805,7 @@ class $FontCombosTable extends FontCombos
 class ColorCombo extends DataClass implements Insertable<ColorCombo> {
   final int id;
   final String name;
-  final String mode;
+  final ThemeMode mode;
   final String backColor;
   final String foreColor;
   final DateTime createdOn;
@@ -4804,7 +4827,8 @@ class ColorCombo extends DataClass implements Insertable<ColorCombo> {
     return ColorCombo(
       id: intType.mapFromDatabaseResponse(data['${effectivePrefix}id']),
       name: stringType.mapFromDatabaseResponse(data['${effectivePrefix}name']),
-      mode: stringType.mapFromDatabaseResponse(data['${effectivePrefix}mode']),
+      mode: $ColorCombosTable.$converter0.mapToDart(
+          stringType.mapFromDatabaseResponse(data['${effectivePrefix}mode'])),
       backColor: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}backColor']),
       foreColor: stringType
@@ -4825,7 +4849,8 @@ class ColorCombo extends DataClass implements Insertable<ColorCombo> {
       map['name'] = Variable<String>(name);
     }
     if (!nullToAbsent || mode != null) {
-      map['mode'] = Variable<String>(mode);
+      final converter = $ColorCombosTable.$converter0;
+      map['mode'] = Variable<String>(converter.mapToSql(mode));
     }
     if (!nullToAbsent || backColor != null) {
       map['backColor'] = Variable<String>(backColor);
@@ -4868,7 +4893,7 @@ class ColorCombo extends DataClass implements Insertable<ColorCombo> {
     return ColorCombo(
       id: serializer.fromJson<int>(json['id']),
       name: serializer.fromJson<String>(json['name']),
-      mode: serializer.fromJson<String>(json['mode']),
+      mode: serializer.fromJson<ThemeMode>(json['mode']),
       backColor: serializer.fromJson<String>(json['backColor']),
       foreColor: serializer.fromJson<String>(json['foreColor']),
       createdOn: serializer.fromJson<DateTime>(json['createdOn']),
@@ -4881,7 +4906,7 @@ class ColorCombo extends DataClass implements Insertable<ColorCombo> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'name': serializer.toJson<String>(name),
-      'mode': serializer.toJson<String>(mode),
+      'mode': serializer.toJson<ThemeMode>(mode),
       'backColor': serializer.toJson<String>(backColor),
       'foreColor': serializer.toJson<String>(foreColor),
       'createdOn': serializer.toJson<DateTime>(createdOn),
@@ -4892,7 +4917,7 @@ class ColorCombo extends DataClass implements Insertable<ColorCombo> {
   ColorCombo copyWith(
           {int id,
           String name,
-          String mode,
+          ThemeMode mode,
           String backColor,
           String foreColor,
           DateTime createdOn,
@@ -4947,7 +4972,7 @@ class ColorCombo extends DataClass implements Insertable<ColorCombo> {
 class ColorCombosCompanion extends UpdateCompanion<ColorCombo> {
   final Value<int> id;
   final Value<String> name;
-  final Value<String> mode;
+  final Value<ThemeMode> mode;
   final Value<String> backColor;
   final Value<String> foreColor;
   final Value<DateTime> createdOn;
@@ -4964,7 +4989,7 @@ class ColorCombosCompanion extends UpdateCompanion<ColorCombo> {
   ColorCombosCompanion.insert({
     this.id = const Value.absent(),
     @required String name,
-    @required String mode,
+    @required ThemeMode mode,
     @required String backColor,
     @required String foreColor,
     this.createdOn = const Value.absent(),
@@ -4996,7 +5021,7 @@ class ColorCombosCompanion extends UpdateCompanion<ColorCombo> {
   ColorCombosCompanion copyWith(
       {Value<int> id,
       Value<String> name,
-      Value<String> mode,
+      Value<ThemeMode> mode,
       Value<String> backColor,
       Value<String> foreColor,
       Value<DateTime> createdOn,
@@ -5022,7 +5047,8 @@ class ColorCombosCompanion extends UpdateCompanion<ColorCombo> {
       map['name'] = Variable<String>(name.value);
     }
     if (mode.present) {
-      map['mode'] = Variable<String>(mode.value);
+      final converter = $ColorCombosTable.$converter0;
+      map['mode'] = Variable<String>(converter.mapToSql(mode.value));
     }
     if (backColor.present) {
       map['backColor'] = Variable<String>(backColor.value);
@@ -5067,8 +5093,11 @@ class $ColorCombosTable extends ColorCombos
   @override
   GeneratedTextColumn get mode => _mode ??= _constructMode();
   GeneratedTextColumn _constructMode() {
-    return GeneratedTextColumn('mode', $tableName, false,
-        $customConstraints: 'CHECK (mode IN (\'Bright\',\'Dark\')) NOT NULL');
+    return GeneratedTextColumn(
+      'mode',
+      $tableName,
+      false,
+    );
   }
 
   final VerificationMeta _backColorMeta = const VerificationMeta('backColor');
@@ -5136,12 +5165,7 @@ class $ColorCombosTable extends ColorCombos
     } else if (isInserting) {
       context.missing(_nameMeta);
     }
-    if (data.containsKey('mode')) {
-      context.handle(
-          _modeMeta, mode.isAcceptableOrUnknown(data['mode'], _modeMeta));
-    } else if (isInserting) {
-      context.missing(_modeMeta);
-    }
+    context.handle(_modeMeta, const VerificationResult.success());
     if (data.containsKey('backColor')) {
       context.handle(_backColorMeta,
           backColor.isAcceptableOrUnknown(data['backColor'], _backColorMeta));
@@ -5177,12 +5201,15 @@ class $ColorCombosTable extends ColorCombos
   $ColorCombosTable createAlias(String alias) {
     return $ColorCombosTable(_db, alias);
   }
+
+  static TypeConverter<ThemeMode, String> $converter0 =
+      const EnumTypeConverter<ThemeMode>(ThemeMode.values);
 }
 
 class AppSetting extends DataClass implements Insertable<AppSetting> {
   final String name;
   final String value;
-  final String type;
+  final AppSettingType type;
   final DateTime createdOn;
   final DateTime updatedOn;
   AppSetting(
@@ -5200,7 +5227,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       name: stringType.mapFromDatabaseResponse(data['${effectivePrefix}name']),
       value:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}value']),
-      type: stringType.mapFromDatabaseResponse(data['${effectivePrefix}type']),
+      type: $AppSettingsTable.$converter0.mapToDart(
+          stringType.mapFromDatabaseResponse(data['${effectivePrefix}type'])),
       createdOn: dateTimeType
           .mapFromDatabaseResponse(data['${effectivePrefix}createdOn']),
       updatedOn: dateTimeType
@@ -5217,7 +5245,8 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
       map['value'] = Variable<String>(value);
     }
     if (!nullToAbsent || type != null) {
-      map['type'] = Variable<String>(type);
+      final converter = $AppSettingsTable.$converter0;
+      map['type'] = Variable<String>(converter.mapToSql(type));
     }
     if (!nullToAbsent || createdOn != null) {
       map['createdOn'] = Variable<DateTime>(createdOn);
@@ -5249,7 +5278,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     return AppSetting(
       name: serializer.fromJson<String>(json['name']),
       value: serializer.fromJson<String>(json['value']),
-      type: serializer.fromJson<String>(json['type']),
+      type: serializer.fromJson<AppSettingType>(json['type']),
       createdOn: serializer.fromJson<DateTime>(json['createdOn']),
       updatedOn: serializer.fromJson<DateTime>(json['updatedOn']),
     );
@@ -5260,7 +5289,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
     return <String, dynamic>{
       'name': serializer.toJson<String>(name),
       'value': serializer.toJson<String>(value),
-      'type': serializer.toJson<String>(type),
+      'type': serializer.toJson<AppSettingType>(type),
       'createdOn': serializer.toJson<DateTime>(createdOn),
       'updatedOn': serializer.toJson<DateTime>(updatedOn),
     };
@@ -5269,7 +5298,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
   AppSetting copyWith(
           {String name,
           String value,
-          String type,
+          AppSettingType type,
           DateTime createdOn,
           DateTime updatedOn}) =>
       AppSetting(
@@ -5312,7 +5341,7 @@ class AppSetting extends DataClass implements Insertable<AppSetting> {
 class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
   final Value<String> name;
   final Value<String> value;
-  final Value<String> type;
+  final Value<AppSettingType> type;
   final Value<DateTime> createdOn;
   final Value<DateTime> updatedOn;
   const AppSettingsCompanion({
@@ -5349,7 +5378,7 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
   AppSettingsCompanion copyWith(
       {Value<String> name,
       Value<String> value,
-      Value<String> type,
+      Value<AppSettingType> type,
       Value<DateTime> createdOn,
       Value<DateTime> updatedOn}) {
     return AppSettingsCompanion(
@@ -5371,7 +5400,8 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
       map['value'] = Variable<String>(value.value);
     }
     if (type.present) {
-      map['type'] = Variable<String>(type.value);
+      final converter = $AppSettingsTable.$converter0;
+      map['type'] = Variable<String>(converter.mapToSql(type.value));
     }
     if (createdOn.present) {
       map['createdOn'] = Variable<DateTime>(createdOn.value);
@@ -5413,9 +5443,11 @@ class $AppSettingsTable extends AppSettings
   @override
   GeneratedTextColumn get type => _type ??= _constructType();
   GeneratedTextColumn _constructType() {
-    return GeneratedTextColumn('type', $tableName, true,
-        $customConstraints:
-            'CHECK (type IN (\'String\',\'Number\',\'Bool\',\'List\',\'AppInfo\',\'ThemeMode\')) NOT NULL  DEFAULT \'String\'');
+    return GeneratedTextColumn(
+      'type',
+      $tableName,
+      true,
+    );
   }
 
   final VerificationMeta _createdOnMeta = const VerificationMeta('createdOn');
@@ -5468,10 +5500,7 @@ class $AppSettingsTable extends AppSettings
     } else if (isInserting) {
       context.missing(_valueMeta);
     }
-    if (data.containsKey('type')) {
-      context.handle(
-          _typeMeta, type.isAcceptableOrUnknown(data['type'], _typeMeta));
-    }
+    context.handle(_typeMeta, const VerificationResult.success());
     if (data.containsKey('createdOn')) {
       context.handle(_createdOnMeta,
           createdOn.isAcceptableOrUnknown(data['createdOn'], _createdOnMeta));
@@ -5495,6 +5524,10 @@ class $AppSettingsTable extends AppSettings
   $AppSettingsTable createAlias(String alias) {
     return $AppSettingsTable(_db, alias);
   }
+
+  static TypeConverter<AppSettingType, String> $converter0 =
+      const EnumTypeConverter<AppSettingType>(
+          AppSettingType.values, AppSettingType.String);
 }
 
 abstract class _$SprightlySetupDatabase extends GeneratedDatabase {

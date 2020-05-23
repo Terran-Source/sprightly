@@ -54,9 +54,7 @@ class AppSettings extends AppParameter<Setting> with _BaseData {
     // get & set all settings from AppSettings table
     _dao.allAppSettings.forEach((appSetting) {
       super.updateParameter(
-          appSetting.name,
-          Setting.from(
-              appSetting, AppSettingType.values.find(appSetting.type)));
+          appSetting.name, Setting.from(appSetting, appSetting.type));
     });
   }
 

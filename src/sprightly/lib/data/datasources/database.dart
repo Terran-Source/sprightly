@@ -5,9 +5,10 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:moor/moor.dart';
 import 'package:moor_ffi/moor_ffi.dart';
-import 'package:sprightly/extensions/enum_extensions.dart';
 import 'package:sprightly/data/constants/enums.dart';
 import 'package:sprightly/data/dao.dart';
+import 'package:sprightly/data/datasources/enum_type_converter.dart';
+import 'package:sprightly/extensions/enum_extensions.dart';
 import 'package:sprightly/utils/file_provider.dart';
 import 'package:sprightly/utils/happy_hash.dart';
 import 'package:sprightly/utils/ready_or_not.dart';
@@ -32,8 +33,9 @@ class Members extends Table {
   TextColumn get nickName =>
       text().named('nickName').nullable().withLength(max: 10)();
   TextColumn get avatar => text().named('avatar').nullable()();
-  TextColumn get idType => text().named('idType').customConstraint(
-      "CHECK (idType IN ('Phone','Email','NickName','Group','GroupMember')) NOT NULL")();
+  TextColumn get idType => text()
+      .named('idType')
+      .map(const EnumTypeConverter<MemberIdType>(MemberIdType.values))();
   TextColumn get idValue => text().named('idValue').withLength(max: 50)();
   TextColumn get secondaryIdValue =>
       text().named('secondaryIdValue').nullable().withLength(max: 50)();
@@ -59,11 +61,8 @@ class Groups extends Table {
 
   TextColumn get id => text().named('id').withLength(min: 16)();
   TextColumn get name => text().named('name').withLength(max: 50)();
-  TextColumn get type => text()
-      .named('type')
-      .nullable()
-      .customConstraint("CHECK (type IN ('Personal','Budget','Shared'))"
-          " NOT NULL DEFAULT 'Shared'")();
+  TextColumn get type => text().named('type').nullable().map(
+      const EnumTypeConverter<GroupType>(GroupType.values, GroupType.Shared))();
   BoolColumn get isHidden =>
       boolean().named('isHidden').withDefault(const Constant(false))();
   DateTimeColumn get createdOn => dateTime()
@@ -119,8 +118,10 @@ class Accounts extends Table {
       .named('parentId')
       .nullable()
       .customConstraint('REFERENCES Accounts(id) NULL ON UPDATE CASCADE')();
-  TextColumn get type => text().named('type').nullable().customConstraint(
-      "CHECK (type IN ('Group','Cash','Credit','Bank','Investment')) NULL")();
+  TextColumn get type => text()
+      .named('type')
+      .nullable()
+      .map(const EnumTypeConverter<AccountType>(AccountType.values))();
   TextColumn get memberId => text()
       .named('memberId')
       .nullable()
@@ -148,9 +149,9 @@ class Categories extends Table {
       .named('parentId')
       .nullable()
       .customConstraint('REFERENCES Categories(id) NULL ON UPDATE CASCADE')();
-  TextColumn get type => text().named('type').nullable().customConstraint(
-      "CHECK (type IN ('Expense','Liability','Income','Investment','Misc'))"
-      " NOT NULL DEFAULT 'Misc'")();
+  TextColumn get type =>
+      text().named('type').nullable().map(const EnumTypeConverter<CategoryType>(
+          CategoryType.values, CategoryType.Misc))();
   DateTimeColumn get createdOn => dateTime()
       .named('createdOn')
       .clientDefault(() => DateTime.now().toUtc())();
@@ -261,9 +262,10 @@ class AppFonts extends Table {
   TextColumn get family => text().named('family').withLength(max: 20)();
   TextColumn get type => text()
       .named('type')
-      .customConstraint("CHECK (type IN ('Regular','Mono')) NOT NULL")();
-  TextColumn get style => text().named('style').customConstraint(
-      "CHECK (style IN ('Regular','Italic','Bold','BoldItalic')) NOT NULL")();
+      .map(const EnumTypeConverter<FontType>(FontType.values))();
+  TextColumn get style => text()
+      .named('style')
+      .map(const EnumTypeConverter<FontStyle>(FontStyle.values))();
   IntColumn get weight =>
       integer().named('weight').withDefault(const Constant(100))();
   DateTimeColumn get createdOn => dateTime()
@@ -341,7 +343,7 @@ class ColorCombos extends Table {
   TextColumn get name => text().named('name').withLength(max: 50)();
   TextColumn get mode => text()
       .named('mode')
-      .customConstraint("CHECK (mode IN ('Bright','Dark')) NOT NULL")();
+      .map(const EnumTypeConverter<ThemeMode>(ThemeMode.values))();
   TextColumn get backColor =>
       text().named('backColor').withLength(min: 3, max: 6)();
   TextColumn get foreColor =>
@@ -362,8 +364,9 @@ class AppSettings extends Table {
 
   TextColumn get name => text().named('name').withLength(max: 50)();
   TextColumn get value => text().named('value')();
-  TextColumn get type => text().named('type').nullable().customConstraint(
-      "CHECK (type IN ('String','Number','Bool','List','AppInfo','ThemeMode')) NOT NULL  DEFAULT 'String'")();
+  TextColumn get type => text().named('type').nullable().map(
+      const EnumTypeConverter<AppSettingType>(
+          AppSettingType.values, AppSettingType.String))();
   DateTimeColumn get createdOn => dateTime()
       .named('createdOn')
       .clientDefault(() => DateTime.now().toUtc())();
@@ -693,7 +696,7 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
         name: Value(name),
         nickName: Value(nickName),
         avatar: Value(avatar),
-        idType: idType.toEnumString(),
+        idType: idType,
         idValue: idValue,
         secondaryIdValue: Value(secondaryIdValue),
         isGroupExpense: Value(isGroupExpense),
@@ -756,7 +759,7 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
         name: name,
         nickName: nickName,
         avatar: avatar,
-        idType: idType.toEnumString(),
+        idType: idType,
         idValue: idValue,
         secondaryIdValue: secondaryIdValue,
         signature: signature,
@@ -982,7 +985,7 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
       name: name,
       groupId: groupId,
       parentId: Value(parentId),
-      type: Value(type.toEnumString()),
+      type: Value(type),
       memberId: Value(memberId),
       balance: Value(balance),
     );
@@ -1002,7 +1005,7 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
       name: name,
       groupId: groupId,
       parentId: parentId,
-      type: type.toEnumString(),
+      type: type,
       memberId: memberId,
       balance: balance,
       updatedOn: DateTime.now().toUtc(),
@@ -1044,7 +1047,7 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
     var newGroupComp = GroupsCompanion.insert(
       id: groupId,
       name: name,
-      type: Value(type.toEnumString()),
+      type: Value(type),
       isHidden: Value(isHidden),
     );
     await into(groups).insert(newGroupComp);
@@ -1058,7 +1061,7 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
     var group = await getGroup(groupId);
     group.copyWith(
       name: name,
-      type: type.toEnumString(),
+      type: type,
       isHidden: isHidden,
       updatedOn: DateTime.now().toUtc(),
     );
@@ -1154,7 +1157,7 @@ class SprightlySetupDao extends DatabaseAccessor<SprightlySetupDatabase>
     var appSetting = await getAppSetting(name);
     appSetting.copyWith(
       value: value,
-      type: type.toEnumString(),
+      type: type,
       updatedOn: DateTime.now().toUtc(),
     );
     var result = updateRecord(appSettings, appSetting);
