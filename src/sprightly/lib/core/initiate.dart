@@ -20,7 +20,9 @@ Future<bool> initiate({
     exceptionDisplay[PreConditionFailedException] =
         'Cannot go further. {message}';
 
-    container.registerSingleton((container) => RemoteFileCache());
+    final remoteFileCache = RemoteFileCache();
+    await remoteFileCache.getReady();
+    container.registerSingleton((container) => remoteFileCache);
 
     // initiate database
     await dbInitiate.initiate(container,
