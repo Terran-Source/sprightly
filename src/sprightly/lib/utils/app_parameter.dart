@@ -11,7 +11,6 @@ class Parameter<T> {
 
   Parameter(this.name, this._value);
 
-  @protected
   static Parameter ofType<Tp>(String name, Tp value) =>
       Parameter<Tp>(name, value);
 
