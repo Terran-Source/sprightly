@@ -2,11 +2,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:sprightly/features/settings/domain/entities/setting_entities.dart';
 import 'package:sprightly/data/constants/enums.dart';
-import 'package:sprightly/data/repositories/settings.dart' as db;
+import 'package:sprightly/data/repositories/settings.dart';
 
-class MockDbAppSettings extends Mock implements db.AppSettings {}
+class MockGlobalSettingsRepo extends Mock implements SettingsRepo {}
 
-MockDbAppSettings mockSettings = MockDbAppSettings();
+MockGlobalSettingsRepo mockSettingsRepo = MockGlobalSettingsRepo();
 
 void main() {
   testAppDetails();
@@ -19,17 +19,17 @@ void testAppDetails() {
     setUp(() {
       //mockSettings = MockDbAppSettings();
       // arrange
-      when(mockSettings.appName).thenReturn('Sprightly');
-      when(mockSettings.packageName).thenReturn('com.marganam.sprightly');
-      when(mockSettings.version).thenReturn('1.0.0');
-      when(mockSettings.buildNumber).thenReturn('100');
-      when(mockSettings.dbVersion).thenReturn(1);
+      when(mockSettingsRepo.appName).thenReturn('Sprightly');
+      when(mockSettingsRepo.packageName).thenReturn('com.marganam.sprightly');
+      when(mockSettingsRepo.version).thenReturn('1.0.0');
+      when(mockSettingsRepo.buildNumber).thenReturn('100');
+      when(mockSettingsRepo.dbVersion).thenReturn(1);
 
       // act
-      entity = AppDetails.fromDB(mockSettings);
+      entity = AppDetails.fromDB(mockSettingsRepo);
     });
     tearDown(() {
-      reset(mockSettings);
+      reset(mockSettingsRepo);
     });
     test('success', () {
       // assert
@@ -39,24 +39,24 @@ void testAppDetails() {
       expect(entity.version, '1.0.0');
       expect(entity.buildNumber, '100');
       expect(entity.dbVersion, 1);
-      verify(mockSettings.appName);
-      verify(mockSettings.packageName);
-      verify(mockSettings.version);
-      verify(mockSettings.buildNumber);
-      verify(mockSettings.dbVersion);
+      verify(mockSettingsRepo.appName);
+      verify(mockSettingsRepo.packageName);
+      verify(mockSettingsRepo.version);
+      verify(mockSettingsRepo.buildNumber);
+      verify(mockSettingsRepo.dbVersion);
     });
     test('singleton instance', () {
       // re-arrange
-      reset(mockSettings);
-      final anotherEntity = AppDetails.fromDB(mockSettings);
+      reset(mockSettingsRepo);
+      final anotherEntity = AppDetails.fromDB(mockSettingsRepo);
 
       // assert
       expect(entity, anotherEntity);
-      verifyNever(mockSettings.appName);
-      verifyNever(mockSettings.packageName);
-      verifyNever(mockSettings.version);
-      verifyNever(mockSettings.buildNumber);
-      verifyNever(mockSettings.dbVersion);
+      verifyNever(mockSettingsRepo.appName);
+      verifyNever(mockSettingsRepo.packageName);
+      verifyNever(mockSettingsRepo.version);
+      verifyNever(mockSettingsRepo.buildNumber);
+      verifyNever(mockSettingsRepo.dbVersion);
     });
   });
 }
@@ -65,17 +65,17 @@ void testAppSettings() {
   AppSettings entity;
   group('test AppSettings', () {
     setUp(() {
-      entity = AppSettings.fromDB(mockSettings);
+      entity = AppSettings.fromDB(mockSettingsRepo);
     });
     tearDown(() {
-      reset(mockSettings);
+      reset(mockSettingsRepo);
     });
     test('success', () {
       // arrange
-      when(mockSettings.environment).thenReturn('Test');
-      when(mockSettings.debug).thenReturn(false);
-      when(mockSettings.primarySetupComplete).thenReturn(false);
-      when(mockSettings.themeMode).thenReturn(ThemeMode.Dark);
+      when(mockSettingsRepo.environment).thenReturn('Test');
+      when(mockSettingsRepo.debug).thenReturn(false);
+      when(mockSettingsRepo.primarySetupComplete).thenReturn(false);
+      when(mockSettingsRepo.themeMode).thenReturn(ThemeMode.Dark);
 
       // assert
       expect(entity, isA<AppSettings>());
@@ -83,21 +83,21 @@ void testAppSettings() {
       expect(entity.debug, false);
       expect(entity.primarySetupComplete, false);
       expect(entity.themeMode, ThemeMode.Dark);
-      verify(mockSettings.environment);
-      verify(mockSettings.debug);
-      verify(mockSettings.primarySetupComplete);
-      verify(mockSettings.themeMode);
+      verify(mockSettingsRepo.environment);
+      verify(mockSettingsRepo.debug);
+      verify(mockSettingsRepo.primarySetupComplete);
+      verify(mockSettingsRepo.themeMode);
     });
     test('singleton instance', () {
       // act
-      final anotherEntity = AppSettings.fromDB(mockSettings);
+      final anotherEntity = AppSettings.fromDB(mockSettingsRepo);
 
       // assert
       expect(entity, anotherEntity);
-      verifyNever(mockSettings.environment);
-      verifyNever(mockSettings.debug);
-      verifyNever(mockSettings.primarySetupComplete);
-      verifyNever(mockSettings.themeMode);
+      verifyNever(mockSettingsRepo.environment);
+      verifyNever(mockSettingsRepo.debug);
+      verifyNever(mockSettingsRepo.primarySetupComplete);
+      verifyNever(mockSettingsRepo.themeMode);
     });
     group('setter test', () {
       test('set debug', () {
@@ -105,30 +105,30 @@ void testAppSettings() {
         entity.debug = true;
 
         // assert
-        verify(mockSettings.debug = true);
-        verifyNever(mockSettings.environment);
-        verifyNever(mockSettings.primarySetupComplete = any);
-        verifyNever(mockSettings.themeMode = any);
+        verify(mockSettingsRepo.debug = true);
+        verifyNever(mockSettingsRepo.environment);
+        verifyNever(mockSettingsRepo.primarySetupComplete = any);
+        verifyNever(mockSettingsRepo.themeMode = any);
       });
       test('set primarySetupComplete', () {
         // act
         entity.primarySetupComplete = true;
 
         // assert
-        verify(mockSettings.primarySetupComplete = true);
-        verifyNever(mockSettings.environment);
-        verifyNever(mockSettings.debug = any);
-        verifyNever(mockSettings.themeMode = any);
+        verify(mockSettingsRepo.primarySetupComplete = true);
+        verifyNever(mockSettingsRepo.environment);
+        verifyNever(mockSettingsRepo.debug = any);
+        verifyNever(mockSettingsRepo.themeMode = any);
       });
       test('set themeMode', () {
         // act
         entity.themeMode = ThemeMode.Bright;
 
         // assert
-        verify(mockSettings.themeMode = any);
-        verifyNever(mockSettings.environment);
-        verifyNever(mockSettings.debug = any);
-        verifyNever(mockSettings.primarySetupComplete = any);
+        verify(mockSettingsRepo.themeMode = any);
+        verifyNever(mockSettingsRepo.environment);
+        verifyNever(mockSettingsRepo.debug = any);
+        verifyNever(mockSettingsRepo.primarySetupComplete = any);
       });
     });
   });

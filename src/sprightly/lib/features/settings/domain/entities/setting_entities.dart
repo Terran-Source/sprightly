@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:sprightly/data/constants/enums.dart';
-import 'package:sprightly/data/repositories/settings.dart' as db;
+import 'package:sprightly/data/repositories/settings.dart';
 
 class AppDetails extends Equatable {
   final String appName;
@@ -18,13 +18,13 @@ class AppDetails extends Equatable {
   );
 
   static AppDetails _cache;
-  factory AppDetails.fromDB(db.AppSettings appSettings) =>
+  factory AppDetails.fromDB(SettingsRepo settingsRepo) =>
       _cache ??= AppDetails._(
-        appSettings.appName,
-        appSettings.packageName,
-        appSettings.version,
-        appSettings.buildNumber,
-        appSettings.dbVersion,
+        settingsRepo.appName,
+        settingsRepo.packageName,
+        settingsRepo.version,
+        settingsRepo.buildNumber,
+        settingsRepo.dbVersion,
       );
 
   @override
@@ -33,24 +33,24 @@ class AppDetails extends Equatable {
 }
 
 class AppSettings extends Equatable {
-  final db.AppSettings _appSettings;
+  final SettingsRepo _settingsRepo;
 
-  AppSettings._(this._appSettings);
+  AppSettings._(this._settingsRepo);
 
   static AppSettings _cache;
-  factory AppSettings.fromDB(db.AppSettings appSettings) =>
+  factory AppSettings.fromDB(SettingsRepo appSettings) =>
       _cache ??= AppSettings._(appSettings);
 
   @override
   List<Object> get props =>
       [environment, debug, primarySetupComplete, themeMode];
 
-  String get environment => _appSettings.environment;
-  bool get debug => _appSettings.debug;
-  set debug(bool value) => _appSettings.debug = value;
-  bool get primarySetupComplete => _appSettings.primarySetupComplete;
+  String get environment => _settingsRepo.environment;
+  bool get debug => _settingsRepo.debug;
+  set debug(bool value) => _settingsRepo.debug = value;
+  bool get primarySetupComplete => _settingsRepo.primarySetupComplete;
   set primarySetupComplete(bool value) =>
-      _appSettings.primarySetupComplete = value;
-  ThemeMode get themeMode => _appSettings.themeMode;
-  set themeMode(ThemeMode mode) => _appSettings.themeMode = mode;
+      _settingsRepo.primarySetupComplete = value;
+  ThemeMode get themeMode => _settingsRepo.themeMode;
+  set themeMode(ThemeMode mode) => _settingsRepo.themeMode = mode;
 }

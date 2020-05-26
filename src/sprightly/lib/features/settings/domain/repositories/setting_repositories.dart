@@ -3,10 +3,10 @@ import 'package:sprightly/features/settings/domain/entities/setting_entities.dar
 import 'package:sprightly/data/repositories/settings.dart' as db;
 
 class SettingsRepo {
-  final db.AppSettings _appSettings;
+  final db.SettingsRepo _dbSettingsRepo;
 
-  SettingsRepo(this._appSettings);
+  SettingsRepo(this._dbSettingsRepo);
 
-  AppDetails appDetails() => AppDetails.fromDB(_appSettings);
-  AppSettings appSettings() => AppSettings.fromDB(_appSettings);
+  AppDetails appDetails() => AppDetails.fromDB(_dbSettingsRepo);
+  AppSettings appSettings() => AppSettings.fromDB(_dbSettingsRepo);
 }

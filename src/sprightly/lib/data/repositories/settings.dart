@@ -32,8 +32,8 @@ Parameter _settingFrom(AppSetting appSetting, AppSettingType type) {
   }
 }
 
-class AppSettings extends AppParameter<Parameter> with _BaseData {
-  AppSettings._(SettingsDao _dao, String environment) {
+class SettingsRepo extends AppParameter<Parameter> with _BaseData {
+  SettingsRepo._(SettingsDao _dao, String environment) {
     if (!_dao.ready)
       throw PreConditionFailedException(
           'SettingsDao has not completed loading yet');
@@ -54,9 +54,9 @@ class AppSettings extends AppParameter<Parameter> with _BaseData {
     });
   }
 
-  static AppSettings _cache;
-  factory AppSettings(SettingsDao dao, {String environment}) =>
-      _cache ??= AppSettings._(dao, environment ?? 'Prod');
+  static SettingsRepo _cache;
+  factory SettingsRepo(SettingsDao dao, {String environment}) =>
+      _cache ??= SettingsRepo._(dao, environment ?? 'Prod');
 
   AppSettingNames get _settingNames => AppSettingNames.universal;
 
