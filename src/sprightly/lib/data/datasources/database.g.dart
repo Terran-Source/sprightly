@@ -483,11 +483,9 @@ class $MembersTable extends Members with TableInfo<$MembersTable, Member> {
   @override
   GeneratedDateTimeColumn get createdOn => _createdOn ??= _constructCreatedOn();
   GeneratedDateTimeColumn _constructCreatedOn() {
-    return GeneratedDateTimeColumn(
-      'createdOn',
-      $tableName,
-      false,
-    )..clientDefault = () => DateTime.now().toUtc();
+    return GeneratedDateTimeColumn('createdOn', $tableName, false,
+        $customConstraints: 'NOT NULL DEFAULT (STRFTIME(\'%s\',\'now\'))')
+      ..clientDefault = () => DateTime.now().toUtc();
   }
 
   final VerificationMeta _updatedOnMeta = const VerificationMeta('updatedOn');
@@ -875,11 +873,9 @@ class $GroupsTable extends Groups with TableInfo<$GroupsTable, Group> {
   @override
   GeneratedDateTimeColumn get createdOn => _createdOn ??= _constructCreatedOn();
   GeneratedDateTimeColumn _constructCreatedOn() {
-    return GeneratedDateTimeColumn(
-      'createdOn',
-      $tableName,
-      false,
-    )..clientDefault = () => DateTime.now().toUtc();
+    return GeneratedDateTimeColumn('createdOn', $tableName, false,
+        $customConstraints: 'NOT NULL DEFAULT (STRFTIME(\'%s\',\'now\'))')
+      ..clientDefault = () => DateTime.now().toUtc();
   }
 
   final VerificationMeta _updatedOnMeta = const VerificationMeta('updatedOn');
@@ -1182,7 +1178,7 @@ class $GroupMembersTable extends GroupMembers
   GeneratedTextColumn _constructGroupId() {
     return GeneratedTextColumn('groupId', $tableName, false,
         minTextLength: 16,
-        $customConstraints: 'REFERENCES Groups(id) NOT NULL ON UPDATE CASCADE');
+        $customConstraints: 'REFERENCES Groups(id) NOT NULL');
   }
 
   final VerificationMeta _memberIdMeta = const VerificationMeta('memberId');
@@ -1192,8 +1188,7 @@ class $GroupMembersTable extends GroupMembers
   GeneratedTextColumn _constructMemberId() {
     return GeneratedTextColumn('memberId', $tableName, false,
         minTextLength: 16,
-        $customConstraints:
-            'REFERENCES Members(id) NOT NULL ON UPDATE CASCADE');
+        $customConstraints: 'REFERENCES Members(id) NOT NULL');
   }
 
   final VerificationMeta _createdOnMeta = const VerificationMeta('createdOn');
@@ -1201,11 +1196,9 @@ class $GroupMembersTable extends GroupMembers
   @override
   GeneratedDateTimeColumn get createdOn => _createdOn ??= _constructCreatedOn();
   GeneratedDateTimeColumn _constructCreatedOn() {
-    return GeneratedDateTimeColumn(
-      'createdOn',
-      $tableName,
-      false,
-    )..clientDefault = () => DateTime.now().toUtc();
+    return GeneratedDateTimeColumn('createdOn', $tableName, false,
+        $customConstraints: 'NOT NULL DEFAULT (STRFTIME(\'%s\',\'now\'))')
+      ..clientDefault = () => DateTime.now().toUtc();
   }
 
   final VerificationMeta _updatedOnMeta = const VerificationMeta('updatedOn');
@@ -1291,7 +1284,7 @@ class Account extends DataClass implements Insertable<Account> {
       this.parentId,
       this.type,
       this.memberId,
-      @required this.balance,
+      this.balance,
       @required this.createdOn,
       this.updatedOn});
   factory Account.fromData(Map<String, dynamic> data, GeneratedDatabase db,
@@ -1623,7 +1616,7 @@ class $AccountsTable extends Accounts with TableInfo<$AccountsTable, Account> {
   GeneratedTextColumn _constructGroupId() {
     return GeneratedTextColumn('groupId', $tableName, false,
         minTextLength: 16,
-        $customConstraints: 'REFERENCES Groups(id) NOT NULL ON UPDATE CASCADE');
+        $customConstraints: 'REFERENCES Groups(id) NOT NULL');
   }
 
   final VerificationMeta _parentIdMeta = const VerificationMeta('parentId');
@@ -1632,7 +1625,7 @@ class $AccountsTable extends Accounts with TableInfo<$AccountsTable, Account> {
   GeneratedIntColumn get parentId => _parentId ??= _constructParentId();
   GeneratedIntColumn _constructParentId() {
     return GeneratedIntColumn('parentId', $tableName, true,
-        $customConstraints: 'REFERENCES Accounts(id) NULL ON UPDATE CASCADE');
+        $customConstraints: 'REFERENCES Accounts(id) NULL');
   }
 
   final VerificationMeta _typeMeta = const VerificationMeta('type');
@@ -1653,8 +1646,7 @@ class $AccountsTable extends Accounts with TableInfo<$AccountsTable, Account> {
   GeneratedTextColumn get memberId => _memberId ??= _constructMemberId();
   GeneratedTextColumn _constructMemberId() {
     return GeneratedTextColumn('memberId', $tableName, true,
-        minTextLength: 16,
-        $customConstraints: 'REFERENCES Members(id) NULL ON UPDATE CASCADE');
+        minTextLength: 16, $customConstraints: 'REFERENCES Members(id) NULL');
   }
 
   final VerificationMeta _balanceMeta = const VerificationMeta('balance');
@@ -1662,8 +1654,8 @@ class $AccountsTable extends Accounts with TableInfo<$AccountsTable, Account> {
   @override
   GeneratedRealColumn get balance => _balance ??= _constructBalance();
   GeneratedRealColumn _constructBalance() {
-    return GeneratedRealColumn('balance', $tableName, false,
-        defaultValue: const Constant(0));
+    return GeneratedRealColumn('balance', $tableName, true,
+        defaultValue: const Constant(0.0));
   }
 
   final VerificationMeta _createdOnMeta = const VerificationMeta('createdOn');
@@ -1671,11 +1663,9 @@ class $AccountsTable extends Accounts with TableInfo<$AccountsTable, Account> {
   @override
   GeneratedDateTimeColumn get createdOn => _createdOn ??= _constructCreatedOn();
   GeneratedDateTimeColumn _constructCreatedOn() {
-    return GeneratedDateTimeColumn(
-      'createdOn',
-      $tableName,
-      false,
-    )..clientDefault = () => DateTime.now().toUtc();
+    return GeneratedDateTimeColumn('createdOn', $tableName, false,
+        $customConstraints: 'NOT NULL DEFAULT (STRFTIME(\'%s\',\'now\'))')
+      ..clientDefault = () => DateTime.now().toUtc();
   }
 
   final VerificationMeta _updatedOnMeta = const VerificationMeta('updatedOn');
@@ -2030,7 +2020,7 @@ class $CategoriesTable extends Categories
   GeneratedIntColumn get parentId => _parentId ??= _constructParentId();
   GeneratedIntColumn _constructParentId() {
     return GeneratedIntColumn('parentId', $tableName, true,
-        $customConstraints: 'REFERENCES Categories(id) NULL ON UPDATE CASCADE');
+        $customConstraints: 'REFERENCES Categories(id) NULL');
   }
 
   final VerificationMeta _typeMeta = const VerificationMeta('type');
@@ -2050,11 +2040,9 @@ class $CategoriesTable extends Categories
   @override
   GeneratedDateTimeColumn get createdOn => _createdOn ??= _constructCreatedOn();
   GeneratedDateTimeColumn _constructCreatedOn() {
-    return GeneratedDateTimeColumn(
-      'createdOn',
-      $tableName,
-      false,
-    )..clientDefault = () => DateTime.now().toUtc();
+    return GeneratedDateTimeColumn('createdOn', $tableName, false,
+        $customConstraints: 'NOT NULL DEFAULT (STRFTIME(\'%s\',\'now\'))')
+      ..clientDefault = () => DateTime.now().toUtc();
   }
 
   final VerificationMeta _updatedOnMeta = const VerificationMeta('updatedOn');
@@ -2528,7 +2516,7 @@ class $SettlementsTable extends Settlements
   GeneratedTextColumn _constructGroupId() {
     return GeneratedTextColumn('groupId', $tableName, false,
         minTextLength: 16,
-        $customConstraints: 'REFERENCES Groups(id) NOT NULL ON UPDATE CASCADE');
+        $customConstraints: 'REFERENCES Groups(id) NOT NULL');
   }
 
   final VerificationMeta _fromMemberIdMeta =
@@ -2540,8 +2528,7 @@ class $SettlementsTable extends Settlements
   GeneratedTextColumn _constructFromMemberId() {
     return GeneratedTextColumn('fromMemberId', $tableName, false,
         minTextLength: 16,
-        $customConstraints:
-            'REFERENCES Members(id) NOT NULL ON UPDATE CASCADE');
+        $customConstraints: 'REFERENCES Members(id) NOT NULL');
   }
 
   final VerificationMeta _toMemberIdMeta = const VerificationMeta('toMemberId');
@@ -2551,8 +2538,7 @@ class $SettlementsTable extends Settlements
   GeneratedTextColumn _constructToMemberId() {
     return GeneratedTextColumn('toMemberId', $tableName, false,
         minTextLength: 16,
-        $customConstraints:
-            'REFERENCES Members(id) NOT NULL ON UPDATE CASCADE');
+        $customConstraints: 'REFERENCES Members(id) NOT NULL');
   }
 
   final VerificationMeta _amountMeta = const VerificationMeta('amount');
@@ -2601,8 +2587,7 @@ class $SettlementsTable extends Settlements
   GeneratedTextColumn _constructTransactionId() {
     return GeneratedTextColumn('transactionId', $tableName, true,
         minTextLength: 16,
-        $customConstraints:
-            'REFERENCES Transactions(id) NULL ON UPDATE CASCADE');
+        $customConstraints: 'REFERENCES Transactions(id) NULL');
   }
 
   final VerificationMeta _signatureMeta = const VerificationMeta('signature');
@@ -2622,11 +2607,9 @@ class $SettlementsTable extends Settlements
   @override
   GeneratedDateTimeColumn get createdOn => _createdOn ??= _constructCreatedOn();
   GeneratedDateTimeColumn _constructCreatedOn() {
-    return GeneratedDateTimeColumn(
-      'createdOn',
-      $tableName,
-      false,
-    )..clientDefault = () => DateTime.now().toUtc();
+    return GeneratedDateTimeColumn('createdOn', $tableName, false,
+        $customConstraints: 'NOT NULL DEFAULT (STRFTIME(\'%s\',\'now\'))')
+      ..clientDefault = () => DateTime.now().toUtc();
   }
 
   final VerificationMeta _updatedOnMeta = const VerificationMeta('updatedOn');
@@ -3256,8 +3239,7 @@ class $TransactionsTable extends Transactions
   GeneratedTextColumn _constructMemberId() {
     return GeneratedTextColumn('memberId', $tableName, false,
         minTextLength: 16,
-        $customConstraints:
-            'REFERENCES Members(id) NOT NULL ON UPDATE CASCADE');
+        $customConstraints: 'REFERENCES Members(id) NOT NULL');
   }
 
   final VerificationMeta _amountMeta = const VerificationMeta('amount');
@@ -3279,7 +3261,7 @@ class $TransactionsTable extends Transactions
   GeneratedTextColumn _constructGroupId() {
     return GeneratedTextColumn('groupId', $tableName, false,
         minTextLength: 16,
-        $customConstraints: 'REFERENCES Groups(id) NOT NULL ON UPDATE CASCADE');
+        $customConstraints: 'REFERENCES Groups(id) NOT NULL');
   }
 
   final VerificationMeta _groupMemberIdsMeta =
@@ -3304,7 +3286,7 @@ class $TransactionsTable extends Transactions
       _fromAccountId ??= _constructFromAccountId();
   GeneratedIntColumn _constructFromAccountId() {
     return GeneratedIntColumn('fromAccountId', $tableName, true,
-        $customConstraints: 'REFERENCES Accounts(id) NULL ON UPDATE CASCADE');
+        $customConstraints: 'REFERENCES Accounts(id) NULL');
   }
 
   final VerificationMeta _toAccountIdMeta =
@@ -3315,7 +3297,7 @@ class $TransactionsTable extends Transactions
       _toAccountId ??= _constructToAccountId();
   GeneratedIntColumn _constructToAccountId() {
     return GeneratedIntColumn('toAccountId', $tableName, true,
-        $customConstraints: 'REFERENCES Accounts(id) NULL ON UPDATE CASCADE');
+        $customConstraints: 'REFERENCES Accounts(id) NULL');
   }
 
   final VerificationMeta _categoryIdMeta = const VerificationMeta('categoryId');
@@ -3324,7 +3306,7 @@ class $TransactionsTable extends Transactions
   GeneratedIntColumn get categoryId => _categoryId ??= _constructCategoryId();
   GeneratedIntColumn _constructCategoryId() {
     return GeneratedIntColumn('categoryId', $tableName, true,
-        $customConstraints: 'REFERENCES Categories(id) NULL ON UPDATE CASCADE');
+        $customConstraints: 'REFERENCES Categories(id) NULL');
   }
 
   final VerificationMeta _settlementIdMeta =
@@ -3335,8 +3317,7 @@ class $TransactionsTable extends Transactions
       _settlementId ??= _constructSettlementId();
   GeneratedTextColumn _constructSettlementId() {
     return GeneratedTextColumn('settlementId', $tableName, true,
-        $customConstraints:
-            'REFERENCES Settlements(id) NULL ON UPDATE CASCADE');
+        $customConstraints: 'REFERENCES Settlements(id) NULL');
   }
 
   final VerificationMeta _notesMeta = const VerificationMeta('notes');
@@ -3394,11 +3375,9 @@ class $TransactionsTable extends Transactions
   @override
   GeneratedDateTimeColumn get createdOn => _createdOn ??= _constructCreatedOn();
   GeneratedDateTimeColumn _constructCreatedOn() {
-    return GeneratedDateTimeColumn(
-      'createdOn',
-      $tableName,
-      false,
-    )..clientDefault = () => DateTime.now().toUtc();
+    return GeneratedDateTimeColumn('createdOn', $tableName, false,
+        $customConstraints: 'NOT NULL DEFAULT (STRFTIME(\'%s\',\'now\'))')
+      ..clientDefault = () => DateTime.now().toUtc();
   }
 
   final VerificationMeta _updatedOnMeta = const VerificationMeta('updatedOn');
@@ -3931,11 +3910,9 @@ class $AppFontsTable extends AppFonts with TableInfo<$AppFontsTable, AppFont> {
   @override
   GeneratedDateTimeColumn get createdOn => _createdOn ??= _constructCreatedOn();
   GeneratedDateTimeColumn _constructCreatedOn() {
-    return GeneratedDateTimeColumn(
-      'createdOn',
-      $tableName,
-      false,
-    )..clientDefault = () => DateTime.now().toUtc();
+    return GeneratedDateTimeColumn('createdOn', $tableName, false,
+        $customConstraints: 'NOT NULL DEFAULT (STRFTIME(\'%s\',\'now\'))')
+      ..clientDefault = () => DateTime.now().toUtc();
   }
 
   final VerificationMeta _updatedOnMeta = const VerificationMeta('updatedOn');
@@ -4535,8 +4512,7 @@ class $FontCombosTable extends FontCombos
   GeneratedIntColumn get headerFont => _headerFont ??= _constructHeaderFont();
   GeneratedIntColumn _constructHeaderFont() {
     return GeneratedIntColumn('headerFont', $tableName, false,
-        $customConstraints:
-            'REFERENCES AppFonts(id) NOT NULL ON UPDATE CASCADE');
+        $customConstraints: 'REFERENCES AppFonts(id) NOT NULL');
   }
 
   final VerificationMeta _bodyFontMeta = const VerificationMeta('bodyFont');
@@ -4545,8 +4521,7 @@ class $FontCombosTable extends FontCombos
   GeneratedIntColumn get bodyFont => _bodyFont ??= _constructBodyFont();
   GeneratedIntColumn _constructBodyFont() {
     return GeneratedIntColumn('bodyFont', $tableName, false,
-        $customConstraints:
-            'REFERENCES AppFonts(id) NOT NULL ON UPDATE CASCADE');
+        $customConstraints: 'REFERENCES AppFonts(id) NOT NULL');
   }
 
   final VerificationMeta _bodyFontBigMeta =
@@ -4557,7 +4532,7 @@ class $FontCombosTable extends FontCombos
       _bodyFontBig ??= _constructBodyFontBig();
   GeneratedIntColumn _constructBodyFontBig() {
     return GeneratedIntColumn('bodyFontBig', $tableName, true,
-        $customConstraints: 'REFERENCES AppFonts(id) NULL ON UPDATE CASCADE');
+        $customConstraints: 'REFERENCES AppFonts(id) NULL');
   }
 
   final VerificationMeta _bodyFontMediumMeta =
@@ -4568,7 +4543,7 @@ class $FontCombosTable extends FontCombos
       _bodyFontMedium ??= _constructBodyFontMedium();
   GeneratedIntColumn _constructBodyFontMedium() {
     return GeneratedIntColumn('bodyFontMedium', $tableName, true,
-        $customConstraints: 'REFERENCES AppFonts(id) NULL ON UPDATE CASCADE');
+        $customConstraints: 'REFERENCES AppFonts(id) NULL');
   }
 
   final VerificationMeta _bodyFontSmallMeta =
@@ -4579,7 +4554,7 @@ class $FontCombosTable extends FontCombos
       _bodyFontSmall ??= _constructBodyFontSmall();
   GeneratedIntColumn _constructBodyFontSmall() {
     return GeneratedIntColumn('bodyFontSmall', $tableName, true,
-        $customConstraints: 'REFERENCES AppFonts(id) NULL ON UPDATE CASCADE');
+        $customConstraints: 'REFERENCES AppFonts(id) NULL');
   }
 
   final VerificationMeta _bodyFontTinyMeta =
@@ -4590,7 +4565,7 @@ class $FontCombosTable extends FontCombos
       _bodyFontTiny ??= _constructBodyFontTiny();
   GeneratedIntColumn _constructBodyFontTiny() {
     return GeneratedIntColumn('bodyFontTiny', $tableName, true,
-        $customConstraints: 'REFERENCES AppFonts(id) NULL ON UPDATE CASCADE');
+        $customConstraints: 'REFERENCES AppFonts(id) NULL');
   }
 
   final VerificationMeta _valueFontMeta = const VerificationMeta('valueFont');
@@ -4599,8 +4574,7 @@ class $FontCombosTable extends FontCombos
   GeneratedIntColumn get valueFont => _valueFont ??= _constructValueFont();
   GeneratedIntColumn _constructValueFont() {
     return GeneratedIntColumn('valueFont', $tableName, false,
-        $customConstraints:
-            'REFERENCES AppFonts(id) NOT NULL ON UPDATE CASCADE');
+        $customConstraints: 'REFERENCES AppFonts(id) NOT NULL');
   }
 
   final VerificationMeta _valueFontBigMeta =
@@ -4611,7 +4585,7 @@ class $FontCombosTable extends FontCombos
       _valueFontBig ??= _constructValueFontBig();
   GeneratedIntColumn _constructValueFontBig() {
     return GeneratedIntColumn('valueFontBig', $tableName, true,
-        $customConstraints: 'REFERENCES AppFonts(id) NULL ON UPDATE CASCADE');
+        $customConstraints: 'REFERENCES AppFonts(id) NULL');
   }
 
   final VerificationMeta _valueFontMediumMeta =
@@ -4622,7 +4596,7 @@ class $FontCombosTable extends FontCombos
       _valueFontMedium ??= _constructValueFontMedium();
   GeneratedIntColumn _constructValueFontMedium() {
     return GeneratedIntColumn('valueFontMedium', $tableName, true,
-        $customConstraints: 'REFERENCES AppFonts(id) NULL ON UPDATE CASCADE');
+        $customConstraints: 'REFERENCES AppFonts(id) NULL');
   }
 
   final VerificationMeta _valueFontSmallMeta =
@@ -4633,7 +4607,7 @@ class $FontCombosTable extends FontCombos
       _valueFontSmall ??= _constructValueFontSmall();
   GeneratedIntColumn _constructValueFontSmall() {
     return GeneratedIntColumn('valueFontSmall', $tableName, true,
-        $customConstraints: 'REFERENCES AppFonts(id) NULL ON UPDATE CASCADE');
+        $customConstraints: 'REFERENCES AppFonts(id) NULL');
   }
 
   final VerificationMeta _valueFontTinyMeta =
@@ -4644,7 +4618,7 @@ class $FontCombosTable extends FontCombos
       _valueFontTiny ??= _constructValueFontTiny();
   GeneratedIntColumn _constructValueFontTiny() {
     return GeneratedIntColumn('valueFontTiny', $tableName, true,
-        $customConstraints: 'REFERENCES AppFonts(id) NULL ON UPDATE CASCADE');
+        $customConstraints: 'REFERENCES AppFonts(id) NULL');
   }
 
   final VerificationMeta _createdOnMeta = const VerificationMeta('createdOn');
@@ -4652,11 +4626,9 @@ class $FontCombosTable extends FontCombos
   @override
   GeneratedDateTimeColumn get createdOn => _createdOn ??= _constructCreatedOn();
   GeneratedDateTimeColumn _constructCreatedOn() {
-    return GeneratedDateTimeColumn(
-      'createdOn',
-      $tableName,
-      false,
-    )..clientDefault = () => DateTime.now().toUtc();
+    return GeneratedDateTimeColumn('createdOn', $tableName, false,
+        $customConstraints: 'NOT NULL DEFAULT (STRFTIME(\'%s\',\'now\'))')
+      ..clientDefault = () => DateTime.now().toUtc();
   }
 
   final VerificationMeta _updatedOnMeta = const VerificationMeta('updatedOn');
@@ -5123,11 +5095,9 @@ class $ColorCombosTable extends ColorCombos
   @override
   GeneratedDateTimeColumn get createdOn => _createdOn ??= _constructCreatedOn();
   GeneratedDateTimeColumn _constructCreatedOn() {
-    return GeneratedDateTimeColumn(
-      'createdOn',
-      $tableName,
-      false,
-    )..clientDefault = () => DateTime.now().toUtc();
+    return GeneratedDateTimeColumn('createdOn', $tableName, false,
+        $customConstraints: 'NOT NULL DEFAULT (STRFTIME(\'%s\',\'now\'))')
+      ..clientDefault = () => DateTime.now().toUtc();
   }
 
   final VerificationMeta _updatedOnMeta = const VerificationMeta('updatedOn');
@@ -5455,11 +5425,9 @@ class $AppSettingsTable extends AppSettings
   @override
   GeneratedDateTimeColumn get createdOn => _createdOn ??= _constructCreatedOn();
   GeneratedDateTimeColumn _constructCreatedOn() {
-    return GeneratedDateTimeColumn(
-      'createdOn',
-      $tableName,
-      false,
-    )..clientDefault = () => DateTime.now().toUtc();
+    return GeneratedDateTimeColumn('createdOn', $tableName, false,
+        $customConstraints: 'NOT NULL DEFAULT (STRFTIME(\'%s\',\'now\'))')
+      ..clientDefault = () => DateTime.now().toUtc();
   }
 
   final VerificationMeta _updatedOnMeta = const VerificationMeta('updatedOn');

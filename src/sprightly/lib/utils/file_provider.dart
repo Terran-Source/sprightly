@@ -277,11 +277,12 @@ FormattedException<T> _formattedException<T extends Exception>(
     );
 
 class RemoteFileCache with ReadyOrNotMixin {
-  static RemoteFileCache universal = RemoteFileCache._();
   RemoteFileCache._() {
     getReadyWorker = _getReady;
     additionalSingleJobs[_cleanUpJob] = _cleanUp;
   }
+
+  static RemoteFileCache universal = RemoteFileCache._();
   factory RemoteFileCache() => universal;
 
   final String _cacheDirectory = '__fileCache';
@@ -293,9 +294,9 @@ class RemoteFileCache with ReadyOrNotMixin {
   DirectoryInfo get directoryInfo => _directoryInfo;
   String get _cleanUpJob => 'cleanUp';
 
-  @override
-  bool get ready => _ready && super.ready;
-  bool _ready = false;
+  // @override
+  // bool get ready => _ready && super.ready;
+  // bool _ready = false;
 
   Future _getReady() async {
     final cacheDirectory = await getDirectory(_cacheDirectory);
@@ -309,12 +310,13 @@ class RemoteFileCache with ReadyOrNotMixin {
     } else
       await cacheDirectory.create(recursive: true);
 
-    // non-essential for startup. let it be on its own.
-    // i.e. not await(ing)
-    compute(DirectoryInfo.readDirectory, cacheDirectory).then((info) {
-      _directoryInfo = info;
-      _ready = true;
-    });
+    // // non-essential for startup. let it be on its own.
+    // // i.e. not await(ing)
+    // await compute(DirectoryInfo.readDirectory, cacheDirectory).then((info) {
+    //   _directoryInfo = info;
+    //   _ready = true;
+    // });
+    _directoryInfo = await DirectoryInfo.readDirectory(cacheDirectory);
   }
 
   /// Fetch the file from the [source] url and store in a the local [_cacheDirectory].

@@ -44,7 +44,8 @@ class Members extends Table {
   TextColumn get signature => text().named('signature').nullable()();
   DateTimeColumn get createdOn => dateTime()
       .named('createdOn')
-      .clientDefault(() => DateTime.now().toUtc())();
+      .clientDefault(() => DateTime.now().toUtc())
+      .customConstraint("NOT NULL DEFAULT (STRFTIME('%s','now'))")();
   DateTimeColumn get updatedOn => dateTime()
       .named('updatedOn')
       .nullable()
@@ -67,7 +68,8 @@ class Groups extends Table {
       boolean().named('isHidden').withDefault(const Constant(false))();
   DateTimeColumn get createdOn => dateTime()
       .named('createdOn')
-      .clientDefault(() => DateTime.now().toUtc())();
+      .clientDefault(() => DateTime.now().toUtc())
+      .customConstraint("NOT NULL DEFAULT (STRFTIME('%s','now'))")();
   DateTimeColumn get updatedOn => dateTime()
       .named('updatedOn')
       .nullable()
@@ -86,14 +88,15 @@ class GroupMembers extends Table {
   TextColumn get groupId => text()
       .named('groupId')
       .withLength(min: 16)
-      .customConstraint('REFERENCES Groups(id) NOT NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES Groups(id) NOT NULL')();
   TextColumn get memberId => text()
       .named('memberId')
       .withLength(min: 16)
-      .customConstraint('REFERENCES Members(id) NOT NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES Members(id) NOT NULL')();
   DateTimeColumn get createdOn => dateTime()
       .named('createdOn')
-      .clientDefault(() => DateTime.now().toUtc())();
+      .clientDefault(() => DateTime.now().toUtc())
+      .customConstraint("NOT NULL DEFAULT (STRFTIME('%s','now'))")();
   DateTimeColumn get updatedOn => dateTime()
       .named('updatedOn')
       .nullable()
@@ -113,11 +116,11 @@ class Accounts extends Table {
   TextColumn get groupId => text()
       .named('groupId')
       .withLength(min: 16)
-      .customConstraint('REFERENCES Groups(id) NOT NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES Groups(id) NOT NULL')();
   IntColumn get parentId => integer()
       .named('parentId')
       .nullable()
-      .customConstraint('REFERENCES Accounts(id) NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES Accounts(id) NULL')();
   TextColumn get type => text()
       .named('type')
       .nullable()
@@ -126,12 +129,13 @@ class Accounts extends Table {
       .named('memberId')
       .nullable()
       .withLength(min: 16)
-      .customConstraint('REFERENCES Members(id) NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES Members(id) NULL')();
   RealColumn get balance =>
-      real().named('balance').withDefault(const Constant(0))();
+      real().named('balance').nullable().withDefault(const Constant(0.0))();
   DateTimeColumn get createdOn => dateTime()
       .named('createdOn')
-      .clientDefault(() => DateTime.now().toUtc())();
+      .clientDefault(() => DateTime.now().toUtc())
+      .customConstraint("NOT NULL DEFAULT (STRFTIME('%s','now'))")();
   DateTimeColumn get updatedOn => dateTime()
       .named('updatedOn')
       .nullable()
@@ -148,13 +152,14 @@ class Categories extends Table {
   IntColumn get parentId => integer()
       .named('parentId')
       .nullable()
-      .customConstraint('REFERENCES Categories(id) NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES Categories(id) NULL')();
   TextColumn get type =>
       text().named('type').nullable().map(const EnumTypeConverter<CategoryType>(
           CategoryType.values, CategoryType.Misc))();
   DateTimeColumn get createdOn => dateTime()
       .named('createdOn')
-      .clientDefault(() => DateTime.now().toUtc())();
+      .clientDefault(() => DateTime.now().toUtc())
+      .customConstraint("NOT NULL DEFAULT (STRFTIME('%s','now'))")();
   DateTimeColumn get updatedOn => dateTime()
       .named('updatedOn')
       .nullable()
@@ -170,15 +175,15 @@ class Settlements extends Table {
   TextColumn get groupId => text()
       .named('groupId')
       .withLength(min: 16)
-      .customConstraint('REFERENCES Groups(id) NOT NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES Groups(id) NOT NULL')();
   TextColumn get fromMemberId => text()
       .named('fromMemberId')
       .withLength(min: 16)
-      .customConstraint('REFERENCES Members(id) NOT NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES Members(id) NOT NULL')();
   TextColumn get toMemberId => text()
       .named('toMemberId')
       .withLength(min: 16)
-      .customConstraint('REFERENCES Members(id) NOT NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES Members(id) NOT NULL')();
   RealColumn get amount => real().named('amount')();
   RealColumn get settledAmount => real().named('settledAmount').nullable()();
   BoolColumn get isTemporary =>
@@ -187,11 +192,12 @@ class Settlements extends Table {
       .named('transactionId')
       .nullable()
       .withLength(min: 16)
-      .customConstraint('REFERENCES Transactions(id) NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES Transactions(id) NULL')();
   TextColumn get signature => text().named('signature').nullable()();
   DateTimeColumn get createdOn => dateTime()
       .named('createdOn')
-      .clientDefault(() => DateTime.now().toUtc())();
+      .clientDefault(() => DateTime.now().toUtc())
+      .customConstraint("NOT NULL DEFAULT (STRFTIME('%s','now'))")();
   DateTimeColumn get updatedOn => dateTime()
       .named('updatedOn')
       .nullable()
@@ -210,29 +216,29 @@ class Transactions extends Table {
   TextColumn get memberId => text()
       .named('memberId')
       .withLength(min: 16)
-      .customConstraint('REFERENCES Members(id) NOT NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES Members(id) NOT NULL')();
   RealColumn get amount => real().named('amount')();
   TextColumn get groupId => text()
       .named('groupId')
       .withLength(min: 16)
-      .customConstraint('REFERENCES Groups(id) NOT NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES Groups(id) NOT NULL')();
   TextColumn get groupMemberIds => text().named('groupMemberIds').nullable()();
   IntColumn get fromAccountId => integer()
       .named('fromAccountId')
       .nullable()
-      .customConstraint('REFERENCES Accounts(id) NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES Accounts(id) NULL')();
   IntColumn get toAccountId => integer()
       .named('toAccountId')
       .nullable()
-      .customConstraint('REFERENCES Accounts(id) NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES Accounts(id) NULL')();
   IntColumn get categoryId => integer()
       .named('categoryId')
       .nullable()
-      .customConstraint('REFERENCES Categories(id) NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES Categories(id) NULL')();
   TextColumn get settlementId => text()
       .named('settlementId')
       .nullable()
-      .customConstraint('REFERENCES Settlements(id) NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES Settlements(id) NULL')();
   TextColumn get notes => text().named('notes').nullable()();
   TextColumn get attachments => text().named('attachments').nullable()();
   TextColumn get tags => text().named('tags').nullable()();
@@ -240,7 +246,8 @@ class Transactions extends Table {
       dateTime().named('doneOn').clientDefault(() => DateTime.now().toUtc())();
   DateTimeColumn get createdOn => dateTime()
       .named('createdOn')
-      .clientDefault(() => DateTime.now().toUtc())();
+      .clientDefault(() => DateTime.now().toUtc())
+      .customConstraint("NOT NULL DEFAULT (STRFTIME('%s','now'))")();
   DateTimeColumn get updatedOn => dateTime()
       .named('updatedOn')
       .nullable()
@@ -270,7 +277,8 @@ class AppFonts extends Table {
       integer().named('weight').withDefault(const Constant(100))();
   DateTimeColumn get createdOn => dateTime()
       .named('createdOn')
-      .clientDefault(() => DateTime.now().toUtc())();
+      .clientDefault(() => DateTime.now().toUtc())
+      .customConstraint("NOT NULL DEFAULT (STRFTIME('%s','now'))")();
   DateTimeColumn get updatedOn => dateTime()
       .named('updatedOn')
       .nullable()
@@ -286,48 +294,49 @@ class FontCombos extends Table {
   TextColumn get name => text().named('name').withLength(max: 50)();
   IntColumn get headerFont => integer()
       .named('headerFont')
-      .customConstraint('REFERENCES AppFonts(id) NOT NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES AppFonts(id) NOT NULL')();
   IntColumn get bodyFont => integer()
       .named('bodyFont')
-      .customConstraint('REFERENCES AppFonts(id) NOT NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES AppFonts(id) NOT NULL')();
   IntColumn get bodyFontBig => integer()
       .named('bodyFontBig')
       .nullable()
-      .customConstraint('REFERENCES AppFonts(id) NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES AppFonts(id) NULL')();
   IntColumn get bodyFontMedium => integer()
       .named('bodyFontMedium')
       .nullable()
-      .customConstraint('REFERENCES AppFonts(id) NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES AppFonts(id) NULL')();
   IntColumn get bodyFontSmall => integer()
       .named('bodyFontSmall')
       .nullable()
-      .customConstraint('REFERENCES AppFonts(id) NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES AppFonts(id) NULL')();
   IntColumn get bodyFontTiny => integer()
       .named('bodyFontTiny')
       .nullable()
-      .customConstraint('REFERENCES AppFonts(id) NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES AppFonts(id) NULL')();
   IntColumn get valueFont => integer()
       .named('valueFont')
-      .customConstraint('REFERENCES AppFonts(id) NOT NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES AppFonts(id) NOT NULL')();
   IntColumn get valueFontBig => integer()
       .named('valueFontBig')
       .nullable()
-      .customConstraint('REFERENCES AppFonts(id) NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES AppFonts(id) NULL')();
   IntColumn get valueFontMedium => integer()
       .named('valueFontMedium')
       .nullable()
-      .customConstraint('REFERENCES AppFonts(id) NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES AppFonts(id) NULL')();
   IntColumn get valueFontSmall => integer()
       .named('valueFontSmall')
       .nullable()
-      .customConstraint('REFERENCES AppFonts(id) NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES AppFonts(id) NULL')();
   IntColumn get valueFontTiny => integer()
       .named('valueFontTiny')
       .nullable()
-      .customConstraint('REFERENCES AppFonts(id) NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES AppFonts(id) NULL')();
   DateTimeColumn get createdOn => dateTime()
       .named('createdOn')
-      .clientDefault(() => DateTime.now().toUtc())();
+      .clientDefault(() => DateTime.now().toUtc())
+      .customConstraint("NOT NULL DEFAULT (STRFTIME('%s','now'))")();
   DateTimeColumn get updatedOn => dateTime()
       .named('updatedOn')
       .nullable()
@@ -350,7 +359,8 @@ class ColorCombos extends Table {
       text().named('foreColor').withLength(min: 3, max: 6)();
   DateTimeColumn get createdOn => dateTime()
       .named('createdOn')
-      .clientDefault(() => DateTime.now().toUtc())();
+      .clientDefault(() => DateTime.now().toUtc())
+      .customConstraint("NOT NULL DEFAULT (STRFTIME('%s','now'))")();
   DateTimeColumn get updatedOn => dateTime()
       .named('updatedOn')
       .nullable()
@@ -369,7 +379,8 @@ class AppSettings extends Table {
           AppSettingType.values, AppSettingType.String))();
   DateTimeColumn get createdOn => dateTime()
       .named('createdOn')
-      .clientDefault(() => DateTime.now().toUtc())();
+      .clientDefault(() => DateTime.now().toUtc())
+      .customConstraint("NOT NULL DEFAULT (STRFTIME('%s','now'))")();
   DateTimeColumn get updatedOn => dateTime()
       .named('updatedOn')
       .nullable()
@@ -445,9 +456,11 @@ class CustomQuery {
   Future<String> _load() {
     switch (_from) {
       case ResourceFrom.Asset:
-        return compute(_getSqlQueryFromAsset, source);
+        // return compute(_getSqlQueryFromAsset, source);
+        return _getSqlQueryFromAsset(source);
       case ResourceFrom.Web:
-        return compute(_getSqlQueryFromRemote, this);
+        // return compute(_getSqlQueryFromRemote, this);
+        return _getSqlQueryFromRemote(this);
       default:
         return null;
     }
@@ -463,10 +476,10 @@ class CustomQuery {
 }
 
 class SprightlyQueries with ReadyOrNotMixin {
-  static SprightlyQueries universal = SprightlyQueries._();
   SprightlyQueries._() {
     getReadyWorker = _getReady;
   }
+  static SprightlyQueries universal = SprightlyQueries._();
   factory SprightlyQueries() => universal;
 
   // startup queries
@@ -537,7 +550,10 @@ mixin _GenericDaoMixin<T extends GeneratedDatabase> on DatabaseAccessor<T> {
     do {
       if (null == hashLibrary) _hashLibrary = HashLibrary.values.random;
       result = hashedAll(items,
-          hashLength: hashLength, library: _hashLibrary, key: key);
+          hashLength: hashLength,
+          library: _hashLibrary,
+          key: key,
+          prefixLibrary: false);
       foundUnique = !await recordWithIdExists(tableName, result);
       if (foundUnique) return result;
       attempts++;
@@ -633,6 +649,7 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
   @override
   Future<void> beforeOpen(OpeningDetails details, Migrator m) async {
     await getReady();
+    moorRuntimeOptions.defaultSerializer = const ExtendedValueSerializer();
     if (details.wasCreated) {
       // TODO: do first time activity
       // creating default Group & Accounts
@@ -647,6 +664,9 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
           type: AccountType.Investment);
     }
   }
+
+  Future<List<Category>> getCategories() => select(categories).get();
+  Future<List<Account>> getAccounts() => select(accounts).get();
 
   List<Group> _sharedGroupList;
   List<Group> get sharedGroupList => _sharedGroupList;
@@ -1122,6 +1142,7 @@ class SprightlySetupDao extends DatabaseAccessor<SprightlySetupDatabase>
   @override
   Future<void> beforeOpen(OpeningDetails details, Migrator m) async {
     await getReady();
+    moorRuntimeOptions.defaultSerializer = const ExtendedValueSerializer();
     if (details.wasCreated) {
       // TODO: do first time activity
       // already done through _queries.setupInitiation

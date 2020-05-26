@@ -14,9 +14,11 @@ Future<void> initiate(
   // initialize database
   final dataDb = db.SprightlyDatabase(
       enableDebug: isDebug, recreateDatabase: recreateDatabase);
+  await dataDb.executor.ensureOpen(dataDb.attachedDatabase);
   container.registerSingleton((container) => dataDb);
   final settingsDb = db.SprightlySetupDatabase(
       enableDebug: isDebug, recreateDatabase: recreateDatabase);
+  await settingsDb.executor.ensureOpen(settingsDb.attachedDatabase);
   container.registerSingleton((container) => settingsDb);
 
   // initialize global dao

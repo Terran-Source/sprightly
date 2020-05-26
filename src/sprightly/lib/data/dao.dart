@@ -31,6 +31,9 @@ class AppInformation with ReadyOrNotMixin<PackageInfo> {
 }
 
 abstract class SystemDao extends AppDao {
+  Future<List<Category>> getCategories();
+  Future<List<Account>> getAccounts();
+
   List<Group> get sharedGroupList;
 
   Future<List<Member>> getGroupAccountMembers(String groupId);
