@@ -37,7 +37,7 @@ abstract class TypeConverter<Dest> {
 
 class AppParameter<T extends Parameter> {
   @protected
-  final Map<String, T> _parameters = const {};
+  final Map<String, T> _parameters = {};
   @protected
   Map<String, T> get parameters => _parameters;
 
