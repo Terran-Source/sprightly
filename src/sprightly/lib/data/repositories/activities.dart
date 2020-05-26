@@ -76,6 +76,8 @@ class Contribution {
 
   Contribution(this.memberId, this.amount, this.split);
 
+  double get amountAbs => amount.abs();
+
   /// to be used as a comparator operator.
   ///
   /// Example:
@@ -292,25 +294,28 @@ class GroupActivity with _BaseData {
       else if (memberContributedAmount < 0)
         negativeContributions.add(Contribution(m, memberContributedAmount, 0));
     });
+
     needSettlement =
         positiveContributions.length > 0 && negativeContributions.length > 0;
+
     if (needSettlement) {
       List<String> settledMember = [];
 
+      // sort in descending order for positive contributions
+      positiveContributions.sort((a, b) => a > b);
+      // sort in ascending order for negative contributions
+      negativeContributions.sort((a, b) => a < b);
+
       // calculate optimized settlements
-      // cocktail approach ;)
+      // cocktail approach ;) \_/ <=> \~/
       while (needSettlement) {
-        // sort in descending order for positive contributions
-        positiveContributions.sort((a, b) => a > b);
-        // sort in ascending order for negative contributions
-        negativeContributions.sort((a, b) => a < b);
         List<Contribution> alfa;
         List<Contribution> beta;
         bool isPFwd = true;
 
         // Contribution List, having less max amount, should be alfa
-        if (positiveContributions[0].amount.abs() <=
-            negativeContributions[0].amount.abs()) {
+        if (positiveContributions[0].amountAbs <=
+            negativeContributions[0].amountAbs) {
           alfa = [...positiveContributions];
           beta = [...negativeContributions];
         } else {
@@ -325,9 +330,9 @@ class GroupActivity with _BaseData {
         int curIndex = 0;
         while (curIndex < alfa.length) {
           var aCon = alfa[curIndex];
-          var alfaAmountAbs = aCon.amount.abs();
+          var alfaAmountAbs = aCon.amountAbs;
           var sameBIndex =
-              beta.indexWhere((bCon) => alfaAmountAbs == bCon.amount.abs());
+              beta.indexWhere((bCon) => alfaAmountAbs == bCon.amountAbs);
           if (-1 != sameBIndex) {
             var sameBCon = beta[sameBIndex];
             finalSettlements.add(await _dao.newSettlementForGroup(
@@ -342,7 +347,7 @@ class GroupActivity with _BaseData {
             continue;
           } else {
             var greaterBIndex =
-                beta.indexWhere((bCon) => alfaAmountAbs < bCon.amount.abs());
+                beta.indexWhere((bCon) => alfaAmountAbs < bCon.amountAbs);
             if (-1 != greaterBIndex) {
               var greaterBCon = beta[greaterBIndex];
               finalSettlements.add(await _dao.newSettlementForGroup(
@@ -352,17 +357,21 @@ class GroupActivity with _BaseData {
                   alfaAmountAbs,
                   isTemporary: true));
               settledMember.add(aCon.memberId);
-              beta.add(Contribution(
-                  greaterBCon.memberId, greaterBCon.amount + aCon.amount, 0));
               beta.removeAt(greaterBIndex);
               alfa.removeAt(curIndex);
+              // beta entry to keep the sorted state
+              var betaAmountLeft = greaterBCon.amount + aCon.amount;
+              var betaAmountLeftAbs = betaAmountLeft.abs();
+              beta.insert(
+                  beta.indexWhere((bCon) => betaAmountLeftAbs > bCon.amountAbs),
+                  Contribution(greaterBCon.memberId, betaAmountLeft, 0));
               continue;
             }
           }
           curIndex++;
         }
 
-        // if all settled, curIndex won't move
+        // if all settled, curIndex would stuck to 0 & won't budge
         needSettlement = curIndex > 0;
         if (needSettlement) {
           // get ready for next iteration
