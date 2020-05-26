@@ -12,31 +12,27 @@ mixin _BaseData {
   SettingsDao _dao;
 }
 
-class Setting<T> extends Parameter<T> {
-  factory Setting.from(AppSetting appSetting, AppSettingType type) {
-    switch (type) {
-      case AppSettingType.AppInfo:
-      case AppSettingType.String:
-        return Parameter.ofType(appSetting.name, appSetting.value);
-      case AppSettingType.Number:
-        return Parameter.ofType(
-            appSetting.name, double.tryParse(appSetting.value));
-      case AppSettingType.Bool:
-        return Parameter.ofType(appSetting.name, appSetting.value == 'true');
-      case AppSettingType.List:
-        return Parameter.ofType(appSetting.name, appSetting.value.split(','));
-      case AppSettingType.ThemeMode:
-        return Parameter.ofType(
-            appSetting.name, ThemeMode.values.find(appSetting.value));
-      default:
-        return null;
-    }
+Parameter _settingFrom(AppSetting appSetting, AppSettingType type) {
+  switch (type) {
+    case AppSettingType.AppInfo:
+    case AppSettingType.String:
+      return Parameter.ofType(appSetting.name, appSetting.value);
+    case AppSettingType.Number:
+      return Parameter.ofType(
+          appSetting.name, double.tryParse(appSetting.value));
+    case AppSettingType.Bool:
+      return Parameter.ofType(appSetting.name, appSetting.value == 'true');
+    case AppSettingType.List:
+      return Parameter.ofType(appSetting.name, appSetting.value.split(','));
+    case AppSettingType.ThemeMode:
+      return Parameter.ofType(
+          appSetting.name, ThemeMode.values.find(appSetting.value));
+    default:
+      return null;
   }
 }
 
-class AppSettings extends AppParameter<Setting> with _BaseData {
-  static AppSettings _cache;
-
+class AppSettings extends AppParameter<Parameter> with _BaseData {
   AppSettings._(SettingsDao _dao, String environment) {
     if (!_dao.ready)
       throw PreConditionFailedException(
@@ -54,10 +50,11 @@ class AppSettings extends AppParameter<Setting> with _BaseData {
     // get & set all settings from AppSettings table
     _dao.allAppSettings.forEach((appSetting) {
       super.updateParameter(
-          appSetting.name, Setting.from(appSetting, appSetting.type));
+          appSetting.name, _settingFrom(appSetting, appSetting.type));
     });
   }
 
+  static AppSettings _cache;
   factory AppSettings(SettingsDao dao, {String environment}) =>
       _cache ??= AppSettings._(dao, environment ?? 'Prod');
 
@@ -76,7 +73,7 @@ class AppSettings extends AppParameter<Setting> with _BaseData {
       });
 
   Stream<T> _getStream<T>(String name) =>
-      (super.parameters[name] as Setting<T>).stream;
+      (super.parameters[name] as Parameter<T>).stream;
 
   // AppInfo details
   String get appName => _getSettings(_settingNames.appName);
