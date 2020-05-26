@@ -19,14 +19,13 @@ typedef FutureOr<T> ReadyOrNotWorker<T>();
 /// ```dart
 /// /// A class designed for singleton use
 /// class SomeClass with ReadyOrNotMixin {
-///   static SomeClass _cache = SomeClass._();
-///
 ///   // constructor
 ///   SomeClass._() {
 ///     // **attach the helper executer**
 ///     getReadyWorker = _initialize; // can be used with `super.` prefix, too
 ///   }
 ///
+///   static SomeClass _cache = SomeClass._();
 ///   // factory to implement singleton instance
 ///   factory SomeClass() => _cache;
 ///
