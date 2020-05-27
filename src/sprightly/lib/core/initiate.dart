@@ -1,4 +1,5 @@
 import 'package:kiwi/kiwi.dart' as kiwi;
+import 'package:sprightly/core/config/app_config.dart';
 import 'package:sprightly/core/exceptions.dart';
 import 'package:sprightly/core/widgets/error_popup.dart';
 import 'package:sprightly/data/initiate.dart' as dbInitiate;
@@ -7,14 +8,11 @@ import 'package:sprightly/features/settings/initiate.dart' as settingsInitiate;
 import 'package:sprightly/utils/file_provider.dart';
 import 'package:sprightly/utils/formatted_exception.dart';
 
-Future<bool> initiate({
-  String environment,
-  Map<String, dynamic> configurations = const {},
-}) async {
+Future<bool> initiate({String environment = 'Prod'}) async {
   try {
     final container = kiwi.Container();
 
-    final isDebug = configurations['debug'] ?? false;
+    final configurations = AppConfig.from(environment);
 
     // add [PreConditionFailedException] to exceptionDisplay
     exceptionDisplay[PreConditionFailedException] =
@@ -33,7 +31,8 @@ Future<bool> initiate({
 
     final appDetails = container<AppDetails>();
     FormattedException.appName = appDetails.appName;
-    FormattedException.debug = isDebug;
+    final appSettings = container<AppSettings>();
+    FormattedException.debug = appSettings.debug;
 
     return true;
   } on FormattedException catch (e) {

@@ -1,4 +1,5 @@
 import 'package:kiwi/kiwi.dart';
+import 'package:sprightly/core/config/app_config.dart';
 import 'package:sprightly/data/dao.dart';
 import 'package:sprightly/data/datasources/database.dart' as db;
 import 'package:sprightly/data/repositories/settings.dart';
@@ -6,18 +7,17 @@ import 'package:sprightly/data/repositories/settings.dart';
 Future<void> initiate(
   Container container, {
   String environment,
-  Map<String, dynamic> configurations = const {},
+  AppConfig configurations,
 }) async {
-  final isDebug = configurations['debug'] ?? false;
-  final recreateDatabase = true; // configurations['recreateDatabase'] ?? false;
-
   // initialize database
   final dataDb = db.SprightlyDatabase(
-      enableDebug: isDebug, recreateDatabase: recreateDatabase);
+      enableDebug: configurations.debug,
+      recreateDatabase: configurations.recreateDatabase);
   await dataDb.executor.ensureOpen(dataDb.attachedDatabase);
   container.registerSingleton((container) => dataDb);
   final settingsDb = db.SprightlySetupDatabase(
-      enableDebug: isDebug, recreateDatabase: recreateDatabase);
+      enableDebug: configurations.debug,
+      recreateDatabase: configurations.recreateDatabase);
   await settingsDb.executor.ensureOpen(settingsDb.attachedDatabase);
   container.registerSingleton((container) => settingsDb);
 

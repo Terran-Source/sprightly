@@ -1,4 +1,5 @@
 import 'package:kiwi/kiwi.dart';
+import 'package:sprightly/core/config/app_config.dart';
 import 'package:sprightly/core/usecase.dart';
 import 'package:sprightly/data/repositories/settings.dart' as globalRepo;
 import 'package:sprightly/features/settings/domain/repositories/setting_repositories.dart';
@@ -7,7 +8,7 @@ import 'package:sprightly/features/settings/domain/usecases/get_settings.dart';
 Future<void> initiate(
   Container container, {
   String environment,
-  Map<String, dynamic> configurations = const {},
+  AppConfig configurations,
 }) async {
   // SettingsRepo settingsRepo = SettingsRepo(repoAppSettings);
   container.registerSingleton(
