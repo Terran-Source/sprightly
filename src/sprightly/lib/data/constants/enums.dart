@@ -1,3 +1,17 @@
+Map<Type, List> enumTypes = {
+  MemberIdType: MemberIdType.values,
+  GroupType: GroupType.values,
+  AccountType: AccountType.values,
+  CategoryType: CategoryType.values,
+  TransactionTag: TransactionTag.values,
+  GroupActivityType: GroupActivityType.values,
+  FontType: FontType.values,
+  FontStyle: FontStyle.values,
+  ThemeMode: ThemeMode.values,
+  AppSettingType: AppSettingType.values,
+  ResourceFrom: ResourceFrom.values,
+};
+
 /// Database enums
 ///
 /// any changes here should be replicated manually in the

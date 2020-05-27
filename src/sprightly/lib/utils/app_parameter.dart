@@ -1,4 +1,4 @@
-library sprightly.app_settings;
+library marganam.app_settings;
 
 import 'dart:async';
 import 'dart:convert';
@@ -11,7 +11,6 @@ class Parameter<T> {
 
   Parameter(this.name, this._value);
 
-  @protected
   static Parameter ofType<Tp>(String name, Tp value) =>
       Parameter<Tp>(name, value);
 
@@ -38,7 +37,7 @@ abstract class TypeConverter<Dest> {
 
 class AppParameter<T extends Parameter> {
   @protected
-  final Map<String, T> _parameters = const {};
+  final Map<String, T> _parameters = {};
   @protected
   Map<String, T> get parameters => _parameters;
 
@@ -55,7 +54,6 @@ class AppParameter<T extends Parameter> {
   Tp getValue<Tp>(String name) => (_parameters[name] as Parameter<Tp>).value;
   void setValue<Tp>(String name, Tp value) => _parameters[name].value = value;
 
-  @protected
   static List<T> getParamList<T extends Parameter>(
     String jsonText, {
     List<TypeConverter> typeConverters,
@@ -65,7 +63,7 @@ class AppParameter<T extends Parameter> {
       if (null != typeConverters) {
         return jsonValue.entries.map((j) {
           var val = j.value;
-          var converter =
+          final converter =
               typeConverters.firstWhere((tc) => tc.parameterName == j.key);
           if (null != converter) val = converter.convert(val);
           return Parameter.ofType(j.key, val);
@@ -84,7 +82,7 @@ class AppParameter<T extends Parameter> {
     List<TypeConverter> typeConverters,
   }) async {
     Uri.parse(source);
-    var jsonText = await RemoteFileCache.universal
+    final jsonText = await RemoteFileCache.universal
         .getRemoteText(source, identifier: identifier, headers: headers);
     return getParamList(jsonText, typeConverters: typeConverters);
   }
@@ -94,7 +92,7 @@ class AppParameter<T extends Parameter> {
     String assetDirectory,
     List<TypeConverter> typeConverters,
   }) async {
-    var jsonText = await getAssetText(source, assetDirectory: assetDirectory);
+    final jsonText = await getAssetText(source, assetDirectory: assetDirectory);
 
     return getParamList(jsonText, typeConverters: typeConverters);
   }

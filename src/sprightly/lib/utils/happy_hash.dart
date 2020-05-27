@@ -1,13 +1,12 @@
-library sprightly.crypto;
+library marganam.crypto;
 
 import 'dart:convert';
 import 'dart:math';
 import 'package:crypto/crypto.dart';
 import 'package:convert/convert.dart';
-import 'package:sprightly/extensions/enum_extensions.dart';
 
 enum HashLibrary {
-  // md5,
+  md5,
   sha1,
   sha224,
   sha256,
@@ -21,22 +20,26 @@ enum HashLibrary {
   hmac_sha512
 }
 
+final Random _random = Random.secure();
+
 String hashedAll(
   List<String> items, {
   int hashLength = 16,
   HashLibrary library = HashLibrary.sha1,
   String key,
+  bool prefixLibrary = true,
 }) {
-  key ??= (Random().nextInt(1000000000) + DateTime.now().millisecondsSinceEpoch)
-      .toString();
-  var utf8Key = utf8.encode(key);
-  var sink = AccumulatorSink<Digest>();
-  var byteChunks = items.map((str) => utf8.encode(str));
+  final keyLength =
+      null == hashLength ? 256 : hashLength < 4096 ? hashLength : 4096;
+  final _key = key ?? randomString(keyLength);
+  final utf8Key = utf8.encode(_key);
+  final sink = AccumulatorSink<Digest>();
+  final byteChunks = items.map((str) => utf8.encode(str));
   ByteConversionSink chunks;
   switch (library) {
-    // case HashLibrary.md5:
-    //   chunks = md5.startChunkedConversion(sink);
-    //   break;
+    case HashLibrary.md5:
+      chunks = md5.startChunkedConversion(sink);
+      break;
     case HashLibrary.sha224:
       chunks = sha224.startChunkedConversion(sink);
       break;
@@ -50,27 +53,27 @@ String hashedAll(
       chunks = sha512.startChunkedConversion(sink);
       break;
     case HashLibrary.hmac_md5:
-      var hmac = Hmac(md5, utf8Key);
+      final hmac = Hmac(md5, utf8Key);
       chunks = hmac.startChunkedConversion(sink);
       break;
     case HashLibrary.hmac_sha1:
-      var hmac = Hmac(sha1, utf8Key);
+      final hmac = Hmac(sha1, utf8Key);
       chunks = hmac.startChunkedConversion(sink);
       break;
     case HashLibrary.hmac_sha224:
-      var hmac = Hmac(sha224, utf8Key);
+      final hmac = Hmac(sha224, utf8Key);
       chunks = hmac.startChunkedConversion(sink);
       break;
     case HashLibrary.hmac_sha256:
-      var hmac = Hmac(sha256, utf8Key);
+      final hmac = Hmac(sha256, utf8Key);
       chunks = hmac.startChunkedConversion(sink);
       break;
     case HashLibrary.hmac_sha384:
-      var hmac = Hmac(sha384, utf8Key);
+      final hmac = Hmac(sha384, utf8Key);
       chunks = hmac.startChunkedConversion(sink);
       break;
     case HashLibrary.hmac_sha512:
-      var hmac = Hmac(sha512, utf8Key);
+      final hmac = Hmac(sha512, utf8Key);
       chunks = hmac.startChunkedConversion(sink);
       break;
     case HashLibrary.sha1:
@@ -80,11 +83,14 @@ String hashedAll(
   }
   byteChunks.forEach((bt) => chunks.add(bt));
   chunks.close();
-  var result = "${library.toEnumString().replaceAll("_", "")}"
-      ":${sink.events.single}";
+  var result =
+      "${prefixLibrary ? library.toString().split(".").last.replaceAll("_", "") + ':' : ''}"
+      "${sink.events.single}";
+  if (null == hashLength) return result;
   if (result.length < hashLength) {
-    result +=
-        hashed(key, hashLength: hashLength - result.length, library: library);
+    result += _key;
+    if (result.length < hashLength)
+      result += randomString(hashLength - result.length);
   }
   return result.substring(0, hashLength);
 }
@@ -94,10 +100,18 @@ String hashed(
   int hashLength = 16,
   HashLibrary library = HashLibrary.sha1,
   String key,
+  bool prefixLibrary = true,
 }) =>
     hashedAll(
       [item],
       hashLength: hashLength,
       library: library,
       key: key,
+      prefixLibrary: prefixLibrary,
     );
+
+String randomString([int length = 16]) {
+  final unicodeIntegers =
+      List<int>.generate(length, (index) => _random.nextInt(256));
+  return base64Encode(unicodeIntegers).substring(0, length);
+}

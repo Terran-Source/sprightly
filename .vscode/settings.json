@@ -1,17 +1,22 @@
 {
-    "cSpell.words": [
-        "Cousine",
-        "Cupertino",
-        "Inika",
-        "Insertable",
-        "Simonetta",
-        "applocale",
-        "daos",
-        "dont",
-        "endregion",
-        "hmac",
-        "interps",
-        "mrjc",
-        "mrjf"
-    ]
+  "cSpell.words": [
+    "Cousine",
+    "Cupertino",
+    "Inika",
+    "Insertable",
+    "STRFTIME",
+    "Simonetta",
+    "applocale",
+    "daos",
+    "dartz",
+    "datasources",
+    "endregion",
+    "hmac",
+    "interps",
+    "marganam",
+    "mockito",
+    "mrjc",
+    "mrjf",
+    "usecase"
+  ]
 }

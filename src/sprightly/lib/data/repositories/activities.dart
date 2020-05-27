@@ -1,9 +1,9 @@
 library sprightly.repositories;
 
-import 'package:sprightly/models/constants/enums.dart';
-import 'package:sprightly/models/dao.dart';
-import 'package:sprightly/models/db/database.dart';
-// import 'package:sprightly/models/entities.dart';
+import 'package:sprightly/core/exceptions.dart';
+import 'package:sprightly/data/constants/enums.dart';
+import 'package:sprightly/data/dao.dart';
+import 'package:sprightly/data/datasources/database.dart';
 
 mixin _BaseData {
   SystemDao _dao;
@@ -114,6 +114,9 @@ class GroupActivity with _BaseData {
         this.groupMember = GroupOnlyMember(_dao, groupId),
         this.groupSettlement = GroupSettlement(_dao, groupId),
         this.groupTransaction = GroupTransaction(_dao, groupId) {
+    if (!_dao.ready)
+      throw PreConditionFailedException(
+          'SystemDao has not completed loading yet');
     super._dao = _dao;
   }
 
@@ -229,7 +232,8 @@ class GroupActivity with _BaseData {
       );
 
   Future<bool> finalizeSettlement(
-    String settlementId, {
+    String settlementId,
+    String signature, {
     double settledAmount,
     String notes,
     List<String> attachments,
@@ -239,9 +243,9 @@ class GroupActivity with _BaseData {
     var result = false;
     var settlement = await _dao.getSettlement(settlementId);
     // only existing calculated settlement & the receiving member can settle
-    if (null != settlement && settlement.toMemberId != memberId) {
-      // TODO: sign the settlement
-      String signature;
+    if (null != settlement &&
+        null != signature &&
+        settlement.toMemberId != memberId) {
       result = await _dao.finalizeSettlement(
         groupId,
         settlementId,

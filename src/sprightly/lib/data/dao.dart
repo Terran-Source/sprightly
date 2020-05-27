@@ -1,48 +1,39 @@
 library sprightly.dao;
 
+import 'dart:async';
+
 import 'package:package_info/package_info.dart';
-import 'package:sprightly/models/constants/enums.dart';
-import 'package:sprightly/models/db/database.dart';
-// import 'package:sprightly/models/entities.dart';
+import 'package:sprightly/data/constants/enums.dart';
+import 'package:sprightly/data/datasources/database.dart';
+import 'package:sprightly/utils/ready_or_not.dart';
 
 String get groupAccountPrefix => 'GroupAccount';
 
 abstract class AppDao {
   bool get ready;
-  Future getReady();
+  FutureOr getReady();
 }
 
-class AppInformation extends AppDao {
-  bool _initialized = false;
-  bool _working = false;
-  @override
-  bool get ready => _initialized;
-  @override
-  Future getReady() async {
-    if (!_initialized && !_working) {
-      _working = true;
-      var packageInfo = await PackageInfo.fromPlatform();
-      _appName = packageInfo.appName;
-      _packageName = packageInfo.packageName;
-      _version = packageInfo.version;
-      _buildNumber = packageInfo.buildNumber;
-      _initialized = true;
-      _working = false;
-    }
+class AppInformation with ReadyOrNotMixin<PackageInfo> {
+  PackageInfo packageInfo;
+
+  AppInformation._() {
+    getReadyWorker = () async => packageInfo = await PackageInfo.fromPlatform();
   }
 
-  String _appName;
-  String _packageName;
-  String _version;
-  String _buildNumber;
+  static AppInformation _cache = AppInformation._();
+  factory AppInformation() => _cache;
 
-  String get appName => _appName;
-  String get packageName => _packageName;
-  String get version => _version;
-  String get buildNumber => _buildNumber;
+  String get appName => packageInfo.appName;
+  String get packageName => packageInfo.packageName;
+  String get version => packageInfo.version;
+  String get buildNumber => packageInfo.buildNumber;
 }
 
 abstract class SystemDao extends AppDao {
+  Future<List<Category>> getCategories();
+  Future<List<Account>> getAccounts();
+
   List<Group> get sharedGroupList;
 
   Future<List<Member>> getGroupAccountMembers(String groupId);

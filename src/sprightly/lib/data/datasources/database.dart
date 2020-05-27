@@ -5,11 +5,13 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:moor/moor.dart';
 import 'package:moor_ffi/moor_ffi.dart';
+import 'package:sprightly/data/constants/enums.dart';
+import 'package:sprightly/data/dao.dart';
+import 'package:sprightly/data/datasources/enum_type_converter.dart';
 import 'package:sprightly/extensions/enum_extensions.dart';
-import 'package:sprightly/models/constants/enums.dart';
-import 'package:sprightly/models/dao.dart';
 import 'package:sprightly/utils/file_provider.dart';
 import 'package:sprightly/utils/happy_hash.dart';
+import 'package:sprightly/utils/ready_or_not.dart';
 
 part 'database.g.dart';
 
@@ -31,8 +33,9 @@ class Members extends Table {
   TextColumn get nickName =>
       text().named('nickName').nullable().withLength(max: 10)();
   TextColumn get avatar => text().named('avatar').nullable()();
-  TextColumn get idType => text().named('idType').customConstraint(
-      "CHECK (idType IN ('Phone','Email','NickName','Group','GroupMember')) NOT NULL")();
+  TextColumn get idType => text()
+      .named('idType')
+      .map(const EnumTypeConverter<MemberIdType>(MemberIdType.values))();
   TextColumn get idValue => text().named('idValue').withLength(max: 50)();
   TextColumn get secondaryIdValue =>
       text().named('secondaryIdValue').nullable().withLength(max: 50)();
@@ -41,7 +44,8 @@ class Members extends Table {
   TextColumn get signature => text().named('signature').nullable()();
   DateTimeColumn get createdOn => dateTime()
       .named('createdOn')
-      .clientDefault(() => DateTime.now().toUtc())();
+      .clientDefault(() => DateTime.now().toUtc())
+      .customConstraint("NOT NULL DEFAULT (STRFTIME('%s','now'))")();
   DateTimeColumn get updatedOn => dateTime()
       .named('updatedOn')
       .nullable()
@@ -58,16 +62,14 @@ class Groups extends Table {
 
   TextColumn get id => text().named('id').withLength(min: 16)();
   TextColumn get name => text().named('name').withLength(max: 50)();
-  TextColumn get type => text()
-      .named('type')
-      .nullable()
-      .customConstraint("CHECK (type IN ('Personal','Budget','Shared'))"
-          " NOT NULL DEFAULT 'Shared'")();
+  TextColumn get type => text().named('type').nullable().map(
+      const EnumTypeConverter<GroupType>(GroupType.values, GroupType.Shared))();
   BoolColumn get isHidden =>
       boolean().named('isHidden').withDefault(const Constant(false))();
   DateTimeColumn get createdOn => dateTime()
       .named('createdOn')
-      .clientDefault(() => DateTime.now().toUtc())();
+      .clientDefault(() => DateTime.now().toUtc())
+      .customConstraint("NOT NULL DEFAULT (STRFTIME('%s','now'))")();
   DateTimeColumn get updatedOn => dateTime()
       .named('updatedOn')
       .nullable()
@@ -86,14 +88,15 @@ class GroupMembers extends Table {
   TextColumn get groupId => text()
       .named('groupId')
       .withLength(min: 16)
-      .customConstraint('REFERENCES Groups(id) NOT NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES Groups(id) NOT NULL')();
   TextColumn get memberId => text()
       .named('memberId')
       .withLength(min: 16)
-      .customConstraint('REFERENCES Members(id) NOT NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES Members(id) NOT NULL')();
   DateTimeColumn get createdOn => dateTime()
       .named('createdOn')
-      .clientDefault(() => DateTime.now().toUtc())();
+      .clientDefault(() => DateTime.now().toUtc())
+      .customConstraint("NOT NULL DEFAULT (STRFTIME('%s','now'))")();
   DateTimeColumn get updatedOn => dateTime()
       .named('updatedOn')
       .nullable()
@@ -113,23 +116,26 @@ class Accounts extends Table {
   TextColumn get groupId => text()
       .named('groupId')
       .withLength(min: 16)
-      .customConstraint('REFERENCES Groups(id) NOT NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES Groups(id) NOT NULL')();
   IntColumn get parentId => integer()
       .named('parentId')
       .nullable()
-      .customConstraint('REFERENCES Accounts(id) NULL ON UPDATE CASCADE')();
-  TextColumn get type => text().named('type').nullable().customConstraint(
-      "CHECK (type IN ('Group','Cash','Credit','Bank','Investment')) NULL")();
+      .customConstraint('REFERENCES Accounts(id) NULL')();
+  TextColumn get type => text()
+      .named('type')
+      .nullable()
+      .map(const EnumTypeConverter<AccountType>(AccountType.values))();
   TextColumn get memberId => text()
       .named('memberId')
       .nullable()
       .withLength(min: 16)
-      .customConstraint('REFERENCES Members(id) NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES Members(id) NULL')();
   RealColumn get balance =>
-      real().named('balance').withDefault(const Constant(0))();
+      real().named('balance').nullable().withDefault(const Constant(0.0))();
   DateTimeColumn get createdOn => dateTime()
       .named('createdOn')
-      .clientDefault(() => DateTime.now().toUtc())();
+      .clientDefault(() => DateTime.now().toUtc())
+      .customConstraint("NOT NULL DEFAULT (STRFTIME('%s','now'))")();
   DateTimeColumn get updatedOn => dateTime()
       .named('updatedOn')
       .nullable()
@@ -146,13 +152,14 @@ class Categories extends Table {
   IntColumn get parentId => integer()
       .named('parentId')
       .nullable()
-      .customConstraint('REFERENCES Categories(id) NULL ON UPDATE CASCADE')();
-  TextColumn get type => text().named('type').nullable().customConstraint(
-      "CHECK (type IN ('Expense','Liability','Income','Investment','Misc'))"
-      " NOT NULL DEFAULT 'Misc'")();
+      .customConstraint('REFERENCES Categories(id) NULL')();
+  TextColumn get type =>
+      text().named('type').nullable().map(const EnumTypeConverter<CategoryType>(
+          CategoryType.values, CategoryType.Misc))();
   DateTimeColumn get createdOn => dateTime()
       .named('createdOn')
-      .clientDefault(() => DateTime.now().toUtc())();
+      .clientDefault(() => DateTime.now().toUtc())
+      .customConstraint("NOT NULL DEFAULT (STRFTIME('%s','now'))")();
   DateTimeColumn get updatedOn => dateTime()
       .named('updatedOn')
       .nullable()
@@ -168,15 +175,15 @@ class Settlements extends Table {
   TextColumn get groupId => text()
       .named('groupId')
       .withLength(min: 16)
-      .customConstraint('REFERENCES Groups(id) NOT NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES Groups(id) NOT NULL')();
   TextColumn get fromMemberId => text()
       .named('fromMemberId')
       .withLength(min: 16)
-      .customConstraint('REFERENCES Members(id) NOT NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES Members(id) NOT NULL')();
   TextColumn get toMemberId => text()
       .named('toMemberId')
       .withLength(min: 16)
-      .customConstraint('REFERENCES Members(id) NOT NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES Members(id) NOT NULL')();
   RealColumn get amount => real().named('amount')();
   RealColumn get settledAmount => real().named('settledAmount').nullable()();
   BoolColumn get isTemporary =>
@@ -185,11 +192,12 @@ class Settlements extends Table {
       .named('transactionId')
       .nullable()
       .withLength(min: 16)
-      .customConstraint('REFERENCES Transactions(id) NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES Transactions(id) NULL')();
   TextColumn get signature => text().named('signature').nullable()();
   DateTimeColumn get createdOn => dateTime()
       .named('createdOn')
-      .clientDefault(() => DateTime.now().toUtc())();
+      .clientDefault(() => DateTime.now().toUtc())
+      .customConstraint("NOT NULL DEFAULT (STRFTIME('%s','now'))")();
   DateTimeColumn get updatedOn => dateTime()
       .named('updatedOn')
       .nullable()
@@ -208,29 +216,29 @@ class Transactions extends Table {
   TextColumn get memberId => text()
       .named('memberId')
       .withLength(min: 16)
-      .customConstraint('REFERENCES Members(id) NOT NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES Members(id) NOT NULL')();
   RealColumn get amount => real().named('amount')();
   TextColumn get groupId => text()
       .named('groupId')
       .withLength(min: 16)
-      .customConstraint('REFERENCES Groups(id) NOT NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES Groups(id) NOT NULL')();
   TextColumn get groupMemberIds => text().named('groupMemberIds').nullable()();
   IntColumn get fromAccountId => integer()
       .named('fromAccountId')
       .nullable()
-      .customConstraint('REFERENCES Accounts(id) NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES Accounts(id) NULL')();
   IntColumn get toAccountId => integer()
       .named('toAccountId')
       .nullable()
-      .customConstraint('REFERENCES Accounts(id) NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES Accounts(id) NULL')();
   IntColumn get categoryId => integer()
       .named('categoryId')
       .nullable()
-      .customConstraint('REFERENCES Categories(id) NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES Categories(id) NULL')();
   TextColumn get settlementId => text()
       .named('settlementId')
       .nullable()
-      .customConstraint('REFERENCES Settlements(id) NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES Settlements(id) NULL')();
   TextColumn get notes => text().named('notes').nullable()();
   TextColumn get attachments => text().named('attachments').nullable()();
   TextColumn get tags => text().named('tags').nullable()();
@@ -238,7 +246,8 @@ class Transactions extends Table {
       dateTime().named('doneOn').clientDefault(() => DateTime.now().toUtc())();
   DateTimeColumn get createdOn => dateTime()
       .named('createdOn')
-      .clientDefault(() => DateTime.now().toUtc())();
+      .clientDefault(() => DateTime.now().toUtc())
+      .customConstraint("NOT NULL DEFAULT (STRFTIME('%s','now'))")();
   DateTimeColumn get updatedOn => dateTime()
       .named('updatedOn')
       .nullable()
@@ -260,14 +269,16 @@ class AppFonts extends Table {
   TextColumn get family => text().named('family').withLength(max: 20)();
   TextColumn get type => text()
       .named('type')
-      .customConstraint("CHECK (type IN ('Regular','Mono')) NOT NULL")();
-  TextColumn get style => text().named('style').customConstraint(
-      "CHECK (style IN ('Regular','Italic','Bold','BoldItalic')) NOT NULL")();
+      .map(const EnumTypeConverter<FontType>(FontType.values))();
+  TextColumn get style => text()
+      .named('style')
+      .map(const EnumTypeConverter<FontStyle>(FontStyle.values))();
   IntColumn get weight =>
       integer().named('weight').withDefault(const Constant(100))();
   DateTimeColumn get createdOn => dateTime()
       .named('createdOn')
-      .clientDefault(() => DateTime.now().toUtc())();
+      .clientDefault(() => DateTime.now().toUtc())
+      .customConstraint("NOT NULL DEFAULT (STRFTIME('%s','now'))")();
   DateTimeColumn get updatedOn => dateTime()
       .named('updatedOn')
       .nullable()
@@ -283,48 +294,49 @@ class FontCombos extends Table {
   TextColumn get name => text().named('name').withLength(max: 50)();
   IntColumn get headerFont => integer()
       .named('headerFont')
-      .customConstraint('REFERENCES AppFonts(id) NOT NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES AppFonts(id) NOT NULL')();
   IntColumn get bodyFont => integer()
       .named('bodyFont')
-      .customConstraint('REFERENCES AppFonts(id) NOT NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES AppFonts(id) NOT NULL')();
   IntColumn get bodyFontBig => integer()
       .named('bodyFontBig')
       .nullable()
-      .customConstraint('REFERENCES AppFonts(id) NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES AppFonts(id) NULL')();
   IntColumn get bodyFontMedium => integer()
       .named('bodyFontMedium')
       .nullable()
-      .customConstraint('REFERENCES AppFonts(id) NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES AppFonts(id) NULL')();
   IntColumn get bodyFontSmall => integer()
       .named('bodyFontSmall')
       .nullable()
-      .customConstraint('REFERENCES AppFonts(id) NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES AppFonts(id) NULL')();
   IntColumn get bodyFontTiny => integer()
       .named('bodyFontTiny')
       .nullable()
-      .customConstraint('REFERENCES AppFonts(id) NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES AppFonts(id) NULL')();
   IntColumn get valueFont => integer()
       .named('valueFont')
-      .customConstraint('REFERENCES AppFonts(id) NOT NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES AppFonts(id) NOT NULL')();
   IntColumn get valueFontBig => integer()
       .named('valueFontBig')
       .nullable()
-      .customConstraint('REFERENCES AppFonts(id) NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES AppFonts(id) NULL')();
   IntColumn get valueFontMedium => integer()
       .named('valueFontMedium')
       .nullable()
-      .customConstraint('REFERENCES AppFonts(id) NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES AppFonts(id) NULL')();
   IntColumn get valueFontSmall => integer()
       .named('valueFontSmall')
       .nullable()
-      .customConstraint('REFERENCES AppFonts(id) NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES AppFonts(id) NULL')();
   IntColumn get valueFontTiny => integer()
       .named('valueFontTiny')
       .nullable()
-      .customConstraint('REFERENCES AppFonts(id) NULL ON UPDATE CASCADE')();
+      .customConstraint('REFERENCES AppFonts(id) NULL')();
   DateTimeColumn get createdOn => dateTime()
       .named('createdOn')
-      .clientDefault(() => DateTime.now().toUtc())();
+      .clientDefault(() => DateTime.now().toUtc())
+      .customConstraint("NOT NULL DEFAULT (STRFTIME('%s','now'))")();
   DateTimeColumn get updatedOn => dateTime()
       .named('updatedOn')
       .nullable()
@@ -340,14 +352,15 @@ class ColorCombos extends Table {
   TextColumn get name => text().named('name').withLength(max: 50)();
   TextColumn get mode => text()
       .named('mode')
-      .customConstraint("CHECK (mode IN ('Bright','Dark')) NOT NULL")();
+      .map(const EnumTypeConverter<ThemeMode>(ThemeMode.values))();
   TextColumn get backColor =>
       text().named('backColor').withLength(min: 3, max: 6)();
   TextColumn get foreColor =>
       text().named('foreColor').withLength(min: 3, max: 6)();
   DateTimeColumn get createdOn => dateTime()
       .named('createdOn')
-      .clientDefault(() => DateTime.now().toUtc())();
+      .clientDefault(() => DateTime.now().toUtc())
+      .customConstraint("NOT NULL DEFAULT (STRFTIME('%s','now'))")();
   DateTimeColumn get updatedOn => dateTime()
       .named('updatedOn')
       .nullable()
@@ -361,11 +374,13 @@ class AppSettings extends Table {
 
   TextColumn get name => text().named('name').withLength(max: 50)();
   TextColumn get value => text().named('value')();
-  TextColumn get type => text().named('type').nullable().customConstraint(
-      "CHECK (type IN ('String','Number','Bool','List','AppInfo','ThemeMode')) NOT NULL  DEFAULT 'String'")();
+  TextColumn get type => text().named('type').nullable().map(
+      const EnumTypeConverter<AppSettingType>(
+          AppSettingType.values, AppSettingType.String))();
   DateTimeColumn get createdOn => dateTime()
       .named('createdOn')
-      .clientDefault(() => DateTime.now().toUtc())();
+      .clientDefault(() => DateTime.now().toUtc())
+      .customConstraint("NOT NULL DEFAULT (STRFTIME('%s','now'))")();
   DateTimeColumn get updatedOn => dateTime()
       .named('updatedOn')
       .nullable()
@@ -441,9 +456,11 @@ class CustomQuery {
   Future<String> _load() {
     switch (_from) {
       case ResourceFrom.Asset:
-        return compute(_getSqlQueryFromAsset, source);
+        // return compute(_getSqlQueryFromAsset, source);
+        return _getSqlQueryFromAsset(source);
       case ResourceFrom.Web:
-        return compute(_getSqlQueryFromRemote, this);
+        // return compute(_getSqlQueryFromRemote, this);
+        return _getSqlQueryFromRemote(this);
       default:
         return null;
     }
@@ -458,12 +475,12 @@ class CustomQuery {
   bool get isLoaded => (_query ?? '').isNotEmpty;
 }
 
-class SprightlyQueries {
-  static SprightlyQueries universal = SprightlyQueries();
+class SprightlyQueries with ReadyOrNotMixin {
+  SprightlyQueries._() {
+    getReadyWorker = _getReady;
+  }
+  static SprightlyQueries universal = SprightlyQueries._();
   factory SprightlyQueries() => universal;
-
-  bool initialized = false;
-  bool _working = false;
 
   // startup queries
   CustomQuery get defaultStartupStatement =>
@@ -494,34 +511,25 @@ class SprightlyQueries {
     //     'https://example.com/some/source/setupMigrationFrom1.sql'),
   };
 
-  Future _init() async {
-    if (!initialized && !_working) {
-      _working = true;
-      try {
-        // Required for fetching file from web
-        await RemoteFileCache.universal.init();
+  Future _getReady() async {
+    // Required for fetching file from web
+    await RemoteFileCache.universal.getReady();
 
-        // custom queries
-        await selectGroupAccountMembers.load();
-        await selectGroupOnlyMembers.load();
-        await selectGroupSettlements.load();
-        await selectGroupTransactions.load();
-
-        initialized = true;
-      } finally {
-        _working = false;
-      }
-    }
+    // custom queries
+    await selectGroupAccountMembers.load();
+    await selectGroupOnlyMembers.load();
+    await selectGroupSettlements.load();
+    await selectGroupTransactions.load();
   }
 }
 
 mixin _GenericDaoMixin<T extends GeneratedDatabase> on DatabaseAccessor<T> {
   SprightlyQueries _queries = SprightlyQueries.universal;
 
-  bool get ready => _queries.initialized;
+  bool get _daoMixinReady => _queries.ready;
 
-  Future getReady() async {
-    await _queries._init();
+  Future _getDaoMixinReady() async {
+    await _queries.getReady();
     await customStatement(await _queries.defaultStartupStatement.load());
   }
 
@@ -533,16 +541,24 @@ mixin _GenericDaoMixin<T extends GeneratedDatabase> on DatabaseAccessor<T> {
   Future<void> beforeOpen(OpeningDetails details, Migrator m);
 
   Future<String> _uniqueId(String tableName, List<String> items,
-      {HashLibrary hashLibrary}) async {
+      {HashLibrary hashLibrary, String key}) async {
     var result = '';
     var foundUnique = false;
     var attempts = 0;
+    var hashLength = hashedIdMinLength;
+    var _hashLibrary = hashLibrary;
     do {
-      if (null == hashLibrary) hashLibrary = HashLibrary.values.random;
-      result =
-          hashedAll(items, hashLength: hashedIdMinLength, library: hashLibrary);
+      if (null == hashLibrary) _hashLibrary = HashLibrary.values.random;
+      result = hashedAll(items,
+          hashLength: hashLength,
+          library: _hashLibrary,
+          key: key,
+          prefixLibrary: false);
       foundUnique = !await recordWithIdExists(tableName, result);
+      if (foundUnique) return result;
       attempts++;
+      // If a unique Id is not found in every 3 attempts, increase the hashLength
+      if (attempts % 3 == 0) hashLength++;
     } while (attempts < uniqueRetry && !foundUnique);
     throw TimeoutException(
         'Can not found a suitable unique Id for $tableName after $attempts attempts');
@@ -583,9 +599,8 @@ mixin _GenericDaoMixin<T extends GeneratedDatabase> on DatabaseAccessor<T> {
           .data;
 
   Future<bool> updateRecord<Tbl extends Table, R extends DataClass>(
-          TableInfo<Tbl, R> table, Insertable<R> record,
-          {bool dontExecute = false}) =>
-      update(table).replace(record, dontExecute: dontExecute);
+          TableInfo<Tbl, R> table, Insertable<R> record) =>
+      update(table).replace(record);
 
   Future<int> deleteRecord<Tbl extends Table, R extends DataClass>(
           TableInfo<Tbl, R> table, Insertable<R> record) =>
@@ -605,26 +620,18 @@ mixin _GenericDaoMixin<T extends GeneratedDatabase> on DatabaseAccessor<T> {
   ],
 )
 class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
-    with _$SprightlyDaoMixin, _GenericDaoMixin
+    with _$SprightlyDaoMixin, _GenericDaoMixin, ReadyOrNotMixin
     implements SystemDao {
-  SprightlyDao(SprightlyDatabase _db) : super(_db);
+  SprightlyDao(SprightlyDatabase _db) : super(_db) {
+    getReadyWorker = _getReady;
+  }
 
-  bool _initialized = false;
-  bool _working = false;
   @override
-  bool get ready => super.ready && _initialized;
-  @override
-  Future getReady() async {
-    if (!_initialized && !_working) {
-      _working = true;
-      try {
-        await super.getReady();
-        _sharedGroupList = await getGroups(GroupType.Shared);
-        _initialized = true;
-      } finally {
-        _working = false;
-      }
-    }
+  bool get ready => super._daoMixinReady && super.ready;
+
+  Future _getReady() async {
+    await super._getDaoMixinReady();
+    _sharedGroupList = await getGroups(GroupType.Shared);
   }
 
   @override
@@ -642,6 +649,7 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
   @override
   Future<void> beforeOpen(OpeningDetails details, Migrator m) async {
     await getReady();
+    moorRuntimeOptions.defaultSerializer = const ExtendedValueSerializer();
     if (details.wasCreated) {
       // TODO: do first time activity
       // creating default Group & Accounts
@@ -656,6 +664,9 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
           type: AccountType.Investment);
     }
   }
+
+  Future<List<Category>> getCategories() => select(categories).get();
+  Future<List<Account>> getAccounts() => select(accounts).get();
 
   List<Group> _sharedGroupList;
   List<Group> get sharedGroupList => _sharedGroupList;
@@ -705,7 +716,7 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
         name: Value(name),
         nickName: Value(nickName),
         avatar: Value(avatar),
-        idType: idType.toEnumString(),
+        idType: idType,
         idValue: idValue,
         secondaryIdValue: Value(secondaryIdValue),
         isGroupExpense: Value(isGroupExpense),
@@ -768,7 +779,7 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
         name: name,
         nickName: nickName,
         avatar: avatar,
-        idType: idType.toEnumString(),
+        idType: idType,
         idValue: idValue,
         secondaryIdValue: secondaryIdValue,
         signature: signature,
@@ -994,7 +1005,7 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
       name: name,
       groupId: groupId,
       parentId: Value(parentId),
-      type: Value(type.toEnumString()),
+      type: Value(type),
       memberId: Value(memberId),
       balance: Value(balance),
     );
@@ -1014,7 +1025,7 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
       name: name,
       groupId: groupId,
       parentId: parentId,
-      type: type.toEnumString(),
+      type: type,
       memberId: memberId,
       balance: balance,
       updatedOn: DateTime.now().toUtc(),
@@ -1056,7 +1067,7 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
     var newGroupComp = GroupsCompanion.insert(
       id: groupId,
       name: name,
-      type: Value(type.toEnumString()),
+      type: Value(type),
       isHidden: Value(isHidden),
     );
     await into(groups).insert(newGroupComp);
@@ -1070,7 +1081,7 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
     var group = await getGroup(groupId);
     group.copyWith(
       name: name,
-      type: type.toEnumString(),
+      type: type,
       isHidden: isHidden,
       updatedOn: DateTime.now().toUtc(),
     );
@@ -1097,30 +1108,23 @@ class SprightlyDao extends DatabaseAccessor<SprightlyDatabase>
   ],
 )
 class SprightlySetupDao extends DatabaseAccessor<SprightlySetupDatabase>
-    with _$SprightlySetupDaoMixin, _GenericDaoMixin
+    with _$SprightlySetupDaoMixin, _GenericDaoMixin, ReadyOrNotMixin
     implements SettingsDao {
-  SprightlySetupDao(SprightlySetupDatabase _db) : super(_db);
+  SprightlySetupDao(SprightlySetupDatabase _db) : super(_db) {
+    getReadyWorker = _getReady;
+  }
 
-  bool _initialized = false;
-  bool _working = false;
   @override
-  bool get ready => super.ready && _appInformation.ready && _initialized;
-  @override
-  Future getReady() async {
-    if (!_initialized && !_working) {
-      _working = true;
-      try {
-        await super.getReady();
-        await _appInformation.getReady();
-        _allAppSettings = await getAppSettings();
-        _allAppFonts = await getAppFonts();
-        _allFontCombos = await getFontCombos();
-        _allColorCombos = await getColorCombos();
-        _initialized = true;
-      } finally {
-        _working = false;
-      }
-    }
+  bool get ready =>
+      super._daoMixinReady && _appInformation.ready && super.ready;
+
+  Future _getReady() async {
+    await super._getDaoMixinReady();
+    await _appInformation.getReady();
+    _allAppSettings = await getAppSettings();
+    _allAppFonts = await getAppFonts();
+    _allFontCombos = await getFontCombos();
+    _allColorCombos = await getColorCombos();
   }
 
   @override
@@ -1138,10 +1142,10 @@ class SprightlySetupDao extends DatabaseAccessor<SprightlySetupDatabase>
   @override
   Future<void> beforeOpen(OpeningDetails details, Migrator m) async {
     await getReady();
+    moorRuntimeOptions.defaultSerializer = const ExtendedValueSerializer();
     if (details.wasCreated) {
       // TODO: do first time activity
       // already done through _queries.setupInitiation
-      // await updateAppSetting('primarySetupComplete', false.toString());
     }
     if (details.wasCreated || details.hadUpgrade) {
       // sync dbVersion
@@ -1174,7 +1178,7 @@ class SprightlySetupDao extends DatabaseAccessor<SprightlySetupDatabase>
     var appSetting = await getAppSetting(name);
     appSetting.copyWith(
       value: value,
-      type: type.toEnumString(),
+      type: type,
       updatedOn: DateTime.now().toUtc(),
     );
     var result = updateRecord(appSettings, appSetting);

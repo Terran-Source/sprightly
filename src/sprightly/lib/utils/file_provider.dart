@@ -1,4 +1,4 @@
-library sprightly.file_provider;
+library marganam.file_provider;
 
 import 'dart:async';
 import 'dart:convert';
@@ -12,7 +12,9 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:sprightly/extensions/file_system_entity_extensions.dart';
 import 'package:sprightly/extensions/http_response_extensions.dart';
+import 'package:sprightly/extensions/string_extensions.dart';
 import 'package:sprightly/utils/formatted_exception.dart';
+import 'package:sprightly/utils/ready_or_not.dart';
 
 String get _moduleName => 'file_provider';
 int get maxCachedRetentionMins => 7 * 24 * 60; // 7 days
@@ -22,7 +24,7 @@ Future<String> getAbsolutePath(
   bool isSupportDirectory = false,
   bool isAbsolute = false,
 }) async {
-  var targetDirectory = isAbsolute
+  final targetDirectory = isAbsolute
       ? ''
       : (isSupportDirectory
               ? await getApplicationSupportDirectory()
@@ -45,7 +47,7 @@ Future<File> getFile(
   bool recreateFile = false,
   bool isAbsolute = false,
 }) async {
-  var file = File(await getAbsolutePath(filePath,
+  final file = File(await getAbsolutePath(filePath,
       isSupportDirectory: isSupportFile, isAbsolute: isAbsolute));
   if (recreateFile && await file.exists()) await file.delete();
   return file;
@@ -57,7 +59,7 @@ Future<String> getFileText(
   bool isSupportFile = false,
   bool isAbsolute = false,
 }) async {
-  var file = await getFile(filePath,
+  final file = await getFile(filePath,
       isSupportFile: isSupportFile, isAbsolute: isAbsolute);
   if (await file.exists()) return file.readAsString(encoding: encoding);
   return null;
@@ -68,7 +70,7 @@ Future<Uint8List> getFileContent(
   bool isSupportFile = false,
   bool isAbsolute = false,
 }) async {
-  var file = await getFile(filePath,
+  final file = await getFile(filePath,
       isSupportFile: isSupportFile, isAbsolute: isAbsolute);
   if (await file.exists()) return file.readAsBytes();
   return null;
@@ -82,7 +84,7 @@ Future<File> saveTextFile(
   bool isSupportFile = false,
   bool isAbsolute = false,
 }) async {
-  var file = await getFile(filePath,
+  final file = await getFile(filePath,
       isSupportFile: isSupportFile, isAbsolute: isAbsolute);
   return file.writeAsString(text, mode: mode, encoding: encoding, flush: true);
 }
@@ -107,7 +109,7 @@ Future<File> saveFileAsBytes(
   bool isSupportFile = false,
   bool isAbsolute = false,
 }) async {
-  var file = await getFile(filePath,
+  final file = await getFile(filePath,
       isSupportFile: isSupportFile, isAbsolute: isAbsolute);
   return file.writeAsBytes(fileContent, mode: mode, flush: true);
 }
@@ -131,9 +133,9 @@ Future<File> saveFileAsByteStream(
   bool isSupportFile = false,
   bool isAbsolute = false,
 }) async {
-  var file = await getFile(filePath,
+  final file = await getFile(filePath,
       isSupportFile: isSupportFile, isAbsolute: isAbsolute);
-  var sink = file.openWrite(mode: mode, encoding: encoding);
+  final sink = file.openWrite(mode: mode, encoding: encoding);
   await fileContent.pipe(sink);
   await sink.flush();
   await sink.close();
@@ -158,7 +160,7 @@ Future<File> deleteFile(
   bool isSupportFile = false,
   bool isAbsolute = false,
 }) async {
-  var file = await getFile(filePath,
+  final file = await getFile(filePath,
       isSupportFile: isSupportFile, isAbsolute: isAbsolute);
   if (await file.exists()) return file.delete();
   return file;
@@ -196,9 +198,9 @@ class DirectoryInfo {
   List<File> files = [];
 
   static Future<DirectoryInfo> readDirectory(Directory directory) async {
-    var directoryInfo = DirectoryInfo(directory);
+    final directoryInfo = DirectoryInfo(directory);
     directoryInfo.contents = directory.list();
-    await for (var content in directoryInfo.contents) {
+    await for (final content in directoryInfo.contents) {
       if (content is File)
         directoryInfo.files.add(content);
       else if (content is Directory)
@@ -210,7 +212,7 @@ class DirectoryInfo {
   static Future<void> cleanUp(_DirectoryCleanUp target) async {
     if (null != target.directoryInfo) {
       List<File> remainingFiles = [];
-      for (var file in target.directoryInfo.files) {
+      for (final file in target.directoryInfo.files) {
         if (target.cache.values.any(
             (cache) => file.path == cache.path && null != cache.downloadOn))
           remainingFiles.add(file);
@@ -220,7 +222,7 @@ class DirectoryInfo {
       if (null != remainingFiles) target.directoryInfo.files = remainingFiles;
 
       List<DirectoryInfo> remainingDirs = [];
-      for (var dir in target.directoryInfo.directories) {
+      for (final dir in target.directoryInfo.directories) {
         if (dir.isEmpty)
           await dir.current.delete();
         else {
@@ -274,8 +276,13 @@ FormattedException<T> _formattedException<T extends Exception>(
       moduleName: _moduleName,
     );
 
-class RemoteFileCache {
-  static RemoteFileCache universal = RemoteFileCache();
+class RemoteFileCache with ReadyOrNotMixin {
+  RemoteFileCache._() {
+    getReadyWorker = _getReady;
+    additionalSingleJobs[_cleanUpJob] = _cleanUp;
+  }
+
+  static RemoteFileCache universal = RemoteFileCache._();
   factory RemoteFileCache() => universal;
 
   final String _cacheDirectory = '__fileCache';
@@ -285,36 +292,31 @@ class RemoteFileCache {
 
   DirectoryInfo _directoryInfo;
   DirectoryInfo get directoryInfo => _directoryInfo;
+  String get _cleanUpJob => 'cleanUp';
 
-  bool initialized = false;
-  bool _working = false;
+  // @override
+  // bool get ready => _ready && super.ready;
+  // bool _ready = false;
 
-  Future<void> init() async {
-    if (!initialized && !_working) {
-      _working = true;
-      try {
-        var cacheDirectory = await getDirectory(_cacheDirectory);
-        if (await cacheDirectory.exists()) {
-          var oldFileCache =
-              await getFileText(p.join(_cacheDirectory, _cacheFile));
-          if (null != oldFileCache)
-            _fileCache
-              ..clear()
-              ..addAll(json.decode(oldFileCache));
-        } else
-          await cacheDirectory.create(recursive: true);
+  Future _getReady() async {
+    final cacheDirectory = await getDirectory(_cacheDirectory);
+    if (await cacheDirectory.exists()) {
+      final oldFileCache =
+          await getFileText(p.join(_cacheDirectory, _cacheFile));
+      if (null != oldFileCache)
+        _fileCache
+          ..clear()
+          ..addAll(json.decode(oldFileCache));
+    } else
+      await cacheDirectory.create(recursive: true);
 
-        // non-essential for startup. let it be on its own.
-        // i.e. not await(ing)
-        compute(DirectoryInfo.readDirectory, cacheDirectory).then((info) {
-          _directoryInfo = info;
-          initialized = true;
-        }).whenComplete(() => _working = false);
-      } catch (error) {
-        _working = false;
-        rethrow;
-      }
-    }
+    // // non-essential for startup. let it be on its own.
+    // // i.e. not await(ing)
+    // await compute(DirectoryInfo.readDirectory, cacheDirectory).then((info) {
+    //   _directoryInfo = info;
+    //   _ready = true;
+    // });
+    _directoryInfo = await DirectoryInfo.readDirectory(cacheDirectory);
   }
 
   /// Fetch the file from the [source] url and store in a the local [_cacheDirectory].
@@ -336,14 +338,14 @@ class RemoteFileCache {
       // :New Method:
       final response = await _client.get(Uri.parse(source), headers: headers);
       if (response.isSuccessStatusCode) {
-        var fileName =
-            response.fileName ?? "$identifier${response.fileExtension}";
+        final fileName = response.fileName ??
+            "${identifier ?? source.escapeMessy()}${response.fileExtension}";
         // :Old Method:
         // var file = await saveFileAsByteStream(
         //     p.join(_cacheDirectory, fileName), response.stream,
         //     encoding: response.encoding);
         // :New Method:
-        var file = await saveFileAsBytes(
+        final file = await saveFileAsBytes(
             p.join(_cacheDirectory, fileName), response.bodyBytes);
         result = CacheFile(
           identifier,
@@ -375,9 +377,9 @@ class RemoteFileCache {
     String identifier,
     Map<String, String> headers = const {},
   }) async {
-    var id = identifier ?? source;
+    final id = identifier ?? source;
     if (!(_fileCache.containsKey(id) && null != _fileCache[id].downloadOn)) {
-      var cacheFile = await _getRemoteFileAndCache(source,
+      final cacheFile = await _getRemoteFileAndCache(source,
           identifier: id, headers: headers);
       if (null != cacheFile)
         _fileCache[id] = cacheFile;
@@ -392,7 +394,7 @@ class RemoteFileCache {
     String identifier,
     Map<String, String> headers = const {},
   }) async {
-    var filePath = await _ensureFileExists(source,
+    final filePath = await _ensureFileExists(source,
         identifier: identifier, headers: headers);
     if (null != filePath) {
       filePath.lastAccessedOn = DateTime.now().toUtc();
@@ -406,7 +408,7 @@ class RemoteFileCache {
     String identifier,
     Map<String, String> headers = const {},
   }) async {
-    var filePath = await _ensureFileExists(source,
+    final filePath = await _ensureFileExists(source,
         identifier: identifier, headers: headers);
     if (null != filePath) {
       filePath.lastAccessedOn = DateTime.now().toUtc();
@@ -438,7 +440,7 @@ class RemoteFileCache {
     try {
       if (_fileCache.isNotEmpty) {
         Map<String, CacheFile> tempFileCache = {};
-        for (var fc in _fileCache.entries) {
+        for (final fc in _fileCache.entries) {
           // Files, which are never been accessed or not accessed
           // for last [maxCachedRetentionMins] minutes
           if (fc.value.lastAccessedOn
@@ -462,17 +464,12 @@ class RemoteFileCache {
     return result;
   }
 
-  Future<bool> cleanUp() async {
-    if (initialized && !_working) {
-      _working = true;
-      return _cleanFileCache().whenComplete(() =>
-          DirectoryInfo.cleanUp(_DirectoryCleanUp(_directoryInfo, _fileCache))
-              .whenComplete(() {
-            _working = false;
-          }));
-    }
-    return false;
+  Future<bool> _cleanUp() async {
+    return _cleanFileCache().whenComplete(() =>
+        DirectoryInfo.cleanUp(_DirectoryCleanUp(_directoryInfo, _fileCache)));
   }
+
+  Future<bool> cleanUp() => triggerJob(_cleanUpJob);
 
   /// to be called before application ends,
   /// or else, any changes after last [dump] will be lost

@@ -1,0 +1,32 @@
+[
+  {
+    "name": "someName",
+    "value": "Some Value",
+    "type": "String"
+  },
+  {
+    "name": "dbVersion",
+    "value": "1",
+    "type": "Number"
+  },
+  {
+    "name": "primarySetupComplete",
+    "value": "false",
+    "type": "Bool"
+  },
+  {
+    "name": "availableOptions",
+    "value": "A,B,C,D",
+    "type": "List"
+  },
+  {
+    "name": "someAppInfo",
+    "value": "Some App Info",
+    "type": "AppInfo"
+  },
+  {
+    "name": "themeMode",
+    "value": "Dark",
+    "type": "ThemeMode"
+  }
+]

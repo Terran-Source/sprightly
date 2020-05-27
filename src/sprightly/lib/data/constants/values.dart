@@ -1,5 +1,6 @@
 class AppSettingNames {
-  static AppSettingNames universal = AppSettingNames();
+  const AppSettingNames._();
+  static AppSettingNames universal = AppSettingNames._();
   factory AppSettingNames() => universal;
 
   // App Information

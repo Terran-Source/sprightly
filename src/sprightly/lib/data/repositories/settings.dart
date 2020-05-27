@@ -1,43 +1,42 @@
 library sprightly.repositories;
 
+import 'package:sprightly/core/exceptions.dart';
 import 'package:sprightly/extensions/enum_extensions.dart';
-import 'package:sprightly/models/constants/enums.dart';
-import 'package:sprightly/models/constants/values.dart';
-import 'package:sprightly/models/dao.dart';
-import 'package:sprightly/models/db/database.dart';
-// import 'package:sprightly/models/entities.dart';
+import 'package:sprightly/data/constants/enums.dart';
+import 'package:sprightly/data/constants/values.dart';
+import 'package:sprightly/data/dao.dart';
+import 'package:sprightly/data/datasources/database.dart';
 import 'package:sprightly/utils/app_parameter.dart';
 
 mixin _BaseData {
   SettingsDao _dao;
 }
 
-class Setting<T> extends Parameter<T> {
-  factory Setting.from(AppSetting appSetting, AppSettingType type) {
-    switch (type) {
-      case AppSettingType.AppInfo:
-      case AppSettingType.String:
-        return Parameter.ofType(appSetting.name, appSetting.value);
-      case AppSettingType.Number:
-        return Parameter.ofType(
-            appSetting.name, double.tryParse(appSetting.value));
-      case AppSettingType.Bool:
-        return Parameter.ofType(appSetting.name, appSetting.value == 'true');
-      case AppSettingType.List:
-        return Parameter.ofType(appSetting.name, appSetting.value.split(','));
-      case AppSettingType.ThemeMode:
-        return Parameter.ofType(
-            appSetting.name, ThemeMode.values.find(appSetting.value));
-      default:
-        return null;
-    }
+Parameter _settingFrom(AppSetting appSetting, AppSettingType type) {
+  switch (type) {
+    case AppSettingType.AppInfo:
+    case AppSettingType.String:
+      return Parameter.ofType(appSetting.name, appSetting.value);
+    case AppSettingType.Number:
+      return Parameter.ofType(
+          appSetting.name, double.tryParse(appSetting.value));
+    case AppSettingType.Bool:
+      return Parameter.ofType(appSetting.name, appSetting.value == 'true');
+    case AppSettingType.List:
+      return Parameter.ofType(appSetting.name, appSetting.value.split(','));
+    case AppSettingType.ThemeMode:
+      return Parameter.ofType(
+          appSetting.name, ThemeMode.values.find(appSetting.value));
+    default:
+      return null;
   }
 }
 
-class AppSettings extends AppParameter<Setting> with _BaseData {
-  static AppSettings _cache;
-
-  AppSettings._(SettingsDao _dao, String environment) {
+class SettingsRepo extends AppParameter<Parameter> with _BaseData {
+  SettingsRepo._(SettingsDao _dao, String environment) {
+    if (!_dao.ready)
+      throw PreConditionFailedException(
+          'SettingsDao has not completed loading yet');
     super._dao = _dao;
     // set environment
     super.setParameterValue(_settingNames.environment, environment);
@@ -51,14 +50,13 @@ class AppSettings extends AppParameter<Setting> with _BaseData {
     // get & set all settings from AppSettings table
     _dao.allAppSettings.forEach((appSetting) {
       super.updateParameter(
-          appSetting.name,
-          Setting.from(
-              appSetting, AppSettingType.values.find(appSetting.type)));
+          appSetting.name, _settingFrom(appSetting, appSetting.type));
     });
   }
 
-  factory AppSettings(SettingsDao dao, {String environment = 'Prod'}) =>
-      _cache ??= AppSettings._(dao, environment);
+  static SettingsRepo _cache;
+  factory SettingsRepo(SettingsDao dao, {String environment}) =>
+      _cache ??= SettingsRepo._(dao, environment ?? 'Prod');
 
   AppSettingNames get _settingNames => AppSettingNames.universal;
 
@@ -75,7 +73,7 @@ class AppSettings extends AppParameter<Setting> with _BaseData {
       });
 
   Stream<T> _getStream<T>(String name) =>
-      (super.parameters[name] as Setting<T>).stream;
+      (super.parameters[name] as Parameter<T>).stream;
 
   // AppInfo details
   String get appName => _getSettings(_settingNames.appName);
