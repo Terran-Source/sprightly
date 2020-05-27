@@ -3,17 +3,22 @@ import 'package:sprightly/core/initiate.dart';
 
 import 'core/widgets/stateful_wrapper.dart';
 
-void main() {
+void main(List<String> args) {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  final String environment;
+
+  const MyApp({Key key, this.environment}) : super(key: key);
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return StatefulWrapper(
-      onInit: () async => await initiate(),
+      onInit: () async =>
+          null == environment ? await initiate() : await initiate(environment),
       loading: getMaterialApp,
       complete: getMaterialApp,
     );

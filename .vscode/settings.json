@@ -17,6 +17,7 @@
     "mockito",
     "mrjc",
     "mrjf",
+    "serializable",
     "usecase"
   ]
 }

@@ -8,11 +8,11 @@ import 'package:sprightly/features/settings/initiate.dart' as settingsInitiate;
 import 'package:sprightly/utils/file_provider.dart';
 import 'package:sprightly/utils/formatted_exception.dart';
 
-Future<bool> initiate({String environment = 'Prod'}) async {
+Future<bool> initiate([String environment = 'Prod']) async {
   try {
     final container = kiwi.Container();
 
-    final configurations = AppConfig.from(environment);
+    final configurations = await AppConfig.from(environment);
 
     // add [PreConditionFailedException] to exceptionDisplay
     exceptionDisplay[PreConditionFailedException] =

@@ -13,6 +13,7 @@ dependencies:
   dartz: ^0.9.1
 
   # DI
+  json_annotation: ^3.0.1
   kiwi: ^0.2.0
 
   # Bloc for state management
@@ -39,7 +40,7 @@ dependencies:
   moor_ffi: ^0.6.0
 
   # package information
-  package_info: 0.4.0+17
+  package_info: 0.4.0+18
 
   # network access
   http: ^0.12.1
@@ -49,6 +50,7 @@ dev_dependencies:
     sdk: flutter
   mockito: ^4.1.1
   build_runner: ^1.10.0
+  json_serializable: ^3.3.0
   moor_generator: ^3.1.0
   english_words: ^3.1.5
 
@@ -109,3 +111,4 @@ flutter:
   assets:
     - assets/queries_min/ # custom & complex sql queries
     - assets/i18n/ # internationalization (i18n) & language support
+    - assets/config/ # app_config(AppConfig) configuration files
