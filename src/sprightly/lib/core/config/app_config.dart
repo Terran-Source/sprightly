@@ -31,7 +31,7 @@ class AppConfig extends Equatable {
   static String get _configBaseDirectory => 'assets/config';
   static String get _configBaseFile => 'config.json';
 
-  static Future<Map<String, dynamic>> jsonMap(configFileName) async {
+  static Future<Map<String, dynamic>> _jsonMap(configFileName) async {
     try {
       return json.decode(await getAssetText(configFileName,
           assetDirectory: _configBaseDirectory));
@@ -41,14 +41,14 @@ class AppConfig extends Equatable {
   }
 
   static Future<AppConfig> from(String environment) async {
-    var json = await jsonMap(_configBaseFile);
+    var json = await _jsonMap(_configBaseFile);
     if (null != environment) {
       final envConfigFile = "${[
         p.basenameWithoutExtension(_configBaseFile),
         environment.toLowerCase()
       ].join('.')}"
           "${p.extension(_configBaseFile)}";
-      final jsonEnv = await jsonMap(envConfigFile);
+      final jsonEnv = await _jsonMap(envConfigFile);
       if (null != jsonEnv) extend(json, jsonEnv);
     }
     if (null != json) return AppConfig.fromJson(json);
