@@ -196,7 +196,7 @@ void formattedExceptionGroupTest<T extends Exception>(
           result, isNot(isInstanceOf<FormattedException<FormatException>>()));
       expect(result.exception, isInstanceOf<T>());
       expect(result.exception, exception);
-      expect(result.message, exception.toString());
+      expect(result.message, messageParams['message']);
       expect(result.exceptionType, actualRuntimeType);
       expect(result.logSource, 'FormattedException:Generic');
       expect(
@@ -223,7 +223,7 @@ void formattedExceptionGroupTest<T extends Exception>(
           result, isNot(isInstanceOf<FormattedException<FormatException>>()));
       expect(result.exception, isInstanceOf<T>());
       expect(result.exception, exception);
-      expect(result.message, exception.toString());
+      expect(result.message, messageParams['message']);
       expect(result.exceptionType, actualRuntimeType);
       expect(result.logSource, '$appName:$moduleName');
       expect(
