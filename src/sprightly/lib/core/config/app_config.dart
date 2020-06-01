@@ -49,7 +49,7 @@ class AppConfig extends Equatable {
       ].join('.')}"
           "${p.extension(_configBaseFile)}";
       final jsonEnv = await _jsonMap(envConfigFile);
-      if (null != jsonEnv) extend(json, jsonEnv);
+      extend(json, jsonEnv);
     }
     if (null != json) return AppConfig.fromJson(json);
     return AppConfig.defaults();
