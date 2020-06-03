@@ -545,12 +545,12 @@ mixin _GenericDaoMixin<T extends GeneratedDatabase> on DatabaseAccessor<T> {
     var result = '';
     var foundUnique = false;
     var attempts = 0;
-    var hashLength = hashedIdMinLength;
+    var _hashLength = hashedIdMinLength;
     var _hashLibrary = hashLibrary;
     do {
       if (null == hashLibrary) _hashLibrary = HashLibrary.values.random;
       result = hashedAll(items,
-          hashLength: hashLength,
+          hashLength: _hashLength,
           library: _hashLibrary,
           key: key,
           prefixLibrary: false);
@@ -558,7 +558,7 @@ mixin _GenericDaoMixin<T extends GeneratedDatabase> on DatabaseAccessor<T> {
       if (foundUnique) return result;
       attempts++;
       // If a unique Id is not found in every 3 attempts, increase the hashLength
-      if (attempts % 3 == 0) hashLength++;
+      if (attempts % 3 == 0) _hashLength++;
     } while (attempts < uniqueRetry && !foundUnique);
     throw TimeoutException(
         'Can not found a suitable unique Id for $tableName after $attempts attempts');
