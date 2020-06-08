@@ -1,5 +1,6 @@
 name: sprightly
 description: Private, Free & Open Source Expense Manager.
+publish_to: 'none'
 version: 0.1.0+1
 
 environment:
@@ -18,7 +19,7 @@ dependencies:
 
   # Bloc for state management
   flutter_bloc: ^4.0.0
-  equatable: ^1.1.1
+  equatable: ^1.2.0
 
   # languages & internationalization
   applocale: ^1.0.3
@@ -32,7 +33,7 @@ dependencies:
   convert: ^2.1.1
 
   # path libraries
-  path_provider: ^1.6.8
+  path_provider: ^1.6.10
   path: 1.6.4
 
   # moor sqlite packages
@@ -40,7 +41,7 @@ dependencies:
   moor_ffi: ^0.6.0
 
   # package information
-  package_info: 0.4.0+18
+  package_info: 0.4.1
 
   # network access
   http: ^0.12.1
