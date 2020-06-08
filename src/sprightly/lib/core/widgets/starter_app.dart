@@ -38,5 +38,5 @@ MaterialApp get getMaterialApp => MaterialApp(
         // closer together (more dense) than on mobile platforms.
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: StarterPage(title: 'Flutter Demo Home Page'),
+      home: StarterPage(title: 'Sprightly Home Page'),
     );
