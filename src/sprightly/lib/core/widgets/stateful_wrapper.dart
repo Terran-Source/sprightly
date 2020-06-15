@@ -1,19 +1,19 @@
 import 'package:flutter/widgets.dart';
 
-typedef Future<T> Initializer<T>();
+typedef Future<T> AsyncFunction<T>();
 
 /// Wrapper for stateful functionality to provide onInit calls in stateless widget
 ///
 /// get the idea from: https://medium.com/filledstacks/how-to-call-a-function-on-start-in-flutter-stateless-widgets-28d90ab3bf49
 class StatefulWrapper<T> extends StatefulWidget {
-  final Initializer<T> onInit;
+  final AsyncFunction<T> onInit;
   final Widget loading;
   final Widget complete;
   final Widget error;
 
   const StatefulWrapper({
     @required this.onInit,
-    @required this.loading,
+    this.loading,
     @required this.complete,
     this.error,
   });
@@ -28,6 +28,7 @@ class _StatefulWrapperState<T> extends State<StatefulWrapper<T>> {
 
   @override
   void initState() {
+    super.initState();
     if (widget.onInit != null) {
       try {
         widget.onInit().then((result) => setState(() {
@@ -37,13 +38,12 @@ class _StatefulWrapperState<T> extends State<StatefulWrapper<T>> {
         _error = true;
       }
     }
-    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     if (_error) return widget.error ?? widget.complete;
-    if (null == _state) return widget.loading;
+    if (null == _state) return widget.loading ?? Container();
     return widget.complete;
   }
 }

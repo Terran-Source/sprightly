@@ -14,7 +14,7 @@ class StarterApp extends StatelessWidget {
     return StatefulWrapper(
       onInit: () async =>
           null == environment ? await initiate() : await initiate(environment),
-      loading: getMaterialApp,
+      loading: getMaterialApp, // now optional
       complete: getMaterialApp,
     );
   }
