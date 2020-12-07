@@ -1,4 +1,4 @@
-import 'package:kiwi/kiwi.dart' as kiwi;
+import 'package:kiwi/kiwi.dart';
 import 'package:sprightly/core/config/app_config.dart';
 import 'package:sprightly/core/exceptions.dart';
 import 'package:sprightly/core/widgets/error_popup.dart';
@@ -10,7 +10,7 @@ import 'package:sprightly/utils/formatted_exception.dart';
 
 Future<bool> initiate([String environment = 'Prod']) async {
   try {
-    final container = kiwi.Container();
+    final kiwiContainer = KiwiContainer();
 
     final configurations = await AppConfig.from(environment);
 
@@ -20,18 +20,18 @@ Future<bool> initiate([String environment = 'Prod']) async {
 
     final remoteFileCache = RemoteFileCache();
     await remoteFileCache.getReady();
-    container.registerSingleton((container) => remoteFileCache);
+    kiwiContainer.registerSingleton((container) => remoteFileCache);
 
     // initiate database
-    await dbInitiate.initiate(container,
+    await dbInitiate.initiate(kiwiContainer,
         environment: environment, configurations: configurations);
 
-    await settingsInitiate.initiate(container,
+    await settingsInitiate.initiate(kiwiContainer,
         environment: environment, configurations: configurations);
 
-    final appDetails = container<AppDetails>();
+    final appDetails = kiwiContainer<AppDetails>();
     FormattedException.appName = appDetails.appName;
-    final appSettings = container<AppSettings>();
+    final appSettings = kiwiContainer<AppSettings>();
     FormattedException.debug = appSettings.debug;
 
     return true;

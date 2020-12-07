@@ -6,30 +6,30 @@ import 'package:sprightly/features/settings/domain/repositories/setting_reposito
 import 'package:sprightly/features/settings/domain/usecases/get_settings.dart';
 
 Future<void> initiate(
-  Container container, {
+  KiwiContainer kiwiContainer, {
   String environment,
   AppConfig configurations,
 }) async {
   // SettingsRepo settingsRepo = SettingsRepo(repoAppSettings);
-  container.registerSingleton(
+  kiwiContainer.registerSingleton(
       (container) => SettingsRepo(container<globalRepo.SettingsRepo>()));
 
-  container.registerSingleton(
+  kiwiContainer.registerSingleton(
       (container) => GetAppDetails(container<SettingsRepo>()));
-  container.registerSingleton(
+  kiwiContainer.registerSingleton(
       (container) => GetAppSettings(container<SettingsRepo>()));
 
-  final getAppDetails = container<GetAppDetails>();
+  final getAppDetails = kiwiContainer<GetAppDetails>();
   final appDetails = (await getAppDetails(NoParams())).fold((l) {
     throw l;
   }, (r) => r);
   if (null != appDetails)
-    container.registerSingleton((container) => appDetails);
+    kiwiContainer.registerSingleton((container) => appDetails);
 
-  final getAppSettings = container<GetAppSettings>();
+  final getAppSettings = kiwiContainer<GetAppSettings>();
   final appSettings = (await getAppSettings(NoParams())).fold((l) {
     throw l;
   }, (r) => r);
   if (null != appSettings)
-    container.registerSingleton((container) => appSettings);
+    kiwiContainer.registerSingleton((container) => appSettings);
 }

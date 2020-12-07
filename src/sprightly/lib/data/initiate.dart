@@ -5,7 +5,7 @@ import 'package:sprightly/data/datasources/database.dart' as db;
 import 'package:sprightly/data/repositories/settings.dart';
 
 Future<void> initiate(
-  Container container, {
+  KiwiContainer kiwiContainer, {
   String environment,
   AppConfig configurations,
 }) async {
@@ -14,27 +14,25 @@ Future<void> initiate(
       enableDebug: configurations.debug,
       recreateDatabase: configurations.recreateDatabase);
   await dataDb.executor.ensureOpen(dataDb.attachedDatabase);
-  container.registerSingleton((container) => dataDb);
+  kiwiContainer.registerSingleton((container) => dataDb);
   final settingsDb = db.SprightlySetupDatabase(
       enableDebug: configurations.debug,
       recreateDatabase: configurations.recreateDatabase);
   await settingsDb.executor.ensureOpen(settingsDb.attachedDatabase);
-  container.registerSingleton((container) => settingsDb);
+  kiwiContainer.registerSingleton((container) => settingsDb);
 
   // initialize global dao
   final appInfo = AppInformation();
   appInfo.getReady();
-  container.registerSingleton((container) => appInfo);
+  kiwiContainer.registerSingleton((container) => appInfo);
   final dataDao = dataDb.sprightlyDao;
   await dataDao.getReady();
-  container
-      .registerSingleton<SystemDao, db.SprightlyDao>((container) => dataDao);
+  kiwiContainer.registerSingleton<SystemDao>((container) => dataDao);
   final settingsDao = settingsDb.sprightlySetupDao;
   await settingsDao.getReady();
-  container.registerSingleton<SettingsDao, db.SprightlySetupDao>(
-      (container) => settingsDao);
+  kiwiContainer.registerSingleton<SettingsDao>((container) => settingsDao);
 
   // initialize global repo
-  container.registerSingleton((container) =>
+  kiwiContainer.registerSingleton((container) =>
       SettingsRepo(container<SettingsDao>(), environment: environment));
 }
