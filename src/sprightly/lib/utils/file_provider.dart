@@ -469,7 +469,7 @@ class RemoteFileCache with ReadyOrNotMixin {
         DirectoryInfo.cleanUp(_DirectoryCleanUp(_directoryInfo, _fileCache)));
   }
 
-  Future<bool> cleanUp() => triggerJob(_cleanUpJob);
+  Future<bool> cleanUp() => triggerJob<bool>(_cleanUpJob);
 
   /// to be called before application ends,
   /// or else, any changes after last [dump] will be lost

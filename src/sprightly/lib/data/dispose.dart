@@ -2,12 +2,12 @@ import 'package:kiwi/kiwi.dart';
 import 'package:sprightly/data/datasources/database.dart';
 
 Future<void> dispose(
-  Container container, {
+  KiwiContainer kiwiContainer, {
   String environment,
   Map<String, dynamic> configurations = const {},
 }) async {
-  final dataDb = container<SprightlyDatabase>();
+  final dataDb = kiwiContainer<SprightlyDatabase>();
   await dataDb.close();
-  final settingsDb = container<SprightlySetupDatabase>();
+  final settingsDb = kiwiContainer<SprightlySetupDatabase>();
   await settingsDb.close();
 }
