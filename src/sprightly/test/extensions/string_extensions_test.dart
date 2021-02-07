@@ -7,15 +7,21 @@ void main() {
       // arrange
       final testString =
           '  abc ';
-
       // act
       final result = testString.trimming(testString);
-
       // asset
       expect(result,'abc');
     });
+    test('toList test', (){
+      // arrange
+     final List<String> expectedList = ["a", "b", "c", "d", "a"];
+     final testString ='abcda';
+      // act
+      final actaulResult = testString.toList();
+      // asset
+      expect(actaulResult,expectedList);
+     });
   });
-  
   group('CleanString test', () {
     test('escapeMessy() test', () {
       // arrange
