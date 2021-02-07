@@ -3,8 +3,19 @@ import 'package:sprightly/extensions/string_extensions.dart';
 
 void main() {
   group('Trimmer test', () {
-    // TODO:
-  }, skip: true);
+    test('trimming() test',(){
+      // arrange
+      final testString =
+          '  abc ';
+
+      // act
+      final result = testString.trimming(testString);
+
+      // asset
+      expect(result,'abc');
+    });
+  });
+  
   group('CleanString test', () {
     test('escapeMessy() test', () {
       // arrange
